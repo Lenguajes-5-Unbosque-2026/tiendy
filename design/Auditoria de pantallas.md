@@ -1,9 +1,11 @@
-# Tiendi — Auditoría y referencias vs. pantallas de la versión final
+# Tiendy — Auditoría y referencias vs. pantallas de la versión final
 
 > Compara tres cosas del archivo de Figma **Tiendy**:
 > 1. La **auditoría de las pantallas v1** (bloque "Auditoría y decisiones de UI", página ⚙️Componentes / Ui kit).
 > 2. Las **referencias** de la página 🖇️ Recursos (Frames 1 a 9).
 > 3. Las **pantallas de la versión final** (página 📱 Diseño · versión final: 49 pantallas en 9 bloques + la Barra inferior de la versión final).
+>
+> *Nota (20-10-2026):* en Figma no existe una página con ese nombre. Las pantallas de `design/flujos/` salen de la página **"📱 Diseño v3 · propuesta"** (42 pantallas, con el componente "Barra inferior v3"). La página "📱 Diseño" tiene la v2 ("CDUs Tiendy").
 >
 > **Cómo se revisó:** se leyó la estructura de las 49 pantallas (textos, capas y qué componentes del UI kit usa cada una) y se miraron capturas de 9 pantallas representativas: 02, 10, 15, 18, 20, 28, 33, 37 y 41.
 > Lo marcado *(Figma)* está escrito en el archivo; lo marcado *(observado)* es lectura propia de las pantallas.
@@ -76,7 +78,7 @@ La regla del UI kit dice: **"Naranja solo como acento de alerta (por agotarse, f
 | **37 Lista de fiados** | "Vencido hace 5 días" y "Último abono hace 12 días" en **rojo**. | Fiados vencidos debería ir en **naranja**. |
 | **10 Cómo cargar productos** | "Recomendado: desde un listado, es lo más rápido" en **naranja**. | No es una alerta: debería ir en verde o en gris. |
 | **33 Mi cuaderno** | El encabezado de fecha "Hoy, martes 23" en **naranja**. | No es una alerta. |
-| **18 Cierre de caja** | "Fiado del día $28.000" en **naranja**; "Faltan $5.000" en **rojo**. | Hay que decidir si un faltante de caja es alerta (naranja) o pérdida (rojo) y dejarlo escrito en la regla. |
+| **18 Cierre de caja** | "Fiado del día $28.000" en **naranja**; "Faltan $5.000" en **rojo**. | **Decidido:** un faltante de caja es alerta y va en **naranja** (ya está en la regla del kit). Hay que cambiar "Faltan $5.000" a naranja en Figma. |
 | **41 Mi inventario** | Los avatares de producto en tono **naranja**. | El naranja queda gastado en algo que no es alerta; mejor un tono neutro o verde. |
 
 ### Componentes
@@ -84,14 +86,17 @@ La regla del UI kit dice: **"Naranja solo como acento de alerta (por agotarse, f
 | Problema | Detalle |
 |---|---|
 | **Componentes del UI kit sin usar** | **Fila de lista**, **Tarjeta de monto**, **Alerta** y **Botón de voz** existen en el UI kit, pero en las pantallas están **dibujados a mano** (108 capas "Tarjeta"). Es el mismo problema #1 de la v1, ahora en menor escala. Ejemplos: la tarjeta "Vendido hoy" (**15**), la alerta de la leche (**15**), las filas de **37** y **41**, el micrófono de **28**. |
-| **Barra inferior distinta** | UI kit: Inicio · Cuaderno · Fiados · Inventario · Perfil. **Versión final:** Inicio · Fiados · **Vender** (central) · Inventario · **Caja** (+ "Ninguno"). Hay que actualizar el componente del UI kit y la tabla de inventario. |
-| **Cuaderno y Perfil sin pestaña propia** | En **33 Mi cuaderno** la pestaña activa es "Caja". **46 Panel del tendero** y **47 Empleados** no tienen una pestaña activa clara. Hay que definir cómo se llega a Perfil. |
+| **Barra inferior distinta** | UI kit: Inicio · Cuaderno · Fiados · Inventario · Perfil. **Versión final:** Inicio · Fiados · **Vender** (central) · Inventario · **Caja** (+ "Ninguno"). **Decidido:** la oficial es la del UI kit. Hay que cambiar las pantallas v3 en Figma para que la usen. |
+| **Cuaderno y Perfil sin pestaña propia** | En **33 Mi cuaderno** la pestaña activa es "Caja". **46 Panel del tendero** y **47 Empleados** no tienen una pestaña activa clara. Se resuelve con la barra del UI kit, que tiene pestañas Cuaderno y Perfil (que en la app se llama "Mi tienda"). |
 | **Barra de estado** | El componente aparece solo en 2 pantallas; en las demás parece venir dentro del Header. Conviene unificarlo. |
 
 ### Otros
 
-- **Faltan números en la secuencia de pantallas:** 07, 08, 14, 24, 25, 26 y 45. Pueden ser pantallas eliminadas o pendientes; conviene renumerar o explicarlo.
-- **Nombre:** el archivo y los logos dicen **Tiendy**; las pantallas de la versión final dicen **Tiendi** ("Tiendi · Versión final"). Hay que escoger uno.
+- **Faltan números en la secuencia de pantallas:** 07, 08, 14, 24, 25, 26 y 45. **Resuelto:** existen en la v1 (página "Casos de uso" de Figma) y se quitaron en la v3. Se conservan los números para no romper las referencias.
+  - 07 Activa tu ubicación · 08 Tipo de negocio · 45 Marketplace de proveedores: eliminadas.
+  - 14 Carga presencial: eliminada como pantalla; la opción "Te ayudamos en tu tienda" sigue en 10.
+  - 24 Cómo te pagan · 25 Datos del cliente (fiado) · 26 Venta registrada: *(observado)* sus pasos quedaron dentro de la hoja de venta: el medio de pago en 20, el cliente del fiado en 23 y la confirmación en 22.
+- **Nombre:** el archivo y los logos dicen **Tiendy**; las pantallas de la versión final dicen **Tiendi** ("Tiendi · Versión final"). **Decidido: el nombre es Tiendy.** Falta corregirlo en Figma: el rótulo de la página v3, el logotipo del 01 Splash v3, el rótulo de la página v2, los textos del UI kit y las colecciones de la biblioteca de variables.
 
 ---
 
