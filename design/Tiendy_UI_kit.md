@@ -31,8 +31,8 @@
 
 ### Decisiones
 
-- **Color primario verde tienda (#12813F):** asocia con plata y frescura, viene de las referencias de supermercado y diferencia a Tiendi de apps de comida. Todos los textos cumplen contraste AA.
-- **Naranja** solo como acento de alerta (por agotarse, fiados vencidos). **Rojo** solo para gastos y deudas.
+- **Color primario verde tienda (#12813F):** asocia con plata y frescura, viene de las referencias de supermercado y diferencia a Tiendy de apps de comida. Todos los textos cumplen contraste AA.
+- **Naranja** solo como acento de alerta (por agotarse, fiados vencidos, faltante en el cierre de caja). **Rojo** solo para gastos y deudas.
 - **Header** verde oscuro con hoja crema redondeada (estructura de las referencias), **barra inferior** blanca con estado activo en píldora.
 - **Tipografía Plus Jakarta Sans:** más legible en tamaños pequeños; sin pesos Light.
 - **Íconos Lucide** (los mismos de shadcn/ui) para que diseño y código hablen igual.
@@ -44,6 +44,8 @@
 ## Color
 
 Variables semánticas (colección "Tiendi · Tema") que apuntan a la paleta base ("Tiendi · Primitivos"). En código viven como variables CSS de Tailwind/shadcn.
+
+> Las colecciones no son locales del archivo Tiendy: vienen de una **biblioteca publicada** aparte. Todavía se llaman "Tiendi" allá; el nombre oficial del producto es Tiendy y hay que renombrarlas en el archivo de la biblioteca.
 
 ### Fondos
 
@@ -87,6 +89,36 @@ Variables semánticas (colección "Tiendi · Tema") que apuntan a la paleta base
 
 ---
 
+## Medidas
+
+Colección "Tiendi · Medidas" (misma biblioteca que el color). Son las variables que usan los componentes del kit.
+
+### Espacio
+
+| Variable | Valor |
+|---|---|
+| `espacio/1` | 4 |
+| `espacio/2` | 8 |
+| `espacio/3` | 12 |
+| `espacio/4` | 16 |
+| `espacio/5` | 20 |
+| `espacio/6` | 24 |
+
+### Radio
+
+| Variable | Valor | Uso |
+|---|---|---|
+| `radio/sm` | 8 | Elementos pequeños |
+| `radio/md` | 12 | |
+| `radio/lg` | 16 | |
+| `radio/xl` | 20 | |
+| `radio/2xl` | 28 | Hoja de contenido que se monta sobre el Header |
+| `radio/full` | 999 | Píldoras y círculos |
+
+*`radio/sm` y `radio/2xl` se agregaron al kit el 20-10-2026 para completar la escala 8/12/16/20/28/full; todavía no existen en la biblioteca de variables de Figma.*
+
+---
+
 ## Tipografía
 
 Plus Jakarta Sans · 14 estilos de texto. Texto de muestra: *"Tienda Doña Rosa vendió $385.000"*.
@@ -127,11 +159,13 @@ Tono Claro sobre el header; Oscuro sobre fondos claros.
 - **Variantes:** `Tono=Claro`, `Tono=Oscuro`
 
 ### Header
-Fondo verde oscuro con decoración suave. La hoja de contenido (radio 28) se monta encima. Props: Volver, Subtítulo, textos Título y Subtítulo.
+Fondo verde oscuro con decoración suave. La hoja de contenido (`radio/2xl`) se monta encima. Props: Volver, Subtítulo, textos Título y Subtítulo.
 - **Variantes:** `Volver=Sí, Subtítulo=Sí` · `Volver=Sí, Subtítulo=No` · `Volver=No, Subtítulo=Sí` · `Volver=No, Subtítulo=No`
 
 ### Barra inferior
 Navegación principal. Variante = pestaña activa.
+
+> **Decidido (20-10-2026): esta es la barra oficial.** Las pantallas de la v3 todavía usan otra, "Barra inferior v3" (Inicio · Fiados · Vender central · Inventario · Caja), y hay que actualizarlas en Figma para que usen este componente. Vender y Caja no tienen pestaña: se abren desde las tarjetas del Home. La pestaña `Activo=Perfil` se muestra como **"Mi tienda"**.
 - **Variantes:** `Activo=Inicio` · `Activo=Cuaderno` · `Activo=Fiados` · `Activo=Inventario` · `Activo=Perfil`
 
 ### Botón
@@ -165,12 +199,18 @@ Totales: vendido hoy, plata en caja, total de la venta. shadcn: `<Card>`.
 - **Variantes:** `Tono=Primario` · `Tono=Claro`
 
 ### Alerta
-Avisos de agotado o fiados vencidos. shadcn: `<Alert>`.
+Avisos de agotado, fiados vencidos o faltante en el cierre de caja. shadcn: `<Alert>`.
 - **Variantes:** `Tono=Acento` · `Tono=Peligro`
 
 ### Botón de voz
-El diferenciador de Tiendi: registro por voz. Estados Reposo y Escuchando.
+El diferenciador de Tiendy: registro por voz. Estados Reposo y Escuchando.
 - **Variantes:** `Estado=Reposo` · `Estado=Escuchando`
+
+---
+
+## Tokens en código
+
+Las variables CSS se llaman igual que en Figma, cambiando `/` por `-`: `fondo/primario` → `--fondo-primario`, `texto/peligro` → `--texto-peligro`, `espacio/4` → `--espacio-4`, `radio/lg` → `--radio-lg`. Las variables propias de shadcn/ui (`--primary`, `--background`, `--destructive`…) no llevan valores propios: apuntan a estas.
 
 ---
 
@@ -182,14 +222,14 @@ Qué componente usa cada patrón de las pantallas y su equivalente en código (s
 |---|---|---|
 | Barra de estado | Todas las pantallas | — (solo diseño) |
 | Header | Todas las pantallas con título (volver / subtítulo) | `components/layout/AppHeader` |
-| Barra inferior | Home, Caja, Cuaderno, Fiados, Inventario, Perfil | `components/layout/BottomNav` |
+| Barra inferior | Home, Cuaderno, Fiados, Inventario, Mi tienda | `components/layout/BottomNav` |
 | Botón | Continuar, Registrar venta, Cerrar caja, Enviar código… | `ui/button` |
 | Campo de texto | Celular, código, montos, búsquedas | `ui/input` |
 | Chip de filtro | Hoy/Semana/Mes, Todos/Vencidos, categorías, ventas rápidas | `ui/toggle-group`, `ui/badge` |
-| Ícono en círculo | Opciones de registro, medios de pago, movimientos | `tiendi/IconBadge` + `lucide-react` |
+| Ícono en círculo | Opciones de registro, medios de pago, movimientos | `tiendy/IconBadge` + `lucide-react` |
 | Avatar | Clientes de fiados, empleados, productos | `ui/avatar` |
-| Fila de lista | Movimientos, fiados, productos, proveedores | `tiendi/ListItem` |
-| Tarjeta de monto | Vendido hoy, plata en caja, total de venta, resultado del cierre | `ui/card` → `tiendi/AmountCard` |
+| Fila de lista | Movimientos, fiados, productos, proveedores | `tiendy/ListItem` |
+| Tarjeta de monto | Vendido hoy, plata en caja, total de venta, resultado del cierre | `ui/card` → `tiendy/AmountCard` |
 | Alerta | Producto por agotarse, fiado vencido | `ui/alert` |
-| Botón de voz | Venta por voz, gasto por voz | `tiendi/VoiceButton` |
+| Botón de voz | Venta por voz, gasto por voz | `tiendy/VoiceButton` |
 | Íconos (33) | Navegación, acciones y estados | `lucide-react` |
