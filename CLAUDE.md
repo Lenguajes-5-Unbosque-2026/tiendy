@@ -2,8 +2,9 @@
 
 ## 1. Qué es el producto
 
-- **Nombre:** Tiendy (nunca "Tiendi"), en código, textos de la app y documentos.
+- **Nombre:** Tiendy, en código, textos de la app y documentos.
 - **Problema:** en las ~500.000 tiendas de barrio de Colombia casi nada queda registrado (ventas por varios medios de pago, fiados, gastos, mercancía, turnos). Todo vive en la memoria, la caja no cuadra y el tendero pierde el control de su plata.
+- **Objetivo:** que el tendero tenga todo su negocio a la mano, en el celular. En cualquier momento puede ver cuánto ha vendido, cuánta plata tiene y por qué medio, cuánto le deben, qué le queda en el estante y cuánto le deja el negocio de verdad. Cada venta registrada alimenta a la vez la caja, el inventario y los fiados. Desde el día uno el registro cubre: ventas y medio de pago · fiados y abonos, con nombre · gastos y salidas de plata, con motivo · entradas de mercancía y su costo · inventario · turnos y cierre de caja, con quién atendía. Detalle en `docs/Brief.md` §2.
 - **Usuario:** el tendero de barrio (y sus empleados o familiares en el mostrador), con poca experiencia tecnológica y sin tiempo para parar de atender.
 - **Propuesta de valor:** registrar cada venta en menos de tres segundos —hablando, tocando una lista o con una foto— mantiene cuadradas la caja, el inventario y los fiados, sin soltar al cliente.
 - **Secundaria:** cada turno abre y cierra con la plata contada, así el tendero sabe qué pasó aunque no estuviera detrás del mostrador.
