@@ -1,0 +1,5 @@
+id,tienda_id,nombre,nombre_corto,rol,puede_fiar,activo,creada_en
+pe01,t01,Rosa Martínez,Doña Rosa,duena,true,true,2026-09-01T08:15:00-05:00
+pe02,t01,Andrés Martínez,Andrés,empleado,true,true,2026-09-02T17:40:00-05:00
+pe03,t01,Yeimy Alexandra Castañeda Rodríguez,Yeimy,empleado,false,true,2026-09-22T19:05:00-05:00
+pe04,t01,Brayan Stiven Gómez,Brayan,empleado,false,false,2026-09-03T09:00:00-05:00

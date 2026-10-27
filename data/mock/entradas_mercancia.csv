@@ -1,0 +1,4 @@
+id,tienda_id,proveedor_id,turno_id,persona_id,fecha_hora,total,medio_pago,pagar_antes_de,imagen
+e01,t01,pr02,tu04,pe02,2026-09-21T10:30:00-05:00,144000,efectivo,,
+e02,t01,pr03,tu05,pe01,2026-09-22T09:30:00-05:00,50400,quede_debiendo,2026-09-29,e02-factura-alpina.jpg
+e03,t01,pr02,tu08,pe01,2026-09-23T11:30:00-05:00,90000,quede_debiendo,2026-09-25,

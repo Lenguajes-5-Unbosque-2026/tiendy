@@ -1,0 +1,7 @@
+id,tienda_id,cliente_id,turno_id,persona_id,fecha_hora,monto,medio_pago
+a01,t01,cl02,tu03,pe01,2026-09-20T10:00:00-05:00,18000,efectivo
+a02,t01,cl04,tu04,pe02,2026-09-21T12:00:00-05:00,11000,transferencia
+a03,t01,cl05,tu05,pe01,2026-09-22T08:40:00-05:00,6000,efectivo
+a04,t01,cl06,tu07,pe01,2026-09-22T16:30:00-05:00,15000,efectivo
+a05,t01,cl08,tu07,pe01,2026-09-22T18:00:00-05:00,9000,efectivo
+a06,t01,cl02,tu08,pe01,2026-09-23T08:40:00-05:00,16000,transferencia

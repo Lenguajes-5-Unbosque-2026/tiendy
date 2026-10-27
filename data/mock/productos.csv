@@ -1,0 +1,41 @@
+id,tienda_id,categoria_id,nombre,nombre_corto,alias,precio_venta,costo,unidades,minimo,venta_rapida,origen,imagen,creado_en
+p01,t01,c03,Leche Alquería 1 L,Leche 1 L,leche|una leche|bolsa de leche,3900,3100,2,6,true,listado,p01-leche-alqueria-1l.jpg,2026-09-01T09:00:00-05:00
+p02,t01,c01,Huevo AA,Huevo,huevo|un huevo|huevos,700,617,6,10,true,listado,p02-huevo-aa.jpg,2026-09-01T09:00:00-05:00
+p03,t01,c01,Arroz Diana 500 g,Arroz,arroz|una libra de arroz,3200,2600,24,5,false,manual,p03-arroz-diana-500g.jpg,2026-09-01T09:12:00-05:00
+p04,t01,c02,"Gaseosa Postobón 1,5 L","Gaseosa 1,5 L",gaseosa|una gaseosa|gaseosa grande,4500,3200,18,6,true,foto,p04-gaseosa-postobon-1-5l.jpg,2026-09-01T09:20:00-05:00
+p05,t01,c05,Papas Margarita pollo 39 g,Papas,papas|unas papas|margarita,2500,1900,30,8,true,foto,p05-papas-margarita.jpg,2026-09-01T09:20:00-05:00
+p06,t01,c01,Pan tajado Bimbo 600 g,Pan tajado,pan tajado|un bimbo,6800,5300,3,4,false,foto,p06-pan-tajado-bimbo.jpg,2026-09-01T09:20:00-05:00
+p07,t01,c01,Aceite Premier 1 L,Aceite,aceite|un aceite,11900,9900,4,3,false,listado,p07-aceite-premier-1l.jpg,2026-09-01T09:00:00-05:00
+p08,t01,c01,Azúcar Manuelita 1 kg,Azúcar,azúcar|un kilo de azúcar,4800,3900,15,5,false,listado,p08-azucar-manuelita-1kg.jpg,2026-09-01T09:00:00-05:00
+p09,t01,c01,Panela 500 g,Panela,panela|una panela,3000,2300,12,4,false,listado,,2026-09-01T09:00:00-05:00
+p10,t01,c04,Papel higiénico Familia x4,Papel x4,papel|un paquete de papel,9500,7600,5,4,false,manual,p10-papel-higienico-familia.jpg,2026-09-01T09:30:00-05:00
+p11,t01,c02,Agua Cristal 600 ml,Agua,agua|una agua,2000,1100,20,6,false,manual,p11-agua-cristal-600ml.jpg,2026-09-01T09:31:00-05:00
+p12,t01,c01,Pan francés,Pan,pan|un pan,500,300,40,15,true,manual,,2026-09-01T09:33:00-05:00
+p13,t01,c01,Café Sello Rojo 250 g,Café,café|un café,9800,8100,8,3,false,listado,p13-cafe-sello-rojo.jpg,2026-09-01T09:00:00-05:00
+p14,t01,c01,Chocolate Corona 250 g,Chocolate,chocolate|un chocolate,6900,5600,6,3,false,listado,p14-chocolate-corona.jpg,2026-09-01T09:00:00-05:00
+p15,t01,c01,Lentejas 500 g,Lentejas,lentejas|una libra de lentejas,3600,2800,10,4,false,listado,p15-lentejas.jpg,2026-09-01T09:00:00-05:00
+p16,t01,c01,Fríjol bola roja 500 g,Fríjol,fríjol|una libra de fríjol,6200,5000,7,3,false,listado,p16-frijol-bola-roja.jpg,2026-09-01T09:00:00-05:00
+p17,t01,c01,Pasta Doria spaghetti 250 g,Pasta,pasta|una pasta,2300,1800,14,5,false,listado,p17-pasta-doria.jpg,2026-09-01T09:00:00-05:00
+p18,t01,c01,Atún Van Camp's en aceite 160 g,Atún,atún|un atún,6500,5300,9,3,false,listado,p18-atun-van-camps.jpg,2026-09-01T09:00:00-05:00
+p19,t01,c01,Sal Refisal 1 kg,Sal,sal|un kilo de sal,2200,1600,10,3,false,listado,p19-sal-refisal.jpg,2026-09-01T09:00:00-05:00
+p20,t01,c01,Avena en hojuelas Quaker 250 g,Avena,avena|una avena,3400,2700,8,3,false,listado,,2026-09-01T09:00:00-05:00
+p21,t01,c02,Coca-Cola 400 ml,Coca-Cola,coca|una coca,2800,2000,24,8,false,foto,p21-coca-cola-400ml.jpg,2026-09-01T09:20:00-05:00
+p22,t01,c02,Cerveza Águila lata 330 ml,Águila,pola|una pola|cerveza,3200,2500,36,12,false,foto,p22-cerveza-aguila-lata.jpg,2026-09-01T09:20:00-05:00
+p23,t01,c02,Pony Malta 330 ml,Pony Malta,pony|una pony,2200,1600,18,6,false,foto,p23-pony-malta.jpg,2026-09-01T09:20:00-05:00
+p24,t01,c02,Jugo Hit caja 200 ml,Hit,hit|un hit|jugo,1500,1050,24,8,false,listado,p24-jugo-hit.jpg,2026-09-01T09:00:00-05:00
+p25,t01,c02,Gatorade 500 ml,Gatorade,gatorade|un gatorade,4200,3300,6,3,false,listado,p25-gatorade.jpg,2026-09-01T09:00:00-05:00
+p26,t01,c03,Kumis Alpina 200 g,Kumis,kumis|un kumis,2600,2000,8,4,false,listado,p26-kumis-alpina.jpg,2026-09-01T09:00:00-05:00
+p27,t01,c03,Queso campesino 250 g,Queso,queso|un queso,7500,6000,4,3,false,manual,,2026-09-01T09:40:00-05:00
+p28,t01,c03,Yogur Alpina fresa 200 g,Yogur,yogur|un yogur,2800,2200,10,4,false,listado,p28-yogur-alpina.jpg,2026-09-01T09:00:00-05:00
+p29,t01,c03,Margarina La Fina 125 g,Margarina,margarina|una la fina,3200,2500,6,3,false,listado,p29-margarina-la-fina.jpg,2026-09-01T09:00:00-05:00
+p30,t01,c04,Jabón Rey barra 300 g,Jabón Rey,jabón|un jabón rey,3000,2300,12,4,false,listado,p30-jabon-rey.jpg,2026-09-01T09:00:00-05:00
+p31,t01,c04,Detergente en polvo Fab Floral bolsa ahorradora 2 kg + 500 g gratis,Fab 2 kg,fab|un fab|detergente,18900,15600,3,2,false,manual,p31-detergente-fab-2kg.jpg,2026-09-01T09:45:00-05:00
+p32,t01,c04,Límpido 1 L,Límpido,límpido|un límpido,4900,3800,6,3,false,listado,p32-limpido-1l.jpg,2026-09-01T09:00:00-05:00
+p33,t01,c04,Crema dental Colgate Triple Acción 75 ml,Colgate,crema dental|una colgate,6500,5200,5,2,false,listado,p33-crema-dental-colgate.jpg,2026-09-01T09:00:00-05:00
+p34,t01,c04,Champú Sedal sobre 18 ml,Sedal sobre,champú|un sobre de sedal,1000,650,40,10,false,manual,,2026-09-01T09:50:00-05:00
+p35,t01,c05,Chocorramo,Chocorramo,chocorramo|un chocorramo,2800,2100,12,6,false,foto,p35-chocorramo.jpg,2026-09-01T09:20:00-05:00
+p36,t01,c05,Galletas Festival fresa,Festival,festival|unas festival,1800,,20,6,false,listado,p36-galletas-festival.jpg,2026-09-01T09:00:00-05:00
+p37,t01,c05,Doritos 45 g,Doritos,doritos|unos doritos,3200,2400,10,4,false,foto,p37-doritos.jpg,2026-09-01T09:20:00-05:00
+p38,t01,c05,Bon Bon Bum,Bon Bon Bum,bombón|un bombón,300,190,50,20,false,manual,,2026-09-01T09:52:00-05:00
+p39,t01,c01,Arepas de maíz blanco x5,Arepas,arepas|un paquete de arepas,3500,2600,0,4,false,manual,,2026-09-01T09:55:00-05:00
+p40,t01,c02,Bolsa de hielo 2 kg,Hielo,hielo|una bolsa de hielo,2000,0,0,5,false,manual,,2026-09-01T09:58:00-05:00
