@@ -104,4 +104,4 @@ Estas salen de preguntas abiertas de las specs (`specs/README.md`). Si el equipo
 
 ## Imágenes
 
-La columna `imagen` dice el nombre exacto del archivo que va en [`imagenes/`](imagenes/). La lista de fotos por conseguir está en [`imagenes/README.md`](imagenes/README.md).
+La columna `imagen` dice el nombre exacto del archivo que está en [`imagenes/`](imagenes/). Son 36 fotos libres de Wikimedia Commons; el autor y la licencia de cada una están en [`imagenes/README.md`](imagenes/README.md).
