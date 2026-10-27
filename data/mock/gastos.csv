@@ -1,0 +1,21 @@
+id,tienda_id,turno_id,persona_id,fecha_hora,monto,categoria,nota,proveedor_id,canal,lo_que_dijo,medio_pago,pagar_antes_de,imagen
+g01,t01,tu01,pe01,2026-09-19T07:30:00-05:00,8000,transporte,,,voz,pagué 8 mil de transporte,efectivo,,
+g02,t01,tu01,pe01,2026-09-19T10:15:00-05:00,45000,servicios,Recibo de la luz (Enel),,manual,,transferencia,,
+g03,t01,tu02,pe02,2026-09-19T15:40:00-05:00,12000,otro,Almuerzo,,manual,,efectivo,,
+g04,t01,tu02,pe02,2026-09-19T18:20:00-05:00,96000,mercancia,,pr04,foto,,efectivo,,g04-recibo-bimbo.jpg
+g05,t01,tu03,pe01,2026-09-20T06:45:00-05:00,6000,transporte,,,voz,pagué 6 mil de transporte,efectivo,,
+g06,t01,tu03,pe01,2026-09-20T09:10:00-05:00,20000,otro,Saqué para el mercado de la casa,,voz,pagué 20 mil de otros,efectivo,,
+g07,t01,tu03,pe01,2026-09-20T12:30:00-05:00,38500,servicios,Internet del local,,manual,,transferencia,,
+g08,t01,tu03,pe01,2026-09-20T16:00:00-05:00,54000,mercancia,,pr03,foto,,quede_debiendo,2026-09-27,g08-factura-alpina.jpg
+g09,t01,tu04,pe02,2026-09-21T08:00:00-05:00,10000,transporte,,,manual,,efectivo,,
+g10,t01,tu04,pe02,2026-09-21T13:45:00-05:00,5000,otro,Bolsas plásticas y servilletas,,manual,,efectivo,,
+g11,t01,tu04,pe02,2026-09-21T19:30:00-05:00,850000,arriendo,"Arriendo del local de septiembre, pagado a Don Hernando por Nequi; queda pendiente la parte del agua, que él manda el recibo la otra semana",,manual,,transferencia,,
+g12,t01,tu05,pe01,2026-09-22T07:20:00-05:00,7000,transporte,,,voz,pagué 7 mil de transporte,efectivo,,
+g13,t01,tu05,pe01,2026-09-22T11:00:00-05:00,62000,servicios,Gas natural,,manual,,efectivo,,
+g14,t01,tu07,pe01,2026-09-22T15:10:00-05:00,15000,otro,,,voz,pagué 15 mil de otros,efectivo,,
+g15,t01,tu07,pe01,2026-09-22T17:45:00-05:00,72000,mercancia,,pr05,manual,,quede_debiendo,2026-09-29,
+g16,t01,tu07,pe01,2026-09-22T20:30:00-05:00,12000,transporte,Domicilio a Doña Gladys,,manual,,efectivo,,
+g17,t01,tu08,pe01,2026-09-23T08:30:00-05:00,20000,transporte,,,voz,pagué 20 mil de transporte,efectivo,,
+g18,t01,tu08,pe01,2026-09-23T09:50:00-05:00,184000,mercancia,,pr01,foto,,quede_debiendo,2026-10-01,g18-factura-distribuidora-el-sol.jpg
+g19,t01,tu08,pe01,2026-09-23T11:05:00-05:00,22000,otro,Almuerzo,,manual,,efectivo,,
+g20,t01,tu08,pe01,2026-09-23T12:10:00-05:00,20000,servicios,Botellón de agua,,voz,pagué 20 mil de servicios,efectivo,,

@@ -1,0 +1,9 @@
+id,tienda_id,nombre,celular,acuerdo_pago,fecha_acuerdo,creado_en
+cl01,t01,Don Carlos Pérez,+573114567788,quincena,2026-09-30,2026-09-05T18:20:00-05:00
+cl02,t01,Doña Marta Gómez,+573157894512,fin_de_mes,2026-09-30,2026-09-06T08:10:00-05:00
+cl03,t01,Julián (vigilante),,esta_semana,2026-09-18,2026-09-08T21:00:00-05:00
+cl04,t01,Luz Mery,+573208765432,quincena,2026-09-30,2026-09-10T12:30:00-05:00
+cl05,t01,Señor Ramírez,+573012223344,fin_de_mes,2026-09-30,2026-09-12T19:45:00-05:00
+cl06,t01,Doña Gladys Esperanza Rodríguez de Castañeda,+573186660011,quincena,2026-10-15,2026-09-15T10:05:00-05:00
+cl07,t01,Wilson (el del taller),+573225550199,esta_semana,2026-09-26,2026-09-19T16:00:00-05:00
+cl08,t01,Profe Alba,+573004441122,,,2026-09-14T07:30:00-05:00
