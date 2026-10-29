@@ -177,6 +177,7 @@ Están escritos en el UI kit dentro de cada componente, pero **no son variables 
 | `alto/header` | `--alto-header` | 170px | Header sin subtítulo |
 | `alto/header-subtitulo` | `--alto-header-subtitulo` | 200px | Header con subtítulo |
 | `alto/barra-estado` | `--alto-barra-estado` | 44px | Barra de estado (solo diseño; en código es el área segura del celular) |
+| `alto/grafica` | `--alto-grafica` | 96px | Alto de las barras de "Ventas de los últimos 7 días" (42), medido en la pantalla |
 | `tamano/boton-volver` | `--tamano-boton-volver` | 36px | Círculo de volver del header |
 | `tamano/boton-vender` | `--tamano-boton-vender` | 56px | Círculo central "Vender" de la barra inferior |
 | `tamano/icono-circulo-m` | `--tamano-icono-circulo-m` | 40px | Ícono en círculo M (filas) |
@@ -220,8 +221,8 @@ Están escritos en el UI kit dentro de cada componente, pero **no son variables 
 
 | Token propuesto | En código | Valor | Dónde se usa |
 |---|---|---|---|
-| `fondo/velo` *(pantallas)* | `--fondo-velo` | `fondo/encabezado` con opacidad, sin medir | Home oscurecido detrás de las hojas inferiores (09a, 21). La auditoría pide usarlo también en 20 y 20a. |
-| `fondo/aviso` *(pantallas)* | `--fondo-aviso` | Casi negro, sin medir | Fondo del aviso "Venta anotada · Deshacer" (22). No tiene token en el kit. |
+| `fondo/velo` *(pantallas)* | `--fondo-velo` | `fondo/encabezado` al 80 % (propuesto en código, por medir en Figma) | Home oscurecido detrás de las hojas inferiores (09a, 21). La auditoría pide usarlo también en 20 y 20a. |
+| `fondo/aviso` *(pantallas)* | `--fondo-aviso` | `neutro/900` (propuesto en código, por medir en Figma) | Fondo del aviso "Venta anotada · Deshacer" (22). No tiene token en el kit. |
 
 ## 8. Variables de shadcn/ui
 
