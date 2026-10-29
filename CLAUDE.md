@@ -51,16 +51,13 @@ Los números que faltan (07, 08, 14, 24, 25, 26, 45) son pantallas de la v1 que 
 
 ## 5. Cómo trabajamos
 
-- Cambios de experiencia (pantallas nuevas o eliminadas, accesos,
-  conexiones entre pasos, estados, textos funcionales) se documentan
-  primero en la spec del flujo y en Figma. No implementes un cambio
-  de experiencia sin que esté en la spec; si te lo piden, avisa y
-  propón actualizar la spec primero.
-- Ajustes visuales (color, espaciado, imagen decorativa, tamaños) se
-  hacen directo en código, siempre con los tokens del UI kit. Nunca
-  escribas valores sueltos como colores hex o tamaños en px.
-- Si un ajuste necesita un token que no existe, se agrega primero
-  al kit.
+- Construimos por vibe coding, por bloques de pantallas. La referencia principal son las imágenes de design/flujos/.
+- Las specs de specs/ son apoyo para entender estados y datos. Si una spec y una pantalla no coinciden, gana la pantalla.
+- Alcance del MVP: Inventario de productos (pantalla de lectura), Registrar venta (acción de escritura) y Resumen del día (complemento). No construyas flujos fuera de esta lista salvo que te lo pidamos.
+- Mobile-first: todo se diseña para celular.
+- Componentes: shadcn/ui según design/componentes.md; los custom se crean como componentes reutilizables.
+- Estilos: siempre con los tokens del tema. Nunca valores sueltos.
+- Datos: primero de data/mock/; después de Supabase.
 - Todo el código vive dentro de web/.
 
 ## 6. Decisiones tomadas
