@@ -1,0 +1,329 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+ * Tokens de Tiendy (design/tokens.md).
+ * Este es el único lugar con valores: el resto del código usa estos nombres.
+ */
+:root {
+  /* 1. Colores primitivos: solo los usan los colores del tema */
+  --neutro-0: #ffffff;
+  --neutro-50: #f6f7f2;
+  --neutro-100: #eef1ea;
+  --neutro-200: #e2e6dd;
+  --neutro-300: #d5dacf;
+  --neutro-400: #c8cec3;
+  --neutro-500: #757f78;
+  --neutro-600: #55625a;
+  --neutro-900: #13201a;
+  --verde-100: #d7f5e1;
+  --verde-200: #aee9c3;
+  --verde-600: #12813f;
+  --verde-700: #0e6b34;
+  --verde-900: #0b3d23;
+  --naranja-100: #ffead9;
+  --naranja-500: #f97316;
+  --naranja-600: #c2410c;
+  --rojo-100: #fde4e1;
+  --rojo-600: #d92d20;
+  --rojo-700: #b42318;
+
+  /* 2. Colores del tema · fondos */
+  --fondo-app: var(--neutro-50);
+  --fondo-tarjeta: var(--neutro-0);
+  --fondo-sutil: var(--neutro-100);
+  --fondo-encabezado: var(--verde-900);
+  --fondo-primario: var(--verde-600);
+  --fondo-primario-suave: var(--verde-100);
+  --fondo-exito: var(--verde-700);
+  --fondo-exito-suave: var(--verde-100);
+  --fondo-advertencia: var(--naranja-500);
+  --fondo-advertencia-suave: var(--naranja-100);
+  --fondo-peligro: var(--rojo-600);
+  --fondo-peligro-suave: var(--rojo-100);
+  --fondo-placeholder: var(--neutro-300);
+
+  /* 2. Colores del tema · textos */
+  --texto-principal: var(--neutro-900);
+  --texto-secundario: var(--neutro-600);
+  --texto-sutil: var(--neutro-500);
+  --texto-inverso: var(--neutro-0);
+  --texto-inverso-suave: var(--verde-200);
+  --texto-primario: var(--verde-700);
+  --texto-advertencia: var(--naranja-600);
+  --texto-exito: var(--verde-700);
+  --texto-peligro: var(--rojo-700);
+
+  /* 2. Colores del tema · bordes */
+  --borde-default: var(--neutro-200);
+  --borde-fuerte: var(--neutro-400);
+  --borde-foco: var(--verde-600);
+
+  /* 3. Tipografía (la familia la carga next/font en app/layout.tsx) */
+  --fuente-base: var(--fuente-plus-jakarta), system-ui, sans-serif;
+  --peso-regular: 400;
+  --peso-medium: 500;
+  --peso-semibold: 600;
+  --peso-bold: 700;
+  --peso-extrabold: 800;
+
+  --texto-display-tamano: 48px;
+  --texto-display-alto: 59px;
+  --texto-display-peso: var(--peso-extrabold);
+  --texto-display-letras: -0.02em;
+  --texto-monto-xl-tamano: 34px;
+  --texto-monto-xl-alto: 40px;
+  --texto-monto-xl-peso: var(--peso-extrabold);
+  --texto-monto-xl-letras: -0.01em;
+  --texto-titulo-1-tamano: 26px;
+  --texto-titulo-1-alto: 31px;
+  --texto-titulo-1-peso: var(--peso-bold);
+  --texto-titulo-2-tamano: 24px;
+  --texto-titulo-2-alto: 30px;
+  --texto-titulo-2-peso: var(--peso-bold);
+  --texto-monto-m-tamano: 22px;
+  --texto-monto-m-alto: 28px;
+  --texto-monto-m-peso: var(--peso-bold);
+  --texto-valor-tamano: 18px;
+  --texto-valor-alto: 25px;
+  --texto-valor-peso: var(--peso-bold);
+  --texto-cuerpo-fuerte-tamano: 16px;
+  --texto-cuerpo-fuerte-alto: 22px;
+  --texto-cuerpo-fuerte-peso: var(--peso-semibold);
+  --texto-boton-tamano: 16px;
+  --texto-boton-alto: 22px;
+  --texto-boton-peso: var(--peso-bold);
+  --texto-cuerpo-tamano: 15px;
+  --texto-cuerpo-alto: 21px;
+  --texto-cuerpo-peso: var(--peso-regular);
+  --texto-chip-tamano: 14px;
+  --texto-chip-alto: 20px;
+  --texto-chip-peso: var(--peso-semibold);
+  --texto-secundario-estilo-tamano: 13px;
+  --texto-secundario-estilo-alto: 18px;
+  --texto-secundario-estilo-peso: var(--peso-medium);
+  --texto-caption-tamano: 12px;
+  --texto-caption-alto: 16px;
+  --texto-caption-peso: var(--peso-medium);
+
+  /* 4. Espaciados */
+  --espacio-1: 4px;
+  --espacio-2: 8px;
+  --espacio-3: 12px;
+  --espacio-4: 16px;
+  --espacio-5: 20px;
+  --espacio-6: 24px;
+  --espacio-margen-pantalla: 28px;
+  --espacio-solape-hoja: 40px;
+
+  /* 5. Radios */
+  --radio-sm: 8px;
+  --radio-md: 12px;
+  --radio-lg: 16px;
+  --radio-xl: 20px;
+  --radio-2xl: 28px;
+  --radio-full: 999px;
+
+  /* 6. Alturas y tamaños */
+  --alto-boton: 52px;
+  --alto-campo: 52px;
+  --alto-tecla: 46px;
+  --alto-chip: 36px;
+  --alto-header: 170px;
+  --alto-header-subtitulo: 200px;
+  --alto-barra-estado: 44px;
+  --tamano-boton-volver: 36px;
+  --tamano-boton-vender: 56px;
+  --tamano-icono-circulo-m: 40px;
+  --tamano-icono-circulo-l: 48px;
+  --tamano-avatar-m: 40px;
+  --tamano-avatar-l: 64px;
+  --tamano-voz: 112px;
+  --tamano-voz-halo: 160px;
+  --tamano-casilla-codigo: 48px;
+  --tamano-pantalla: 393px;
+  --icono-sm: 20px;
+  --icono-md: 24px;
+  --icono-lg: 28px;
+  --icono-xl: 48px;
+  --icono-trazo: 2px;
+
+  /* 7. Bordes y sombras */
+  --borde-ancho-default: 1px;
+  --borde-ancho-boton: 1.5px;
+  --borde-ancho-foco: 2px;
+  --sombra-ninguna: none;
+
+  /* 8. Variables de shadcn/ui: no llevan valores, apuntan a los tokens */
+  --background: var(--fondo-app);
+  --foreground: var(--texto-principal);
+  --card: var(--fondo-tarjeta);
+  --card-foreground: var(--texto-principal);
+  --popover: var(--fondo-tarjeta);
+  --popover-foreground: var(--texto-principal);
+  --primary: var(--fondo-primario);
+  --primary-foreground: var(--texto-inverso);
+  --secondary: var(--fondo-primario-suave);
+  --secondary-foreground: var(--texto-primario);
+  --muted: var(--fondo-sutil);
+  --muted-foreground: var(--texto-secundario);
+  --accent: var(--fondo-primario-suave);
+  --accent-foreground: var(--texto-primario);
+  --destructive: var(--fondo-peligro);
+  --border: var(--borde-default);
+  --input: var(--fondo-sutil);
+  --ring: var(--borde-foco);
+  --radius: var(--radio-lg);
+  --chart-1: var(--fondo-primario);
+  --chart-2: var(--fondo-encabezado);
+}
+
+/* Expone los tokens como clases de Tailwind: bg-fondo-app, p-espacio-4, text-monto-xl… */
+@theme inline {
+  /* Colores de shadcn/ui */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+
+  /* Colores de Tiendy */
+  --color-fondo-app: var(--fondo-app);
+  --color-fondo-tarjeta: var(--fondo-tarjeta);
+  --color-fondo-sutil: var(--fondo-sutil);
+  --color-fondo-encabezado: var(--fondo-encabezado);
+  --color-fondo-primario: var(--fondo-primario);
+  --color-fondo-primario-suave: var(--fondo-primario-suave);
+  --color-fondo-exito: var(--fondo-exito);
+  --color-fondo-exito-suave: var(--fondo-exito-suave);
+  --color-fondo-advertencia: var(--fondo-advertencia);
+  --color-fondo-advertencia-suave: var(--fondo-advertencia-suave);
+  --color-fondo-peligro: var(--fondo-peligro);
+  --color-fondo-peligro-suave: var(--fondo-peligro-suave);
+  --color-fondo-placeholder: var(--fondo-placeholder);
+  --color-texto-principal: var(--texto-principal);
+  --color-texto-secundario: var(--texto-secundario);
+  --color-texto-sutil: var(--texto-sutil);
+  --color-texto-inverso: var(--texto-inverso);
+  --color-texto-inverso-suave: var(--texto-inverso-suave);
+  --color-texto-primario: var(--texto-primario);
+  --color-texto-advertencia: var(--texto-advertencia);
+  --color-texto-exito: var(--texto-exito);
+  --color-texto-peligro: var(--texto-peligro);
+  --color-borde-default: var(--borde-default);
+  --color-borde-fuerte: var(--borde-fuerte);
+  --color-borde-foco: var(--borde-foco);
+
+  /* Tipografía */
+  --font-sans: var(--fuente-base);
+  --font-heading: var(--fuente-base);
+
+  --text-display: var(--texto-display-tamano);
+  --text-display--line-height: var(--texto-display-alto);
+  --text-display--font-weight: var(--texto-display-peso);
+  --text-display--letter-spacing: var(--texto-display-letras);
+  --text-monto-xl: var(--texto-monto-xl-tamano);
+  --text-monto-xl--line-height: var(--texto-monto-xl-alto);
+  --text-monto-xl--font-weight: var(--texto-monto-xl-peso);
+  --text-monto-xl--letter-spacing: var(--texto-monto-xl-letras);
+  --text-titulo-1: var(--texto-titulo-1-tamano);
+  --text-titulo-1--line-height: var(--texto-titulo-1-alto);
+  --text-titulo-1--font-weight: var(--texto-titulo-1-peso);
+  --text-titulo-2: var(--texto-titulo-2-tamano);
+  --text-titulo-2--line-height: var(--texto-titulo-2-alto);
+  --text-titulo-2--font-weight: var(--texto-titulo-2-peso);
+  --text-monto-m: var(--texto-monto-m-tamano);
+  --text-monto-m--line-height: var(--texto-monto-m-alto);
+  --text-monto-m--font-weight: var(--texto-monto-m-peso);
+  --text-valor: var(--texto-valor-tamano);
+  --text-valor--line-height: var(--texto-valor-alto);
+  --text-valor--font-weight: var(--texto-valor-peso);
+  --text-cuerpo-fuerte: var(--texto-cuerpo-fuerte-tamano);
+  --text-cuerpo-fuerte--line-height: var(--texto-cuerpo-fuerte-alto);
+  --text-cuerpo-fuerte--font-weight: var(--texto-cuerpo-fuerte-peso);
+  --text-boton: var(--texto-boton-tamano);
+  --text-boton--line-height: var(--texto-boton-alto);
+  --text-boton--font-weight: var(--texto-boton-peso);
+  --text-cuerpo: var(--texto-cuerpo-tamano);
+  --text-cuerpo--line-height: var(--texto-cuerpo-alto);
+  --text-cuerpo--font-weight: var(--texto-cuerpo-peso);
+  --text-chip: var(--texto-chip-tamano);
+  --text-chip--line-height: var(--texto-chip-alto);
+  --text-chip--font-weight: var(--texto-chip-peso);
+  --text-secundario: var(--texto-secundario-estilo-tamano);
+  --text-secundario--line-height: var(--texto-secundario-estilo-alto);
+  --text-secundario--font-weight: var(--texto-secundario-estilo-peso);
+  --text-caption: var(--texto-caption-tamano);
+  --text-caption--line-height: var(--texto-caption-alto);
+  --text-caption--font-weight: var(--texto-caption-peso);
+
+  /* Espaciados, alturas y tamaños (sirven para p-, m-, gap-, h-, w-, size-, max-w-) */
+  --spacing-espacio-1: var(--espacio-1);
+  --spacing-espacio-2: var(--espacio-2);
+  --spacing-espacio-3: var(--espacio-3);
+  --spacing-espacio-4: var(--espacio-4);
+  --spacing-espacio-5: var(--espacio-5);
+  --spacing-espacio-6: var(--espacio-6);
+  --spacing-margen-pantalla: var(--espacio-margen-pantalla);
+  --spacing-solape-hoja: var(--espacio-solape-hoja);
+  --spacing-alto-boton: var(--alto-boton);
+  --spacing-alto-campo: var(--alto-campo);
+  --spacing-alto-tecla: var(--alto-tecla);
+  --spacing-alto-chip: var(--alto-chip);
+  --spacing-alto-header: var(--alto-header);
+  --spacing-alto-header-subtitulo: var(--alto-header-subtitulo);
+  --spacing-alto-barra-estado: var(--alto-barra-estado);
+  --spacing-boton-volver: var(--tamano-boton-volver);
+  --spacing-boton-vender: var(--tamano-boton-vender);
+  --spacing-icono-circulo-m: var(--tamano-icono-circulo-m);
+  --spacing-icono-circulo-l: var(--tamano-icono-circulo-l);
+  --spacing-avatar-m: var(--tamano-avatar-m);
+  --spacing-avatar-l: var(--tamano-avatar-l);
+  --spacing-voz: var(--tamano-voz);
+  --spacing-voz-halo: var(--tamano-voz-halo);
+  --spacing-casilla-codigo: var(--tamano-casilla-codigo);
+  --spacing-pantalla: var(--tamano-pantalla);
+  --spacing-icono-sm: var(--icono-sm);
+  --spacing-icono-md: var(--icono-md);
+  --spacing-icono-lg: var(--icono-lg);
+  --spacing-icono-xl: var(--icono-xl);
+
+  /* Radios: rounded-sm … rounded-2xl, rounded-full */
+  --radius-sm: var(--radio-sm);
+  --radius-md: var(--radio-md);
+  --radius-lg: var(--radio-lg);
+  --radius-xl: var(--radio-xl);
+  --radius-2xl: var(--radio-2xl);
+  --radius-full: var(--radio-full);
+
+  /* Sombras: el kit pide superficies planas */
+  --shadow-ninguna: var(--sombra-ninguna);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-fondo-sutil text-texto-principal text-cuerpo;
+  }
+}

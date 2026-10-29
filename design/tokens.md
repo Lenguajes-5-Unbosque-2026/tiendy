@@ -137,13 +137,13 @@ No se usan pesos Light (300) ni textos de menos de 12px.
 | `espacio/5` | `--espacio-5` | 20px | Relleno de tarjetas grandes (Vender, Vendido hoy) |
 | `espacio/6` | `--espacio-6` | 24px | Separación entre secciones |
 | `espacio/margen-pantalla` | `--espacio-margen-pantalla` | 28px | Margen izquierdo y derecho del contenido (393px → 337px útiles) |
+| `espacio/solape-hoja` *(propuesto)* | `--espacio-solape-hoja` | 40px | Cuánto sube la hoja crema sobre el header (UI kit §6: "el contenido empieza 40px antes del final del header") |
 
 **Valores que salen de las pantallas y no están en la escala** (por decidir, ver la sección 9):
 
 | Valor | Dónde | Propuesta |
 |---|---|---|
 | 14px | Relleno de la Tarjeta de monto compacta (dos columnas en 17 y 19) | Usar `espacio/3` (12) o `espacio/4` (16), o agregar `espacio/3-5` |
-| 40px | Cuánto sube la hoja crema sobre el header | Agregar `espacio/solape-hoja` |
 | 20px *(pantallas)* | Margen de la hoja inferior (20, 21, 09a) | Es distinto al margen de pantalla (28px): ¿agregar `espacio/margen-hoja`? |
 
 ## 5. Radios
