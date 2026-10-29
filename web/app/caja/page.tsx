@@ -43,11 +43,11 @@ export default function CajaPage() {
           etiqueta="Ventas en efectivo"
           monto={pesos(caja.ventasEfectivo)}
         />
-        <AmountCard compacta etiqueta="Gastos en efectivo" monto={pesos(caja.gastosEfectivo)} />
         <AmountCard
           compacta
-          etiqueta="Fiado · no está en caja"
-          monto={pesos(caja.porMedio.fiado)}
+          etiqueta="Gastos en efectivo"
+          monto={pesos(caja.gastosEfectivo)}
+          className="col-span-2"
         />
       </div>
 
@@ -58,7 +58,6 @@ export default function CajaPage() {
             [
               ["Efectivo", caja.porMedio.efectivo],
               ["Transferencia", caja.porMedio.transferencia],
-              ["Fiado", caja.porMedio.fiado],
             ] as const
           ).map(([medio, monto]) => (
             <div key={medio} className="flex justify-between">

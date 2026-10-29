@@ -1,8 +1,5 @@
 // Lo que no se guarda porque se calcula (data/mock/README.md).
 import type {
-  Abono,
-  AcuerdoPago,
-  Cliente,
   Gasto,
   MedioPago,
   Producto,
@@ -22,7 +19,7 @@ export function ventasAnotadas(ventas: Venta[]) {
   return ventas.filter((v) => v.estado === "anotada");
 }
 
-/** Resumen del día para el Home (15): vendido, ganancia y fiado. */
+/** Resumen del día para el Home (15): vendido y ganancia. */
 export function resumenDelDia(
   ventas: Venta[],
   lineas: VentaProducto[],
@@ -30,7 +27,7 @@ export function resumenDelDia(
 ) {
   const delDia = ventasAnotadas(ventas).filter((v) => esDelDia(v.fecha_hora, fecha));
   const ids = new Set(delDia.map((v) => v.id));
-  const porMedio: Record<MedioPago, number> = { efectivo: 0, transferencia: 0, fiado: 0 };
+  const porMedio: Record<MedioPago, number> = { efectivo: 0, transferencia: 0 };
   for (const v of delDia) porMedio[v.medio_pago] += v.total;
 
   // Sin costo no se puede calcular la ganancia de esa línea (p36)
@@ -41,7 +38,6 @@ export function resumenDelDia(
   return {
     vendido: delDia.reduce((suma, v) => suma + v.total, 0),
     ganancia,
-    fiado: porMedio.fiado,
     porMedio,
     cantidadVentas: delDia.length,
   };
@@ -65,23 +61,11 @@ export function cajaDelTurno(turno: Turno, ventas: Venta[], gastos: Gasto[]) {
     porMedio: {
       efectivo: ventasEfectivo,
       transferencia: sumar("transferencia"),
-      fiado: sumar("fiado"),
     },
     esperado: turno.base + ventasEfectivo - gastosEfectivo,
     cantidadVentas: delTurno.length,
     cantidadGastos: gastosTurno.length,
   };
-}
-
-/** Lo que debe un cliente = sus ventas fiadas anotadas − sus abonos. */
-export function deudaCliente(clienteId: string, ventas: Venta[], abonos: Abono[]) {
-  const fiado = ventasAnotadas(ventas)
-    .filter((v) => v.medio_pago === "fiado" && v.cliente_id === clienteId)
-    .reduce((s, v) => s + v.total, 0);
-  const abonado = abonos
-    .filter((a) => a.cliente_id === clienteId)
-    .reduce((s, a) => s + a.monto, 0);
-  return Math.max(0, fiado - abonado);
 }
 
 /** Fechas (AAAA-MM-DD) de los últimos `n` días, terminando hoy. */
@@ -147,103 +131,6 @@ export function estadoStock(producto: Producto, promedio: number) {
   else if (dias !== null) alcance = dias <= 1 ? "se acaba mañana" : `alcanza ${dias} días`;
 
   return { porAgotarse, nivel, dias, alcance, promedio };
-}
-
-/** Días completos entre dos fechas AAAA-MM-DD (positivo si `hasta` es después). */
-export function diasEntre(desde: string, hasta: string) {
-  const a = Date.UTC(+desde.slice(0, 4), +desde.slice(5, 7) - 1, +desde.slice(8, 10));
-  const b = Date.UTC(+hasta.slice(0, 4), +hasta.slice(5, 7) - 1, +hasta.slice(8, 10));
-  return Math.round((b - a) / 86_400_000);
-}
-
-const ACUERDOS: Record<AcuerdoPago, string> = {
-  esta_semana: "esta semana",
-  quincena: "quincena",
-  fin_de_mes: "fin de mes",
-};
-
-export function textoAcuerdo(acuerdo: AcuerdoPago) {
-  return ACUERDOS[acuerdo];
-}
-
-/** Cómo va un cliente con su fiado, para la lista (37). */
-export function estadoFiado(cliente: Cliente, deuda: number, abonos: Abono[]) {
-  const suyos = abonos
-    .filter((a) => a.cliente_id === cliente.id)
-    .sort((a, b) => b.fecha_hora.localeCompare(a.fecha_hora));
-  const ultimo = suyos[0];
-  const haceUltimo = ultimo ? diasEntre(ultimo.fecha_hora, HOY) : null;
-  const cuando =
-    haceUltimo === null ? "" : haceUltimo === 0 ? "hoy" : haceUltimo === 1 ? "ayer" : `hace ${haceUltimo} días`;
-
-  if (deuda === 0) {
-    return { texto: ultimo ? `Al día · abonó ${cuando}` : "Al día", tono: "exito" as const, vencido: false };
-  }
-  const atraso = cliente.fecha_acuerdo ? diasEntre(cliente.fecha_acuerdo, HOY) : null;
-  if (atraso !== null && atraso > 0) {
-    return {
-      texto: `Vencido hace ${atraso} ${atraso === 1 ? "día" : "días"}`,
-      tono: "peligro" as const,
-      vencido: true,
-    };
-  }
-  if (cliente.acuerdo_pago) {
-    return { texto: `Paga ${cliente.acuerdo_pago === "quincena" ? "en quincena" : textoAcuerdo(cliente.acuerdo_pago)}`, tono: "secundario" as const, vencido: false };
-  }
-  if (ultimo) return { texto: `Último abono ${cuando}`, tono: "secundario" as const, vencido: false };
-  return { texto: "Sin acuerdo de pago", tono: "secundario" as const, vencido: false };
-}
-
-/** Si el cliente acordó pagar en los próximos 7 días (filtro "Esta semana" de 37). */
-export function pagaEstaSemana(cliente: Cliente) {
-  if (cliente.acuerdo_pago === "esta_semana") return true;
-  if (!cliente.fecha_acuerdo) return false;
-  const dias = diasEntre(HOY, cliente.fecha_acuerdo);
-  return dias >= 0 && dias <= 7;
-}
-
-export type Movimiento = {
-  id: string;
-  tipo: "fiado" | "abono";
-  titulo: string;
-  fecha: string;
-  monto: number;
-};
-
-/** Fiados y abonos de un cliente, del más nuevo al más viejo (38). */
-export function movimientosCliente(
-  clienteId: string,
-  ventas: Venta[],
-  lineas: VentaProducto[],
-  productos: Producto[],
-  abonos: Abono[]
-): Movimiento[] {
-  const nombreCorto = new Map(productos.map((p) => [p.id, p.nombre_corto]));
-  const fiados: Movimiento[] = ventasAnotadas(ventas)
-    .filter((v) => v.medio_pago === "fiado" && v.cliente_id === clienteId)
-    .map((v) => {
-      const nombres = lineas
-        .filter((l) => l.venta_id === v.id)
-        .map((l) => nombreCorto.get(l.producto_id))
-        .filter(Boolean);
-      return {
-        id: v.id,
-        tipo: "fiado",
-        titulo: `Fiado · ${nombres.join(", ")}`,
-        fecha: v.fecha_hora,
-        monto: v.total,
-      };
-    });
-  const pagos: Movimiento[] = abonos
-    .filter((a) => a.cliente_id === clienteId)
-    .map((a) => ({
-      id: a.id,
-      tipo: "abono",
-      titulo: `Abono en ${a.medio_pago === "efectivo" ? "efectivo" : "transferencia"}`,
-      fecha: a.fecha_hora,
-      monto: a.monto,
-    }));
-  return [...fiados, ...pagos].sort((a, b) => b.fecha.localeCompare(a.fecha));
 }
 
 /** Días de venta que cubre la sugerencia de compra (44). */

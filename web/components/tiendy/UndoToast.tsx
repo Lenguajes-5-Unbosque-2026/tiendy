@@ -7,7 +7,6 @@ import type { MedioPago } from "@/lib/mock/tipos";
 const nombreMedio: Record<MedioPago, string> = {
   efectivo: "Efectivo",
   transferencia: "Transferencia",
-  fiado: "Fiado",
 };
 
 /** Aviso con Deshacer (22): "Venta anotada · $11.500 · Efectivo · inventario actualizado". */
@@ -15,10 +14,7 @@ export function UndoToast() {
   const { aviso, deshacerVenta } = useTienda();
   if (!aviso) return null;
 
-  const medio =
-    aviso.medioPago === "fiado" && aviso.cliente
-      ? `Fiado a ${aviso.cliente}`
-      : nombreMedio[aviso.medioPago];
+  const medio = nombreMedio[aviso.medioPago];
 
   return (
     <div className="absolute inset-x-0 bottom-full px-espacio-4 pb-espacio-3">

@@ -13,12 +13,10 @@ const archivos = {
   personas: "personas.csv",
   categorias: "categorias.csv",
   productos: "productos.csv",
-  clientes: "clientes.csv",
   turnos: "turnos.csv",
   ventas: "ventas.csv",
   ventaProductos: "venta_productos.csv",
   gastos: "gastos.csv",
-  abonos: "abonos.csv",
 };
 
 // Columnas que son plata o cantidades

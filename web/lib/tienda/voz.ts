@@ -30,7 +30,6 @@ function leerPlata(texto: string): number | null {
 }
 
 function leerMedio(texto: string): MedioPago | null {
-  if (/\b(fiado|fiao|fiar|fiele|fiale|me lo anota)\b/.test(texto)) return "fiado";
   if (/\b(nequi|daviplata|transferencia|transfiere)\b/.test(texto)) return "transferencia";
   if (/\b(efectivo|plata|billete|paga con)\b/.test(texto)) return "efectivo";
   return null;

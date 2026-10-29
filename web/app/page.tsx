@@ -31,9 +31,8 @@ export default function InicioPage() {
       }
     >
       <AmountCard variante="oscura" etiqueta="Vendido hoy" monto={pesos(resumen.vendido)}>
-        <span className="flex gap-espacio-6 text-chip text-texto-inverso-suave">
-          <span>Ganancia {pesos(resumen.ganancia)}</span>
-          <span>Fiado {pesos(resumen.fiado)}</span>
+        <span className="text-chip text-texto-inverso-suave">
+          Ganancia {pesos(resumen.ganancia)}
         </span>
       </AmountCard>
 

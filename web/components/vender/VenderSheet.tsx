@@ -20,13 +20,11 @@ import { interpretarVenta, normalizar } from "@/lib/tienda/voz";
 const mediosPago: { valor: MedioPago; etiqueta: string }[] = [
   { valor: "efectivo", etiqueta: "Efectivo" },
   { valor: "transferencia", etiqueta: "Nequi / Daviplata" },
-  { valor: "fiado", etiqueta: "Fiado" },
 ];
 
 const nombreMedio: Record<MedioPago, string> = {
   efectivo: "efectivo",
   transferencia: "Nequi / Daviplata",
-  fiado: "fiado",
 };
 
 /** Segundos antes de guardar sola una venta dicha por voz (21). */
@@ -58,8 +56,7 @@ export function VenderSheet() {
       if (!venta.entendido) return;
       const medioPago = venta.medioPago ?? "efectivo";
       setBorrador({ lineas: venta.lineas, medioPago, pagaCon: venta.pagaCon, canal: "voz" });
-      // El fiado necesita escoger cliente: no se guarda solo
-      setCuenta(medioPago === "fiado" ? null : SEGUNDOS_AUTOGUARDADO);
+      setCuenta(SEGUNDOS_AUTOGUARDADO);
     },
     [productos, setBorrador],
   );
@@ -112,16 +109,7 @@ export function VenderSheet() {
         .filter((l) => l.cantidad > 0),
     });
 
-  const irAFiado = () => {
-    setVenderAbierto(false);
-    router.push("/vender/fiado");
-  };
-
-  const elegirMedio = (medioPago: MedioPago) => {
-    setBorrador({ ...borrador, medioPago });
-    // Al elegir Fiado se pasa a "Venta fiada" (23) para escoger el cliente
-    if (medioPago === "fiado" && lineas.length > 0) irAFiado();
-  };
+  const elegirMedio = (medioPago: MedioPago) => setBorrador({ ...borrador, medioPago });
 
   const limpiar = () => {
     setBusqueda("");
@@ -130,7 +118,6 @@ export function VenderSheet() {
   };
 
   const anotar = () => {
-    if (borrador.medioPago === "fiado") return irAFiado();
     anotarVenta(borrador);
     limpiar();
     setVenderAbierto(false);

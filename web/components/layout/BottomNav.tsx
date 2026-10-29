@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Banknote,
-  HandCoins,
   House,
   Package,
   Wallet,
@@ -17,17 +16,14 @@ import { cn } from "@/lib/utils";
 
 type Tab = { href: string; label: string; icon: LucideIcon };
 
-const tabsIzquierda: Tab[] = [
-  { href: "/", label: "Inicio", icon: House },
-  { href: "/fiados", label: "Fiados", icon: HandCoins },
-];
+const tabsIzquierda: Tab[] = [{ href: "/", label: "Inicio", icon: House }];
 
 const tabsDerecha: Tab[] = [
   { href: "/inventario", label: "Inventario", icon: Package },
   { href: "/caja", label: "Caja", icon: Wallet },
 ];
 
-/** Barra inferior (UI kit §7): Inicio · Fiados · Vender · Inventario · Caja. */
+/** Barra inferior: Inicio · Vender · Inventario · Caja. */
 export function BottomNav() {
   const pathname = usePathname();
   const { setVenderAbierto } = useTienda();
@@ -56,7 +52,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navegación principal"
-      className="sticky bottom-0 z-10 grid grid-cols-5 items-end rounded-t-2xl border-t border-borde-default bg-fondo-tarjeta px-espacio-2 pt-espacio-2 pb-[max(var(--espacio-2),env(safe-area-inset-bottom))]"
+      className="sticky bottom-0 z-10 grid grid-cols-4 items-end rounded-t-2xl border-t border-borde-default bg-fondo-tarjeta px-espacio-2 pt-espacio-2 pb-[max(var(--espacio-2),env(safe-area-inset-bottom))]"
     >
       {/* Aviso "Venta anotada · Deshacer" (22), justo encima de la barra */}
       <UndoToast />

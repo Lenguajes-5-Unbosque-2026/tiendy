@@ -1,7 +1,6 @@
 // Forma de los datos de data/mock/ (ver data/mock/README.md).
 
-export type MedioPago = "efectivo" | "transferencia" | "fiado";
-export type AcuerdoPago = "esta_semana" | "quincena" | "fin_de_mes";
+export type MedioPago = "efectivo" | "transferencia";
 
 export type Tienda = {
   id: string;
@@ -33,15 +32,6 @@ export type Producto = {
   imagen: string | null;
 };
 
-export type Cliente = {
-  id: string;
-  nombre: string;
-  celular: string | null;
-  acuerdo_pago: AcuerdoPago | null;
-  fecha_acuerdo: string | null;
-  creado_en: string;
-};
-
 export type Turno = {
   id: string;
   persona_id: string;
@@ -59,7 +49,6 @@ export type Venta = {
   fecha_hora: string;
   canal: "toque" | "busqueda" | "voz";
   medio_pago: MedioPago;
-  cliente_id: string | null;
   total: number;
   paga_con: number | null;
   estado: "anotada" | "deshecha" | "eliminada";
@@ -83,25 +72,13 @@ export type Gasto = {
   medio_pago: "efectivo" | "transferencia" | "quede_debiendo";
 };
 
-export type Abono = {
-  id: string;
-  cliente_id: string;
-  turno_id: string;
-  persona_id: string;
-  fecha_hora: string;
-  monto: number;
-  medio_pago: "efectivo" | "transferencia";
-};
-
 export type DatosMock = {
   tienda: Tienda;
   personas: Persona[];
   categorias: Categoria[];
   productos: Producto[];
-  clientes: Cliente[];
   turnos: Turno[];
   ventas: Venta[];
   ventaProductos: VentaProducto[];
   gastos: Gasto[];
-  abonos: Abono[];
 };

@@ -1,7 +1,7 @@
 "use client";
 
 // Estado de la tienda en el celular. Arranca con data/mock/ y guarda lo que
-// cambia (ventas, inventario, clientes) en el navegador hasta que llegue Supabase.
+// cambia (ventas, inventario) en el navegador hasta que llegue Supabase.
 import {
   createContext,
   useCallback,
@@ -13,9 +13,6 @@ import {
 
 import datos from "@/lib/mock/datos.json";
 import type {
-  Abono,
-  AcuerdoPago,
-  Cliente,
   DatosMock,
   MedioPago,
   Producto,
@@ -26,20 +23,18 @@ import { HOY } from "@/lib/tienda/calculos";
 
 const mock = datos as unknown as DatosMock;
 // Cambia la versión si cambia la forma de lo guardado
-const CLAVE = "tiendy:mvp:v2";
+const CLAVE = "tiendy:mvp:v3";
 const DURACION_AVISO = 6000;
 
 type Mutable = {
   productos: Producto[];
-  clientes: Cliente[];
   ventas: Venta[];
   ventaProductos: VentaProducto[];
-  abonos: Abono[];
 };
 
 export type LineaVenta = { productoId: string; cantidad: number };
 
-/** La venta que se está armando en la hoja (20) y que sigue en "Venta fiada" (23). */
+/** La venta que se está armando en la hoja (20). */
 export type Borrador = {
   lineas: LineaVenta[];
   medioPago: MedioPago;
@@ -47,14 +42,7 @@ export type Borrador = {
   canal: Venta["canal"];
 };
 
-export type Aviso = { ventaId: string; total: number; medioPago: MedioPago; cliente?: string };
-
-type NuevaVenta = Omit<Borrador, "lineas"> & {
-  lineas: LineaVenta[];
-  clienteId?: string;
-  /** Para el aviso: el cliente nuevo todavía no está en la lista al anotar. */
-  clienteNombre?: string;
-};
+export type Aviso = { ventaId: string; total: number; medioPago: MedioPago };
 
 const borradorVacio: Borrador = {
   lineas: [],
@@ -65,10 +53,8 @@ const borradorVacio: Borrador = {
 
 const inicial: Mutable = {
   productos: mock.productos,
-  clientes: mock.clientes,
   ventas: mock.ventas,
   ventaProductos: mock.ventaProductos,
-  abonos: mock.abonos,
 };
 
 function horaDeHoy() {
@@ -122,9 +108,9 @@ function useTiendaState() {
     setAviso(null);
   }, []);
 
-  /** Anota la venta: suma a la caja, descuenta el inventario y, si es fiada, suma a la deuda. */
+  /** Anota la venta: suma a la caja y descuenta el inventario. */
   const anotarVenta = useCallback(
-    (venta: NuevaVenta) => {
+    (venta: Borrador) => {
       const id = `v-${Date.now()}`;
       const lineas: VentaProducto[] = venta.lineas.map((l, i) => {
         const p = estado.productos.find((x) => x.id === l.productoId)!;
@@ -146,7 +132,6 @@ function useTiendaState() {
         fecha_hora: horaDeHoy(),
         canal: venta.canal,
         medio_pago: venta.medioPago,
-        cliente_id: venta.clienteId ?? null,
         total,
         paga_con: venta.medioPago === "efectivo" ? venta.pagaCon : null,
         estado: "anotada",
@@ -162,7 +147,7 @@ function useTiendaState() {
         }),
       }));
 
-      mostrarAviso({ ventaId: id, total, medioPago: venta.medioPago, cliente: venta.clienteNombre });
+      mostrarAviso({ ventaId: id, total, medioPago: venta.medioPago });
       setBorrador(borradorVacio);
       return id;
     },
@@ -198,52 +183,6 @@ function useTiendaState() {
     []
   );
 
-  /** Cliente nuevo o acuerdo de pago de uno que ya existe (23). */
-  const guardarCliente = useCallback(
-    (cliente: { id?: string; nombre?: string; celular?: string | null; acuerdo: AcuerdoPago }) => {
-      const id = cliente.id ?? `cl-${Date.now()}`;
-      setEstado((e) => {
-        if (cliente.id) {
-          return {
-            ...e,
-            clientes: e.clientes.map((c) =>
-              c.id === cliente.id ? { ...c, acuerdo_pago: cliente.acuerdo } : c
-            ),
-          };
-        }
-        const nuevo: Cliente = {
-          id,
-          nombre: cliente.nombre ?? "",
-          celular: cliente.celular ?? null,
-          acuerdo_pago: cliente.acuerdo,
-          fecha_acuerdo: null,
-          creado_en: horaDeHoy(),
-        };
-        return { ...e, clientes: [nuevo, ...e.clientes] };
-      });
-      return id;
-    },
-    []
-  );
-
-  /** Abono (39): baja la deuda del cliente y entra a la caja; no es una venta nueva. */
-  const registrarAbono = useCallback(
-    (abono: { clienteId: string; monto: number; medioPago: Abono["medio_pago"] }) => {
-      const nuevo: Abono = {
-        id: `a-${Date.now()}`,
-        cliente_id: abono.clienteId,
-        turno_id: turnoAbierto?.id ?? "",
-        persona_id: atiende?.id ?? "",
-        fecha_hora: horaDeHoy(),
-        monto: abono.monto,
-        medio_pago: abono.medioPago,
-      };
-      setEstado((e) => ({ ...e, abonos: [...e.abonos, nuevo] }));
-      return nuevo;
-    },
-    [turnoAbierto, atiende]
-  );
-
   return {
     ...estado,
     tienda: mock.tienda,
@@ -261,8 +200,6 @@ function useTiendaState() {
     anotarVenta,
     deshacerVenta,
     guardarProducto,
-    guardarCliente,
-    registrarAbono,
   };
 }
 

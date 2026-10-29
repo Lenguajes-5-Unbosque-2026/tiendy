@@ -12,7 +12,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Tiendy",
-  description: "Todo tu negocio a la mano: ventas, caja, fiados e inventario.",
+  description: "Todo tu negocio a la mano: ventas, caja e inventario.",
 };
 
 export const viewport: Viewport = {

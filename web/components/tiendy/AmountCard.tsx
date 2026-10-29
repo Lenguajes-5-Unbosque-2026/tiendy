@@ -10,7 +10,7 @@ type AmountCardProps = {
   centrada?: boolean;
   /** El monto en verde cuando es plata que entra ("Ventas en efectivo"). */
   montoPrimario?: boolean;
-  /** Línea de detalle debajo del monto ("Ganancia $118.000 · Fiado $28.000"). */
+  /** Línea de detalle debajo del monto ("Ganancia $118.000"). */
   children?: React.ReactNode;
   className?: string;
 };
