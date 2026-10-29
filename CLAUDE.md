@@ -62,8 +62,8 @@ Los números que faltan (07, 08, 14, 24, 25, 26, 45) son pantallas de la v1 que 
 ## 6. Decisiones tomadas
 
 - **Diseño definitivo:** la página "📱 Diseño v3 · propuesta" de Figma está aprobada; es la que se implementa.
-- **Barra inferior oficial:** Inicio · Vender · Inventario · Caja. Vender es el círculo verde y abre la hoja de venta (20); también se abre desde la tarjeta "Vender" del Home. Mi cuaderno se abre desde Caja y Mi tienda desde el Home (no tienen pestaña).
-- **Sin fiados:** Fiados salió del producto: no hay pantallas, medio de pago, clientes ni abonos. Si una pantalla de `design/flujos/` todavía lo muestra (Home, Caja, la hoja de venta, la barra inferior), se ignora.
+- **Barra inferior oficial:** Inicio · Fiados · Vender · Inventario · Caja. Vender es el círculo verde y abre la hoja de venta (20); también se abre desde la tarjeta "Vender" del Home. Mi cuaderno se abre desde Caja y Mi tienda desde el Home (no tienen pestaña).
+- **Fiados próximamente:** Fiados salió del producto por ahora: no hay medio de pago, clientes ni abonos. La pestaña Fiados se queda en la barra y abre una pantalla "Pronto podrás agregar los fiados de tu negocio en esta sección" (`web/app/fiados/page.tsx`). Si una pantalla de `design/flujos/` todavía muestra fiado en Home, Caja o la hoja de venta, se ignora.
 - **Mi tienda:** es el nombre oficial de la sección que en Figma se llama "Perfil" (bloque 9, pestaña `Activo=Perfil` del kit). En la app el texto visible es "Mi tienda".
 - **Colores de estado:** naranja solo para alertas (por agotarse, faltante en el cierre de caja); rojo solo para gastos.
 - **Tokens en código:** mismos nombres que en Figma, con `-` en vez de `/` (`--fondo-primario`, `--espacio-4`, `--radio-lg`). Las variables de shadcn/ui apuntan a ellas. Detalle en `design/Tiendy_UI_kit.md`.
