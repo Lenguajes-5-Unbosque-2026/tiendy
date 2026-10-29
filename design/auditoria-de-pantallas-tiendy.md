@@ -23,7 +23,7 @@ De las 44 pantallas, 15 ya cumplen con el kit nuevo y 29 tienen algo por corregi
 El criterio central de la revisión: el verde es la marca y la acción, y el rojo y el naranja solo avisan de algo. Si nada está mal, en la pantalla no hay rojo ni naranja.
 
 - **Verde:** header, botones, enlaces, íconos de acciones, avatares y plata que entra (+$).
-- **Negro y gris:** gastos, fiados, deudas, saldos, títulos de sección y textos de apoyo.
+- **Negro y gris:** gastos, saldos, títulos de sección y textos de apoyo.
 - **Naranja:** solo avisos leves que piden atención pronto, como "Se está acabando la leche" o "Quedan 6".
 - **Rojo:** solo problemas que ya pasaron, como "Faltan $5.000", "Vencido hace 5 días" o "Quedan 2".
 
@@ -35,7 +35,7 @@ Seis problemas explican la mayoría de las correcciones; arreglando cada uno una
 
 | Problema | Pantallas | Cómo arreglarlo |
 | --- | --- | --- |
-| Íconos de acciones con el dibujo en rojo o naranja: el círculo es verde, pero el trazo del ícono no | 09, 10, 15, 22, 27, 33, 38 | Seleccionar la capa del dibujo de cada ícono y ponerle el trazo `texto/primario` (o `texto/secundario` en los movimientos de gasto y fiado) |
+| Íconos de acciones con el dibujo en rojo o naranja: el círculo es verde, pero el trazo del ícono no | 09, 10, 15, 22, 27, 33 | Seleccionar la capa del dibujo de cada ícono y ponerle el trazo `texto/primario` (o `texto/secundario` en los movimientos de gasto) |
 | Avatares con letra para cosas que no son personas | 12, 17, 31, 35, 41, 43, 46 | Usar Ícono en círculo: `package` para productos, `list` en "Movimientos de hoy", `clock` en "Quedé debiendo" y en turnos (o la inicial de quien atendió), y un ícono propio para Notificaciones y Micrófono |
 | Buscadores con la acción escrita dentro del campo ("Buscar movimiento Filtros", "Buscar producto + Agregar") | 33, 41 | Dejar el campo solo con el placeholder y poner "Filtros" o "+ Agregar" como botón aparte, al lado |
 | Fondo distinto detrás de las hojas inferiores: unas muestran el Home oscurecido y otras un verde liso | 09a y 21 (Home oscurecido); 20 y 20a (verde liso) | Usar el Home oscurecido en todas |
@@ -44,7 +44,7 @@ Seis problemas explican la mayoría de las correcciones; arreglando cada uno una
 
 ## Revisión por bloque
 
-Los bloques de Fiados y Caja son los más sólidos; Home, Gasto e Inventario concentran las correcciones de prioridad alta.
+El bloque de Caja es el más sólido; Home, Gasto e Inventario concentran las correcciones de prioridad alta.
 
 ### Bloque 1 · Registro e inicio de sesión
 
@@ -87,7 +87,6 @@ Los bloques de Fiados y Caja son los más sólidos; Home, Gasto e Inventario con
 | 20a Vender sin productos | Media | Mismo fondo verde liso que la 20. |
 | 21 Vender · lo que dijiste | Cumple | — |
 | 22 Venta anotada · deshacer | Alta | Íconos de Registrar gasto y Llegó mercancía como en el Home. Además, "Vendido hoy" subió a $396.500, pero la ganancia sigue en $118.000. |
-| 23 Fiado: elegir cliente | Cumple | — |
 
 ### Bloque 5 · Gasto
 
@@ -109,15 +108,6 @@ Los bloques de Fiados y Caja son los más sólidos; Home, Gasto e Inventario con
 | 35 Turnos | Media | Los avatares muestran la inicial del día (H, L, D, S, V), no de una persona. Los títulos se parten en dos líneas: acortar a "Dom 21 sep.". |
 | 36 Detalle de movimiento | Cumple | — |
 
-### Bloque 7 · Fiados
-
-| Pantalla | Prioridad | Qué corregir |
-| --- | --- | --- |
-| 37 Lista de fiados | Cumple | — |
-| 38 Detalle del fiado | Alta | Los dos íconos de "Fiado" están en naranja. Sugerencia: agregar `phone` y `message-square` a los botones Llamar y WhatsApp. |
-| 39 Registrar abono | Cumple | — |
-| 40 Deuda saldada | Cumple | — |
-
 ### Bloque 8 · Inventario
 
 | Pantalla | Prioridad | Qué corregir |
@@ -133,7 +123,6 @@ Los bloques de Fiados y Caja son los más sólidos; Home, Gasto e Inventario con
 | Pantalla | Prioridad | Qué corregir |
 | --- | --- | --- |
 | 46 Panel del tendero (Mi tienda) | Alta | El botón "Cerrar sesión" queda tapado por la barra inferior. Notificaciones y Micrófono usan avatares con letra. Ninguna pantalla muestra cómo se llega a Mi tienda: el Home no tiene entrada. El título del bloque dice "Perfil", pero la pantalla se llama "Mi tienda". |
-| 47 Empleados | Baja | La casilla "Puede registrar fiados" es un cuadro verde sin check, igual que en la 13. |
 
 ## Plan de corrección
 
@@ -141,7 +130,7 @@ En este orden, las primeras cuatro tareas resuelven las 9 pantallas de prioridad
 
 **Prioridad alta**
 
-- [ ] Pasar a verde o gris el dibujo de los íconos que están en rojo o naranja (09, 10, 15, 22, 27, 33, 38)
+- [ ] Pasar a verde o gris el dibujo de los íconos que están en rojo o naranja (09, 10, 15, 22, 27, 33)
 - [ ] Unificar "por agotarse" en naranja (Advertencia) y dejar rojo solo para agotado o crítico (15, 41, 43)
 - [ ] Separar "Filtros" y "+ Agregar" de los buscadores (33, 41)
 - [ ] Subir el botón "Cerrar sesión" para que no lo tape la barra inferior y definir cómo se llega a Mi tienda (46)

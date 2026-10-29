@@ -14,8 +14,8 @@
 |---|---|---|
 | 16a | ¿Quién atiende? | Header "¿Quién atiende?" con volver. "Elige tu nombre para abrir el turno", "No necesitas cuenta ni contraseña. Todo lo que anotes queda con tu nombre." Tarjetas con avatar: "Doña Rosa · Dueña", "Andrés · Empleado" (elegida, borde verde) y "Agregar · Solo la dueña". Botón "Seguir · contar la base". |
 | 16 | Abrir caja | Header "Abrir caja" con volver. "¿Con cuánto efectivo empiezas hoy?", tarjeta "Base del día $80.000 · Ayer cerraste con $76.500", chips $50.000 / $80.000 / $100.000 / Igual que ayer, teclado numérico (1–9, 000, 0, Borrar) y botón "Abrir caja". |
-| 17 | Resumen de caja | Header "Caja del día · Abierta 7:02 a.m." con volver. "Efectivo esperado en caja $341.000". Cuatro tarjetas: Base $80.000, Ventas en efectivo $323.000 (verde), Gastos en efectivo $62.000, "Fiado · no está en caja" $28.000. "Por medio de pago": Efectivo $323.000, Transferencia $34.000, Fiado $28.000. Fila "Movimientos de hoy · 42 ventas · 3 gastos". Botón "Cerrar caja". Barra inferior con Caja activa. |
-| 18 | Cierre de caja | Header "Cerrar caja" con volver. Tarjeta "Debería haber en efectivo $341.000 · Transferencias del día $34.000 · Fiado del día $28.000". "¿Cuánto efectivo contaste?" con ayuda "Base + ventas en efectivo − gastos en efectivo. Cuenta billetes y monedas." Campo con $336.000. Alerta roja "Faltan $5.000 · Revisa si olvidaste anotar algún gasto". "¿Por qué crees que falta? (le avisamos a la dueña)" con chips "Olvidé anotar un gasto" (elegido), "Di mal unas vueltas" y "No sé". Botones "Confirmar cierre" y "Revisar movimientos". |
+| 17 | Resumen de caja | Header "Caja del día · Abierta 7:02 a.m." con volver. "Efectivo esperado en caja $341.000". Tres tarjetas: Base $80.000, Ventas en efectivo $323.000 (verde), Gastos en efectivo $62.000. "Por medio de pago": Efectivo $323.000, Transferencia $34.000. Fila "Movimientos de hoy · 42 ventas · 3 gastos". Botón "Cerrar caja". Barra inferior con Caja activa. |
+| 18 | Cierre de caja | Header "Cerrar caja" con volver. Tarjeta "Debería haber en efectivo $341.000 · Transferencias del día $34.000". "¿Cuánto efectivo contaste?" con ayuda "Base + ventas en efectivo − gastos en efectivo. Cuenta billetes y monedas." Campo con $336.000. Alerta roja "Faltan $5.000 · Revisa si olvidaste anotar algún gasto". "¿Por qué crees que falta? (le avisamos a la dueña)" con chips "Olvidé anotar un gasto" (elegido), "Di mal unas vueltas" y "No sé". Botones "Confirmar cierre" y "Revisar movimientos". |
 | 19 | Resultado del cierre | Header "Caja cerrada · Hoy · 7:02 a.m. a 9:15 p.m.". Check de éxito, "Turno cerrado, Doña Rosa". Tarjetas Vendido $385.000, Gastos $62.000, Ganancia del día $118.000 (fondo verde suave) y Diferencia de caja −$5.000 (fondo rojo suave, texto rojo). Botones "Ver el cuaderno del día" y "Finalizar". Barra inferior con Caja activa. |
 
 En el flujo, 16a va antes que 16: el botón de 16a dice "Seguir · contar la base".
@@ -37,13 +37,13 @@ En el flujo, 16a va antes que 16: el botón de 16a dice "Seguir · contar la bas
 
 1. Desde la fila **Caja del día** del Home o la pestaña **Caja** de la barra inferior, llega a **Caja del día** (17).
 2. Ve el **efectivo esperado: $341.000** = base $80.000 + ventas en efectivo $323.000 − gastos en efectivo $62.000.
-3. Ve las ventas por medio de pago: efectivo $323.000, transferencia $34.000 y fiado $28.000 (este no está en la caja).
+3. Ve las ventas por medio de pago: efectivo $323.000 y transferencia $34.000.
 4. Toca **Movimientos de hoy** para ver el detalle en Mi cuaderno (CU-06 · 33).
 
 ### Cerrar el turno (17 → 18 → 19)
 
 1. A las 9:15 p.m., en **Caja del día** (17), toca **Cerrar caja**.
-2. En **Cerrar caja** (18) ve que **debería haber $341.000** en efectivo, además de $34.000 en transferencias y $28.000 fiados.
+2. En **Cerrar caja** (18) ve que **debería haber $341.000** en efectivo, además de $34.000 en transferencias.
 3. Cuenta billetes y monedas y escribe **$336.000**.
 4. Aparece la alerta **Faltan $5.000 · Revisa si olvidaste anotar algún gasto**.
 5. Responde **¿Por qué crees que falta?** con **Olvidé anotar un gasto**. Esa respuesta le llega a la dueña.
@@ -66,7 +66,7 @@ En el flujo, 16a va antes que 16: el botón de 16a dice "Seguir · contar la bas
 
 ## Qué pasa después
 
-- **Al abrir:** empieza un turno con la persona y la base. Todo lo que se anote durante el turno (ventas, gastos, abonos) queda con su nombre ("Anotó: Doña Rosa", CU-06 · 36).
+- **Al abrir:** empieza un turno con la persona y la base. Todo lo que se anote durante el turno (ventas, gastos) queda con su nombre ("Anotó: Doña Rosa", CU-06 · 36).
 - **Al cerrar:**
   - El turno guarda la hora de cierre, el efectivo contado, la diferencia y el motivo elegido.
   - La dueña recibe el motivo del faltante ("le avisamos a la dueña").
@@ -88,7 +88,7 @@ En el flujo, 16a va antes que 16: el botón de 16a dice "Seguir · contar la bas
 |---|---|
 | Personas de la tienda (dueña y empleados activos) | Tarjetas de 16a |
 | Último cierre: efectivo contado | "Ayer cerraste con $76.500" e "Igual que ayer" |
-| Ventas del turno por medio de pago, con su costo | Ventas en efectivo, Transferencia, Fiado, Vendido, Ganancia |
+| Ventas del turno por medio de pago, con su costo | Ventas en efectivo, Transferencia, Vendido, Ganancia |
 | Gastos del turno pagados en efectivo | Gastos en efectivo |
 | Cantidad de ventas y gastos del turno | "42 ventas · 3 gastos" |
 
@@ -110,7 +110,7 @@ En el flujo, 16a va antes que 16: el botón de 16a dice "Seguir · contar la bas
 ## Preguntas abiertas
 
 1. **Dos versiones de Abrir caja.** 09a (hoja sin teclado) y 16 (pantalla completa con teclado) son el mismo paso. ¿Cuál se queda? (auditoría).
-2. **Abonos en efectivo.** El abono de un fiado "entra a la caja" (CU-07 · 39), pero la fórmula de 18 no lo suma. ¿El efectivo esperado incluye los abonos en efectivo? ¿Y las ventas cobradas por transferencia que se pagan al proveedor?
+2. **Pagos al proveedor.** ¿El efectivo esperado tiene en cuenta las ventas cobradas por transferencia que se pagan al proveedor?
 3. **Gastos "Quedé debiendo" y mercancía de contado.** ¿La mercancía pagada con "Efectivo de la caja" (CU-08 · 41a) resta del efectivo esperado aunque "no cuenta como gasto del día"?
 4. **Motivos de la diferencia.** Los chips de 18 son para un faltante. ¿Cuáles salen si sobra plata? ¿Es obligatorio elegir un motivo?
 5. **Aviso a la dueña.** ¿Cómo le llega: notificación en la app, SMS o WhatsApp? (Mi tienda tiene "Notificaciones", CU-09 · 46).

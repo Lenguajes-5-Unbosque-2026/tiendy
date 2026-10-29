@@ -14,7 +14,7 @@ export type FilaDetalle = {
   total?: boolean;
 };
 
-/** Tarjeta de detalle: filas clave–valor ("Deuda actual · $53.500"). */
+/** Tarjeta de detalle: filas clave–valor ("Monto · $184.000"). */
 export function DetailCard({ filas, className }: { filas: FilaDetalle[]; className?: string }) {
   return (
     <dl className={cn("flex flex-col gap-espacio-2 rounded-lg bg-fondo-tarjeta p-espacio-4", className)}>

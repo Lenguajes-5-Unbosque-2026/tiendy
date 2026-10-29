@@ -49,7 +49,7 @@ Los valores base. **No se usan directo en las pantallas**: solo los usan los col
 
 ## 2. Colores del tema
 
-Los que se usan al construir. El nombre dice para qué sirven. **Regla del color:** el verde es la marca y la acción; el naranja y el rojo solo avisan de algo (naranja: advertencia leve; rojo: un problema que ya pasó). Un gasto o un fiado no es un error: va en neutro.
+Los que se usan al construir. El nombre dice para qué sirven. **Regla del color:** el verde es la marca y la acción; el naranja y el rojo solo avisan de algo (naranja: advertencia leve; rojo: un problema que ya pasó). Un gasto no es un error: va en neutro.
 
 ### Fondos
 
@@ -61,11 +61,11 @@ Los que se usan al construir. El nombre dice para qué sirven. **Regla del color
 | `fondo/encabezado` | `--fondo-encabezado` | verde/900 | `#0B3D23` | Header y tarjeta oscura de "Vendido hoy" |
 | `fondo/primario` | `--fondo-primario` | verde/600 | `#12813F` | Botón primario, chip elegido, botón Vender, barras de la gráfica |
 | `fondo/primario-suave` | `--fondo-primario-suave` | verde/100 | `#D7F5E1` | Botón secundario, fondo de íconos y avatares, pestaña activa, alerta de éxito |
-| `fondo/exito` | `--fondo-exito` | verde/700 | `#0E6B34` | Check sólido de las pantallas de éxito (19, 32, 40) |
+| `fondo/exito` | `--fondo-exito` | verde/700 | `#0E6B34` | Check sólido de las pantallas de éxito (19, 32) |
 | `fondo/exito-suave` | `--fondo-exito-suave` | verde/100 | `#D7F5E1` | Área del check en pantallas de éxito, tarjeta "Ganancia del día" (19) |
 | `fondo/advertencia` | `--fondo-advertencia` | naranja/500 | `#F97316` | **Solo** ícono de la alerta de advertencia (producto por agotarse) |
 | `fondo/advertencia-suave` | `--fondo-advertencia-suave` | naranja/100 | `#FFEAD9` | **Solo** fondo de una alerta de advertencia |
-| `fondo/peligro` | `--fondo-peligro` | rojo/600 | `#D92D20` | **Solo** problemas reales: faltante, fiado vencido, agotado crítico |
+| `fondo/peligro` | `--fondo-peligro` | rojo/600 | `#D92D20` | **Solo** problemas reales: faltante, agotado crítico |
 | `fondo/peligro-suave` | `--fondo-peligro-suave` | rojo/100 | `#FDE4E1` | **Solo** fondo de alerta de peligro y de la diferencia de caja negativa |
 | `fondo/placeholder` | `--fondo-placeholder` | neutro/300 | `#D5DACF` | Relleno de fotos todavía vacías |
 
@@ -73,14 +73,14 @@ Los que se usan al construir. El nombre dice para qué sirven. **Regla del color
 
 | Token | En código | Apunta a | Valor | Dónde se usa |
 |---|---|---|---|---|
-| `texto/principal` | `--texto-principal` | neutro/900 | `#13201A` | Títulos, montos y cuerpo; montos de gastos y fiados |
+| `texto/principal` | `--texto-principal` | neutro/900 | `#13201A` | Títulos, montos y cuerpo; montos de gastos |
 | `texto/secundario` | `--texto-secundario` | neutro/600 | `#55625A` | Detalles de filas, títulos de sección, ayudas, barra inferior |
 | `texto/sutil` | `--texto-sutil` | neutro/500 | `#757F78` | **Solo** placeholders y legales no necesarios (no cumple contraste en texto pequeño) |
 | `texto/inverso` | `--texto-inverso` | neutro/0 | `#FFFFFF` | Texto e íconos sobre verde, header y rojo |
 | `texto/inverso-suave` | `--texto-inverso-suave` | verde/200 | `#AEE9C3` | Subtítulo del header ("Paso 1 de 3", "Abierta 7:02 a.m.") |
 | `texto/primario` | `--texto-primario` | verde/700 | `#0E6B34` | Enlaces, acciones de texto, plata que entra (+$), "Vueltas" |
 | `texto/advertencia` | `--texto-advertencia` | naranja/600 | `#C2410C` | **Solo** advertencia leve ("Quedan 6") |
-| `texto/exito` | `--texto-exito` | verde/700 | `#0E6B34` | Confirmaciones en texto ("Pago de fiado", "Al día") |
+| `texto/exito` | `--texto-exito` | verde/700 | `#0E6B34` | Confirmaciones en texto ("Caja cuadró") |
 | `texto/peligro` | `--texto-peligro` | rojo/700 | `#B42318` | **Solo** problemas: "Faltan $5.000", "Vencido hace 5 días", "Quedan 2", "−$5.000" |
 
 ### Bordes
@@ -112,14 +112,14 @@ No se usan pesos Light (300) ni textos de menos de 12px.
 | Token | En código | Tamaño / interlineado | Peso | Espaciado entre letras | Ejemplo | Dónde se usa |
 |---|---|---|---|---|---|---|
 | `display` | `--texto-display` | 48 / 59 | 800 | −2 % | Tiendy | Solo el nombre en el splash (01) |
-| `monto-xl` | `--texto-monto-xl` | 34 / 40 | 800 | −1 % | $385.000 | Monto protagonista: Vendido hoy, Base del día, Te debe, Total de la venta |
+| `monto-xl` | `--texto-monto-xl` | 34 / 40 | 800 | −1 % | $385.000 | Monto protagonista: Vendido hoy, Base del día, Total de la venta |
 | `titulo-1` | `--texto-titulo-1` | 26 / 31 | 700 | 0 | ¿Cuál es tu número? | Pregunta o título del contenido |
 | `titulo-2` | `--texto-titulo-2` | 24 / 30 | 700 | 0 | Vender | Tarjetas grandes del Home, título de la hoja "Nueva venta" |
 | `monto-m` | `--texto-monto-m` | 22 / 28 | 700 | 0 | $62.000 | Montos en dos columnas (17, 19, 33) y título del header |
 | `valor` | `--texto-valor` | 18 / 25 | 700 | 0 | $11.500 | Totales dentro de una tarjeta, valor a la derecha de una fila |
 | `cuerpo-fuerte` | `--texto-cuerpo-fuerte` | 16 / 22 | 600 | 0 | Se está acabando la leche | Título de fila y de alerta, etiqueta de campo |
 | `boton` | `--texto-boton` | 16 / 22 | 700 | 0 | Anotar venta · $11.500 | Texto de todos los botones |
-| `cuerpo` | `--texto-cuerpo` | 15 / 21 | 400 | 0 | Anota ventas, gastos y fiados… | Párrafos y valores de filas |
+| `cuerpo` | `--texto-cuerpo` | 15 / 21 | 400 | 0 | Anota ventas y gastos… | Párrafos y valores de filas |
 | `chip` | `--texto-chip` | 14 / 20 | 600 | 0 | Quincena | Chips y opciones rápidas |
 | `secundario` | `--texto-secundario-estilo` | 13 / 18 | 500 | 0 | Quedan 2 · ver sugerencia de compra | Detalles, ayudas, títulos de sección, subtítulo del header |
 | `caption` | `--texto-caption` | 12 / 16 | 500 | 0 | Al continuar aceptas los Términos | Legales y etiquetas de la barra inferior |
@@ -214,7 +214,7 @@ Están escritos en el UI kit dentro de cada componente, pero **no son variables 
 | Token | En código | Valor | Dónde se usa |
 |---|---|---|---|
 | `sombra/ninguna` | `--sombra-ninguna` | `none` | **Regla del kit:** "Superficies planas: las tarjetas blancas se separan del fondo crema por color, sin sombras." |
-| `sombra/tarjeta` *(pantallas, por decidir)* | `--sombra-tarjeta` | Sin medir | Varias pantallas muestran una sombra suave debajo de las tarjetas blancas (16, 18, 23, 29, 31, 42, 44, 47). Contradice la regla del kit (ver la sección 9). |
+| `sombra/tarjeta` *(pantallas, por decidir)* | `--sombra-tarjeta` | Sin medir | Varias pantallas muestran una sombra suave debajo de las tarjetas blancas (16, 18, 29, 31, 42, 44, 47). Contradice la regla del kit (ver la sección 9). |
 | `sombra/hoja` *(pantallas, por decidir)* | `--sombra-hoja` | Sin medir | Hoja inferior (20, 21, 09a) y aviso "Venta anotada" (22). |
 
 ### Capas

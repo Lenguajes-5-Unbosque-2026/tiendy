@@ -32,7 +32,7 @@
 ### Decisiones
 
 - **Color primario verde tienda (#12813F):** asocia con plata y frescura, viene de las referencias de supermercado y diferencia a Tiendy de apps de comida. Todos los textos cumplen contraste AA.
-- **Naranja** solo como acento de alerta (por agotarse, fiados vencidos, faltante en el cierre de caja). **Rojo** solo para gastos y deudas.
+- **Naranja** solo como acento de alerta (por agotarse, faltante en el cierre de caja). **Rojo** solo para gastos.
 - **Header** verde oscuro con hoja crema redondeada (estructura de las referencias), **barra inferior** blanca con estado activo en píldora.
 - **Tipografía Plus Jakarta Sans:** más legible en tamaños pequeños; sin pesos Light.
 - **Íconos Lucide** (los mismos de shadcn/ui) para que diseño y código hablen igual.
@@ -165,8 +165,8 @@ Fondo verde oscuro con decoración suave. La hoja de contenido (`radio/2xl`) se 
 ### Barra inferior
 Navegación principal. Variante = pestaña activa.
 
-> **Decidido (20-10-2026): esta es la barra oficial.** Las pantallas de la v3 todavía usan otra, "Barra inferior v3" (Inicio · Fiados · Vender central · Inventario · Caja), y hay que actualizarlas en Figma para que usen este componente. Vender y Caja no tienen pestaña: se abren desde las tarjetas del Home. La pestaña `Activo=Perfil` se muestra como **"Mi tienda"**.
-- **Variantes:** `Activo=Inicio` · `Activo=Cuaderno` · `Activo=Fiados` · `Activo=Inventario` · `Activo=Perfil`
+> **Decidido (20-10-2026): esta es la barra oficial.** Las pantallas de la v3 todavía usan otra, "Barra inferior v3" (Inicio · Vender central · Inventario · Caja), y hay que actualizarlas en Figma para que usen este componente. Vender y Caja no tienen pestaña: se abren desde las tarjetas del Home. La pestaña `Activo=Perfil` se muestra como **"Mi tienda"**.
+- **Variantes:** `Activo=Inicio` · `Activo=Cuaderno` · `Activo=Inventario` · `Activo=Perfil`
 
 ### Botón
 shadcn: `<Button variant="default | secondary | outline | ghost">`. Alto 52, píldora.
@@ -191,7 +191,7 @@ Para personas y productos: inicial en círculo. shadcn: `<Avatar><AvatarFallback
 - **Tamaños:** M (40 px) · L (48 px)
 
 ### Fila de lista
-Movimientos, fiados, productos, opciones. Final: Flecha o Valor.
+Movimientos, productos, opciones. Final: Flecha o Valor.
 - **Variantes:** `Final=Flecha` · `Final=Valor`
 
 ### Tarjeta de monto
@@ -199,7 +199,7 @@ Totales: vendido hoy, plata en caja, total de la venta. shadcn: `<Card>`.
 - **Variantes:** `Tono=Primario` · `Tono=Claro`
 
 ### Alerta
-Avisos de agotado, fiados vencidos o faltante en el cierre de caja. shadcn: `<Alert>`.
+Avisos de agotado o faltante en el cierre de caja. shadcn: `<Alert>`.
 - **Variantes:** `Tono=Acento` · `Tono=Peligro`
 
 ### Botón de voz
@@ -222,14 +222,14 @@ Qué componente usa cada patrón de las pantallas y su equivalente en código (s
 |---|---|---|
 | Barra de estado | Todas las pantallas | — (solo diseño) |
 | Header | Todas las pantallas con título (volver / subtítulo) | `components/layout/AppHeader` |
-| Barra inferior | Home, Cuaderno, Fiados, Inventario, Mi tienda | `components/layout/BottomNav` |
+| Barra inferior | Home, Cuaderno, Inventario, Mi tienda | `components/layout/BottomNav` |
 | Botón | Continuar, Registrar venta, Cerrar caja, Enviar código… | `ui/button` |
 | Campo de texto | Celular, código, montos, búsquedas | `ui/input` |
 | Chip de filtro | Hoy/Semana/Mes, Todos/Vencidos, categorías, ventas rápidas | `ui/toggle-group`, `ui/badge` |
 | Ícono en círculo | Opciones de registro, medios de pago, movimientos | `tiendy/IconBadge` + `lucide-react` |
-| Avatar | Clientes de fiados, empleados, productos | `ui/avatar` |
-| Fila de lista | Movimientos, fiados, productos, proveedores | `tiendy/ListItem` |
+| Avatar | Empleados, productos | `ui/avatar` |
+| Fila de lista | Movimientos, productos, proveedores | `tiendy/ListItem` |
 | Tarjeta de monto | Vendido hoy, plata en caja, total de venta, resultado del cierre | `ui/card` → `tiendy/AmountCard` |
-| Alerta | Producto por agotarse, fiado vencido | `ui/alert` |
+| Alerta | Producto por agotarse | `ui/alert` |
 | Botón de voz | Venta por voz, gasto por voz | `tiendy/VoiceButton` |
 | Íconos (33) | Navegación, acciones y estados | `lucide-react` |
