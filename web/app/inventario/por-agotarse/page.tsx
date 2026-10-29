@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { CircleCheck } from "lucide-react";
 
 import { AppScreen } from "@/components/layout/AppScreen";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { ChoiceChips } from "@/components/tiendy/ChoiceChips";
 import { EmptyState } from "@/components/tiendy/EmptyState";
 import { IconBadge } from "@/components/tiendy/IconBadge";
@@ -26,8 +27,13 @@ export default function PorAgotarsePage() {
       title="Por agotarse"
       subtitle={plural(porAgotarse.length, "producto", "productos")}
       back="/inventario"
-      // Sugerencias de compra (44) queda fuera del MVP
-      footer={porAgotarse.length > 0 && <Button disabled>Ver sugerencia de compra</Button>}
+      footer={
+        porAgotarse.length > 0 && (
+          <Link href="/inventario/sugerencias" className={buttonVariants()}>
+            Ver sugerencia de compra
+          </Link>
+        )
+      }
     >
       {porAgotarse.length === 0 ? (
         <EmptyState
