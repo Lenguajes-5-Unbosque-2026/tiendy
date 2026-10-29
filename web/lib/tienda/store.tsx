@@ -13,6 +13,7 @@ import {
 
 import datos from "@/lib/mock/datos.json";
 import type {
+  Abono,
   AcuerdoPago,
   Cliente,
   DatosMock,
@@ -24,7 +25,8 @@ import type {
 import { HOY } from "@/lib/tienda/calculos";
 
 const mock = datos as unknown as DatosMock;
-const CLAVE = "tiendy:mvp:v1";
+// Cambia la versión si cambia la forma de lo guardado
+const CLAVE = "tiendy:mvp:v2";
 const DURACION_AVISO = 6000;
 
 type Mutable = {
@@ -32,6 +34,7 @@ type Mutable = {
   clientes: Cliente[];
   ventas: Venta[];
   ventaProductos: VentaProducto[];
+  abonos: Abono[];
 };
 
 export type LineaVenta = { productoId: string; cantidad: number };
@@ -65,6 +68,7 @@ const inicial: Mutable = {
   clientes: mock.clientes,
   ventas: mock.ventas,
   ventaProductos: mock.ventaProductos,
+  abonos: mock.abonos,
 };
 
 function horaDeHoy() {
@@ -222,12 +226,29 @@ function useTiendaState() {
     []
   );
 
+  /** Abono (39): baja la deuda del cliente y entra a la caja; no es una venta nueva. */
+  const registrarAbono = useCallback(
+    (abono: { clienteId: string; monto: number; medioPago: Abono["medio_pago"] }) => {
+      const nuevo: Abono = {
+        id: `a-${Date.now()}`,
+        cliente_id: abono.clienteId,
+        turno_id: turnoAbierto?.id ?? "",
+        persona_id: atiende?.id ?? "",
+        fecha_hora: horaDeHoy(),
+        monto: abono.monto,
+        medio_pago: abono.medioPago,
+      };
+      setEstado((e) => ({ ...e, abonos: [...e.abonos, nuevo] }));
+      return nuevo;
+    },
+    [turnoAbierto, atiende]
+  );
+
   return {
     ...estado,
     tienda: mock.tienda,
     categorias: mock.categorias,
     gastos: mock.gastos,
-    abonos: mock.abonos,
     turnoAbierto,
     atiende,
     borrador,
@@ -241,6 +262,7 @@ function useTiendaState() {
     deshacerVenta,
     guardarProducto,
     guardarCliente,
+    registrarAbono,
   };
 }
 

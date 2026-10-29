@@ -86,7 +86,11 @@ export type Gasto = {
 export type Abono = {
   id: string;
   cliente_id: string;
+  turno_id: string;
+  persona_id: string;
+  fecha_hora: string;
   monto: number;
+  medio_pago: "efectivo" | "transferencia";
 };
 
 export type DatosMock = {

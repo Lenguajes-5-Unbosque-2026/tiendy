@@ -32,3 +32,17 @@ export function inicial(nombre: string): string {
 export function plural(n: number, singular: string, varios: string): string {
   return `${n} ${n === 1 ? singular : varios}`;
 }
+
+const MESES = ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "sep.", "oct.", "nov.", "dic."];
+
+/** "2026-09-30" o una fecha ISO → "30 sep.". */
+export function fechaCorta(fecha: string): string {
+  const [, mes, dia] = fecha.slice(0, 10).split("-").map(Number);
+  return `${dia} ${MESES[mes - 1]}`;
+}
+
+/** "+573114567788" → "+57 311 456 7788". */
+export function celular(numero: string): string {
+  const m = numero.match(/^\+57(\d{3})(\d{3})(\d{4})$/);
+  return m ? `+57 ${m[1]} ${m[2]} ${m[3]}` : numero;
+}
