@@ -1,61 +1,50 @@
-id,tienda_id,turno_id,persona_id,fecha_hora,canal,lo_que_dijo,medio_pago,cliente_id,total,paga_con,estado
-v01,t01,tu01,pe01,2026-09-19T07:07:00-05:00,busqueda,,transferencia,,22800,,anotada
-v02,t01,tu01,pe01,2026-09-19T08:06:00-05:00,toque,,efectivo,,11900,20000,anotada
-v03,t01,tu01,pe01,2026-09-19T09:02:00-05:00,toque,,transferencia,,4500,,anotada
-v04,t01,tu01,pe01,2026-09-19T10:09:00-05:00,voz,"tres papas, tres límpidos, cuatro panes y dos atunes, fiado a Doña Marta Gómez",fiado,cl02,37200,,anotada
-v05,t01,tu01,pe01,2026-09-19T10:56:00-05:00,voz,"un huevo, en efectivo",efectivo,,700,,anotada
-v06,t01,tu01,pe01,2026-09-19T11:52:00-05:00,voz,"un queso, en efectivo, me paga con 10 mil",efectivo,,7500,10000,anotada
-v07,t01,tu01,pe01,2026-09-19T12:57:00-05:00,toque,,efectivo,,2600,,anotada
-v08,t01,tu02,pe02,2026-09-19T14:55:00-05:00,voz,"una gaseosa, tres leches, dos fab y unas papas, por Nequi",transferencia,,56500,,anotada
-v09,t01,tu02,pe02,2026-09-19T15:47:00-05:00,toque,,efectivo,,17200,,anotada
-v10,t01,tu02,pe02,2026-09-19T16:44:00-05:00,voz,"un aceite, unas papas, una leche y un límpido, fiado a Señor Ramírez",fiado,cl05,23200,,anotada
-v11,t01,tu02,pe02,2026-09-19T17:52:00-05:00,busqueda,,efectivo,,1400,2000,anotada
-v12,t01,tu02,pe02,2026-09-19T18:44:00-05:00,toque,,efectivo,,3900,5000,anotada
-v13,t01,tu02,pe02,2026-09-19T19:42:00-05:00,toque,,efectivo,,3500,5000,anotada
-v14,t01,tu02,pe02,2026-09-19T20:33:00-05:00,busqueda,,efectivo,,2500,,anotada
-v15,t01,tu03,pe01,2026-09-20T07:22:00-05:00,toque,,efectivo,,3200,,anotada
-v16,t01,tu03,pe01,2026-09-20T08:59:00-05:00,toque,,fiado,cl08,9000,,anotada
-v17,t01,tu03,pe01,2026-09-20T10:16:00-05:00,busqueda,,transferencia,,14600,,anotada
-v18,t01,tu03,pe01,2026-09-20T11:47:00-05:00,toque,,transferencia,,7000,,anotada
-v19,t01,tu03,pe01,2026-09-20T12:51:00-05:00,busqueda,,efectivo,,20800,,anotada
-v20,t01,tu03,pe01,2026-09-20T14:23:00-05:00,voz,"una leche, cinco huevos, dos fab y una avena, en efectivo",efectivo,,48600,,anotada
-v21,t01,tu03,pe01,2026-09-20T15:43:00-05:00,busqueda,,fiado,cl04,23000,,anotada
-v22,t01,tu03,pe01,2026-09-20T17:17:00-05:00,toque,,transferencia,,38200,,anotada
-v23,t01,tu03,pe01,2026-09-20T18:38:00-05:00,voz,"dos lentejas, en efectivo",efectivo,,7200,,deshecha
-v24,t01,tu03,pe01,2026-09-20T20:03:00-05:00,busqueda,,efectivo,,6700,10000,anotada
-v25,t01,tu04,pe02,2026-09-21T08:33:00-05:00,voz,"tres festival y un bimbo, en efectivo, me paga con 20 mil",efectivo,,12200,20000,anotada
-v26,t01,tu04,pe02,2026-09-21T09:50:00-05:00,toque,,efectivo,,14600,20000,anotada
-v27,t01,tu04,pe02,2026-09-21T11:09:00-05:00,busqueda,,fiado,cl03,13500,,anotada
-v28,t01,tu04,pe02,2026-09-21T12:26:00-05:00,toque,,efectivo,,6400,,anotada
-v29,t01,tu04,pe02,2026-09-21T14:04:00-05:00,voz,"tres yogures, en efectivo, me paga con 10 mil",efectivo,,8400,10000,anotada
-v30,t01,tu04,pe02,2026-09-21T15:26:00-05:00,voz,"tres cremas dentales y un aceite, en efectivo",efectivo,,31400,,anotada
-v31,t01,tu04,pe02,2026-09-21T16:51:00-05:00,toque,,efectivo,,11800,,anotada
-v32,t01,tu04,pe02,2026-09-21T18:05:00-05:00,voz,"tres atunes, tres panes y una gaseosa, fiado a Wilson",fiado,cl07,25500,,anotada
-v33,t01,tu04,pe02,2026-09-21T19:36:00-05:00,voz,"unas papas, una leche y dos cocas, en efectivo, me paga con 20 mil",efectivo,,12000,20000,anotada
-v34,t01,tu05,pe01,2026-09-22T06:54:00-05:00,voz,"un paquete de papel, en efectivo",efectivo,,9500,,anotada
-v35,t01,tu05,pe01,2026-09-22T08:19:00-05:00,toque,,efectivo,,15100,,anotada
-v36,t01,tu05,pe01,2026-09-22T09:10:00-05:00,toque,,transferencia,,11400,,anotada
-v37,t01,tu05,pe01,2026-09-22T10:12:00-05:00,voz,"un kumis, dos panelas y tres bombones, en efectivo",efectivo,,9500,,anotada
-v38,t01,tu05,pe01,2026-09-22T11:12:00-05:00,busqueda,,efectivo,,1800,,anotada
-v39,t01,tu05,pe01,2026-09-22T12:23:00-05:00,voz,"cinco huevos, dos leches, tres chocolates y dos margarinas, fiado a Doña Gladys Esperanza Rodríguez de Castañeda",fiado,cl06,38400,,anotada
-v40,t01,tu07,pe01,2026-09-22T15:12:00-05:00,toque,,efectivo,,19700,,anotada
-v41,t01,tu07,pe01,2026-09-22T15:54:00-05:00,toque,,efectivo,,2500,5000,eliminada
-v42,t01,tu07,pe01,2026-09-22T16:49:00-05:00,voz,"una leche, por Nequi",transferencia,,3900,,anotada
-v43,t01,tu07,pe01,2026-09-22T17:46:00-05:00,busqueda,,efectivo,,5500,,anotada
-v44,t01,tu07,pe01,2026-09-22T18:43:00-05:00,toque,,efectivo,,2500,,anotada
-v45,t01,tu07,pe01,2026-09-22T19:44:00-05:00,toque,,fiado,cl01,12900,,anotada
-v46,t01,tu07,pe01,2026-09-22T20:26:00-05:00,busqueda,,efectivo,,7500,10000,anotada
-v47,t01,tu08,pe01,2026-09-23T07:16:00-05:00,toque,,efectivo,,8000,10000,anotada
-v48,t01,tu08,pe01,2026-09-23T07:41:00-05:00,voz,"cuatro huevos, en efectivo, me paga con 5 mil",efectivo,,2800,5000,anotada
-v49,t01,tu08,pe01,2026-09-23T08:09:00-05:00,voz,"unas papas, en efectivo",efectivo,,2500,,anotada
-v50,t01,tu08,pe01,2026-09-23T08:30:00-05:00,toque,,fiado,cl02,13600,,anotada
-v51,t01,tu08,pe01,2026-09-23T09:01:00-05:00,voz,"un kilo de sal y un pan, por Nequi",transferencia,,2700,,anotada
-v52,t01,tu08,pe01,2026-09-23T09:20:00-05:00,toque,,efectivo,,4200,,anotada
-v53,t01,tu08,pe01,2026-09-23T09:32:00-05:00,toque,,efectivo,,6000,10000,anotada
-v54,t01,tu08,pe01,2026-09-23T10:05:00-05:00,busqueda,,fiado,cl06,8100,,anotada
-v55,t01,tu08,pe01,2026-09-23T10:25:00-05:00,busqueda,,efectivo,,18600,,anotada
-v56,t01,tu08,pe01,2026-09-23T10:49:00-05:00,toque,,efectivo,,4500,,anotada
-v57,t01,tu08,pe01,2026-09-23T10:57:00-05:00,voz,"un chocorramo y una libra de fríjol, en efectivo",efectivo,,9000,,anotada
-v58,t01,tu08,pe01,2026-09-23T11:32:00-05:00,toque,,fiado,cl01,22100,,anotada
-v59,t01,tu08,pe01,2026-09-23T11:36:00-05:00,voz,"una gaseosa, en efectivo",efectivo,,4500,,anotada
-v60,t01,tu08,pe01,2026-09-23T12:12:00-05:00,busqueda,,efectivo,,25700,,anotada
+id,tienda_id,turno_id,persona_id,fecha_hora,canal,lo_que_dijo,medio_pago,total,paga_con,estado
+v01,t01,tu01,pe01,2026-09-19T07:07:00-05:00,busqueda,,transferencia,22800,,anotada
+v02,t01,tu01,pe01,2026-09-19T08:06:00-05:00,toque,,efectivo,11900,20000,anotada
+v03,t01,tu01,pe01,2026-09-19T09:02:00-05:00,toque,,transferencia,4500,,anotada
+v05,t01,tu01,pe01,2026-09-19T10:56:00-05:00,voz,"un huevo, en efectivo",efectivo,700,,anotada
+v06,t01,tu01,pe01,2026-09-19T11:52:00-05:00,voz,"un queso, en efectivo, me paga con 10 mil",efectivo,7500,10000,anotada
+v07,t01,tu01,pe01,2026-09-19T12:57:00-05:00,toque,,efectivo,2600,,anotada
+v08,t01,tu02,pe02,2026-09-19T14:55:00-05:00,voz,"una gaseosa, tres leches, dos fab y unas papas, por Nequi",transferencia,56500,,anotada
+v09,t01,tu02,pe02,2026-09-19T15:47:00-05:00,toque,,efectivo,17200,,anotada
+v11,t01,tu02,pe02,2026-09-19T17:52:00-05:00,busqueda,,efectivo,1400,2000,anotada
+v12,t01,tu02,pe02,2026-09-19T18:44:00-05:00,toque,,efectivo,3900,5000,anotada
+v13,t01,tu02,pe02,2026-09-19T19:42:00-05:00,toque,,efectivo,3500,5000,anotada
+v14,t01,tu02,pe02,2026-09-19T20:33:00-05:00,busqueda,,efectivo,2500,,anotada
+v15,t01,tu03,pe01,2026-09-20T07:22:00-05:00,toque,,efectivo,3200,,anotada
+v17,t01,tu03,pe01,2026-09-20T10:16:00-05:00,busqueda,,transferencia,14600,,anotada
+v18,t01,tu03,pe01,2026-09-20T11:47:00-05:00,toque,,transferencia,7000,,anotada
+v19,t01,tu03,pe01,2026-09-20T12:51:00-05:00,busqueda,,efectivo,20800,,anotada
+v20,t01,tu03,pe01,2026-09-20T14:23:00-05:00,voz,"una leche, cinco huevos, dos fab y una avena, en efectivo",efectivo,48600,,anotada
+v22,t01,tu03,pe01,2026-09-20T17:17:00-05:00,toque,,transferencia,38200,,anotada
+v23,t01,tu03,pe01,2026-09-20T18:38:00-05:00,voz,"dos lentejas, en efectivo",efectivo,7200,,deshecha
+v24,t01,tu03,pe01,2026-09-20T20:03:00-05:00,busqueda,,efectivo,6700,10000,anotada
+v25,t01,tu04,pe02,2026-09-21T08:33:00-05:00,voz,"tres festival y un bimbo, en efectivo, me paga con 20 mil",efectivo,12200,20000,anotada
+v26,t01,tu04,pe02,2026-09-21T09:50:00-05:00,toque,,efectivo,14600,20000,anotada
+v28,t01,tu04,pe02,2026-09-21T12:26:00-05:00,toque,,efectivo,6400,,anotada
+v29,t01,tu04,pe02,2026-09-21T14:04:00-05:00,voz,"tres yogures, en efectivo, me paga con 10 mil",efectivo,8400,10000,anotada
+v30,t01,tu04,pe02,2026-09-21T15:26:00-05:00,voz,"tres cremas dentales y un aceite, en efectivo",efectivo,31400,,anotada
+v31,t01,tu04,pe02,2026-09-21T16:51:00-05:00,toque,,efectivo,11800,,anotada
+v33,t01,tu04,pe02,2026-09-21T19:36:00-05:00,voz,"unas papas, una leche y dos cocas, en efectivo, me paga con 20 mil",efectivo,12000,20000,anotada
+v34,t01,tu05,pe01,2026-09-22T06:54:00-05:00,voz,"un paquete de papel, en efectivo",efectivo,9500,,anotada
+v35,t01,tu05,pe01,2026-09-22T08:19:00-05:00,toque,,efectivo,15100,,anotada
+v36,t01,tu05,pe01,2026-09-22T09:10:00-05:00,toque,,transferencia,11400,,anotada
+v37,t01,tu05,pe01,2026-09-22T10:12:00-05:00,voz,"un kumis, dos panelas y tres bombones, en efectivo",efectivo,9500,,anotada
+v38,t01,tu05,pe01,2026-09-22T11:12:00-05:00,busqueda,,efectivo,1800,,anotada
+v40,t01,tu07,pe01,2026-09-22T15:12:00-05:00,toque,,efectivo,19700,,anotada
+v41,t01,tu07,pe01,2026-09-22T15:54:00-05:00,toque,,efectivo,2500,5000,eliminada
+v42,t01,tu07,pe01,2026-09-22T16:49:00-05:00,voz,"una leche, por Nequi",transferencia,3900,,anotada
+v43,t01,tu07,pe01,2026-09-22T17:46:00-05:00,busqueda,,efectivo,5500,,anotada
+v44,t01,tu07,pe01,2026-09-22T18:43:00-05:00,toque,,efectivo,2500,,anotada
+v46,t01,tu07,pe01,2026-09-22T20:26:00-05:00,busqueda,,efectivo,7500,10000,anotada
+v47,t01,tu08,pe01,2026-09-23T07:16:00-05:00,toque,,efectivo,8000,10000,anotada
+v48,t01,tu08,pe01,2026-09-23T07:41:00-05:00,voz,"cuatro huevos, en efectivo, me paga con 5 mil",efectivo,2800,5000,anotada
+v49,t01,tu08,pe01,2026-09-23T08:09:00-05:00,voz,"unas papas, en efectivo",efectivo,2500,,anotada
+v51,t01,tu08,pe01,2026-09-23T09:01:00-05:00,voz,"un kilo de sal y un pan, por Nequi",transferencia,2700,,anotada
+v52,t01,tu08,pe01,2026-09-23T09:20:00-05:00,toque,,efectivo,4200,,anotada
+v53,t01,tu08,pe01,2026-09-23T09:32:00-05:00,toque,,efectivo,6000,10000,anotada
+v55,t01,tu08,pe01,2026-09-23T10:25:00-05:00,busqueda,,efectivo,18600,,anotada
+v56,t01,tu08,pe01,2026-09-23T10:49:00-05:00,toque,,efectivo,4500,,anotada
+v57,t01,tu08,pe01,2026-09-23T10:57:00-05:00,voz,"un chocorramo y una libra de fríjol, en efectivo",efectivo,9000,,anotada
+v59,t01,tu08,pe01,2026-09-23T11:36:00-05:00,voz,"una gaseosa, en efectivo",efectivo,4500,,anotada
+v60,t01,tu08,pe01,2026-09-23T12:12:00-05:00,busqueda,,efectivo,25700,,anotada

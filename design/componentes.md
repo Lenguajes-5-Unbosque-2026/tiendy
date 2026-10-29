@@ -16,16 +16,16 @@ Cada componente del UI kit (`design/tiendy-ui-kit.md`, sección 7), si existe un
 
 | # | Componente | shadcn/ui | Trabajo | Pantallas | Cuántas | En código |
 |---|---|---|---|---|---|---|
-| 1 | **Barra de estado** | — | Ninguno (solo diseño) | Todas menos 20 y 20a | 42 | En código es el área segura del celular (`env(safe-area-inset-top)`) |
-| 2 | **Header** (volver, subtítulo) | — | **Desde cero** | 03, 04, 05, 06, 09, 10, 11, 12, 13, 15, 16, 16a, 17, 18, 19, 22, 23, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 41a, 42, 43, 44, 46, 47 | 38 | `layout/AppHeader` (incluye la hoja crema que sube encima) |
-| 3 | **Botón** (Primario, Secundario, Borde, Texto, deshabilitado) | `button` | Adaptar | 02, 03, 04, 05, 06, 09a, 11, 12, 13, 16, 16a, 17, 18, 19, 20, 20a, 21, 23, 28, 29, 30, 31, 32, 34, 36, 38, 39, 40, 41a, 42, 43, 44, 46, 47 | 34 | `ui/button` con variantes `default`, `secondary`, `outline` y `ghost`, alto `--alto-boton` y `--radio-full` |
-| 4 | **Chip de filtro** (elegido / sin elegir; una o varias respuestas) | `toggle-group` | Adaptar | 09a, 11, 12, 13, 16, 18, 20, 21, 23, 27, 29, 31, 33, 34, 35, 37, 39, 41, 41a, 43 | 20 | `ui/toggle-group` (`type="single"` para una respuesta, `"multiple"` para filtros) |
-| 5 | **Fila de lista** (ícono o avatar · título · detalle · valor y/o flecha · elegida) | `card` (base) | **Desde cero** | 10, 12, 13, 15, 17, 23, 27, 31, 33, 35, 37, 38, 40, 41, 43, 44, 46, 47 | 18 | `tiendy/ListItem` |
-| 6 | **Barra inferior** (Inicio · Fiados · Vender · Inventario · Caja) | — | **Desde cero** | 09, 15, 17, 19, 22, 32, 33, 35, 37, 38, 40, 41, 41a, 42, 43, 44, 46, 47 | 18 | `layout/BottomNav` |
-| 7 | **Ícono en círculo** (M/L · 8 tonos) | — | **Desde cero** (simple) | 09, 10, 15, 18, 19, 20a, 21, 22, 27, 31, 32, 33, 36, 38, 40, 41, 42, 46 | 18 | `tiendy/IconBadge` + `lucide-react` |
-| 8 | **Tarjeta de monto** (oscura / clara · compacta · centrada) | `card` | Componer | 09a, 15, 16, 17, 18, 19, 20, 21, 22, 23, 29, 31, 33, 38, 39 | 15 | `tiendy/AmountCard` sobre `ui/card` |
-| 9 | **Campo de texto** (vacío / lleno / activo · con ícono · con +57) | `input` + `label` | Adaptar | 03, 11, 13, 18, 20, 23, 29, 33, 34, 37, 41, 41a, 42, 47 | 14 | `ui/input` con alto `--alto-campo` y fondo `--fondo-sutil` |
-| 10 | **Avatar** (inicial · Primario / Oscuro / Neutro · M/L) | `avatar` | Adaptar | 16a, 23, 37, 47 (+ mal usado en 12, 17, 31, 35, 41, 43, 46) | 4 (+7) | `ui/avatar` con `AvatarFallback` |
+| 1 | **Barra de estado** | — | Ninguno (solo diseño) | Todas menos 20 y 20a | 37 | En código es el área segura del celular (`env(safe-area-inset-top)`) |
+| 2 | **Header** (volver, subtítulo) | — | **Desde cero** | 03, 04, 05, 06, 09, 10, 11, 12, 13, 15, 16, 16a, 17, 18, 19, 22, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 41, 41a, 42, 43, 44, 46, 47 | 33 | `layout/AppHeader` (incluye la hoja crema que sube encima) |
+| 3 | **Botón** (Primario, Secundario, Borde, Texto, deshabilitado) | `button` | Adaptar | 02, 03, 04, 05, 06, 09a, 11, 12, 13, 16, 16a, 17, 18, 19, 20, 20a, 21, 28, 29, 30, 31, 32, 34, 36, 41a, 42, 43, 44, 46, 47 | 30 | `ui/button` con variantes `default`, `secondary`, `outline` y `ghost`, alto `--alto-boton` y `--radio-full` |
+| 4 | **Chip de filtro** (elegido / sin elegir; una o varias respuestas) | `toggle-group` | Adaptar | 09a, 11, 12, 13, 16, 18, 20, 21, 27, 29, 31, 33, 34, 35, 41, 41a, 43 | 17 | `ui/toggle-group` (`type="single"` para una respuesta, `"multiple"` para filtros) |
+| 5 | **Fila de lista** (ícono o avatar · título · detalle · valor y/o flecha · elegida) | `card` (base) | **Desde cero** | 10, 12, 13, 15, 17, 27, 31, 33, 35, 41, 43, 44, 46, 47 | 14 | `tiendy/ListItem` |
+| 6 | **Barra inferior** (Inicio · Vender · Inventario · Caja) | — | **Desde cero** | 09, 15, 17, 19, 22, 32, 33, 35, 41, 41a, 42, 43, 44, 46, 47 | 15 | `layout/BottomNav` |
+| 7 | **Ícono en círculo** (M/L · 8 tonos) | — | **Desde cero** (simple) | 09, 10, 15, 18, 19, 20a, 21, 22, 27, 31, 32, 33, 36, 41, 42, 46 | 16 | `tiendy/IconBadge` + `lucide-react` |
+| 8 | **Tarjeta de monto** (oscura / clara · compacta · centrada) | `card` | Componer | 09a, 15, 16, 17, 18, 19, 20, 21, 22, 29, 31, 33 | 12 | `tiendy/AmountCard` sobre `ui/card` |
+| 9 | **Campo de texto** (vacío / lleno / activo · con ícono · con +57) | `input` + `label` | Adaptar | 03, 11, 13, 18, 20, 29, 33, 34, 41, 41a, 42, 47 | 12 | `ui/input` con alto `--alto-campo` y fondo `--fondo-sutil` |
+| 10 | **Avatar** (inicial · Primario / Oscuro / Neutro · M/L) | `avatar` | Adaptar | 16a, 47 (+ mal usado en 12, 17, 31, 35, 41, 43, 46) | 2 (+7) | `ui/avatar` con `AvatarFallback` |
 | 11 | **Alerta** (Advertencia / Peligro / Éxito · con flecha) | `alert` | Adaptar | 15, 18, 22, 32, 41 | 5 | `ui/alert` con variantes `advertencia`, `peligro` y `exito` |
 | 12 | **Botón de voz** (reposo / escuchando) | — | **Desde cero** | 28 (grande); 20 (botón de micrófono pequeño junto al buscador) | 2 | `tiendy/VoiceButton`. Además necesita la lógica de voz (Web Speech API u otra) |
 
@@ -35,16 +35,16 @@ Aparecen en las pantallas pero el UI kit no los define como componente. Hay que 
 
 | # | Patrón | shadcn/ui | Trabajo | Pantallas | Cuántas | En código |
 |---|---|---|---|---|---|---|
-| 13 | **Tarjeta de detalle** (filas clave–valor: "Monto · $184.000") | `card` + `separator` | Componer | 17, 18, 28, 30, 32, 36, 39, 40, 46 | 9 | `tiendy/DetailCard` |
-| 14 | **Opción elegible** (fila o tarjeta con borde verde al elegirla: método de carga, cómo pagaste, cliente, quién atiende) | `radio-group` | Componer | 10, 16a, 23, 27, 31 | 5 | `tiendy/OptionCard` sobre `ui/radio-group` (reusa `ListItem`) |
+| 13 | **Tarjeta de detalle** (filas clave–valor: "Monto · $184.000") | `card` + `separator` | Componer | 17, 18, 28, 30, 32, 36, 46 | 7 | `tiendy/DetailCard` |
+| 14 | **Opción elegible** (fila o tarjeta con borde verde al elegirla: método de carga, cómo pagaste, quién atiende) | `radio-group` | Componer | 10, 16a, 27, 31 | 4 | `tiendy/OptionCard` sobre `ui/radio-group` (reusa `ListItem`) |
 | 15 | **Selector de cantidad** (− número +) | `button` | **Desde cero** (simple) | 11, 20, 21, 42, 44 | 5 | `tiendy/QuantityStepper` |
 | 16 | **Hoja inferior** (sube sobre el Home oscurecido, con agarradera y "Cancelar") | `drawer` | Adaptar | 09a, 20, 20a, 21 | 4 | `ui/drawer` (usa vaul: se cierra deslizando hacia abajo) |
 | 17 | **Tarjeta de acción grande** (Abrir caja, Vender, Registrar gasto, Llegó mercancía, Cargar productos) | `card` | Componer | 09, 15, 22 | 3 | `tiendy/ActionCard` (usa `IconBadge` L) |
-| 18 | **Pantalla de éxito** (área verde con check grande y título) | — | **Desde cero** (simple) | 19, 32, 40 | 3 | `tiendy/SuccessHero` |
+| 18 | **Pantalla de éxito** (área verde con check grande y título) | — | **Desde cero** (simple) | 19, 32 | 2 | `tiendy/SuccessHero` |
 | 19 | **Teclado numérico** (1–9, 000, 0, Borrar) | — | **Desde cero** | 16, 29 | 2 | `tiendy/NumberPad` con `--alto-tecla` |
 | 20 | **Área de cámara** (marco punteado, fondo oscuro) | — | **Desde cero** | 12, 30 | 2 | `tiendy/CameraFrame` (usa la cámara del celular con `<input type="file" capture>` o `getUserMedia`) |
 | 21 | **Casilla de verificación** | `checkbox` | Adaptar | 13, 47 | 2 | `ui/checkbox` (con el check blanco que pide la auditoría) |
-| 22 | **Encabezado de grupo de lista** ("Hoy, martes 23", "Movimientos", "Datos del negocio") | — | Ninguno (texto con estilo `secundario`) | 33, 38, 46 | 3 | Solo estilos |
+| 22 | **Encabezado de grupo de lista** ("Hoy, martes 23", "Movimientos", "Datos del negocio") | — | Ninguno (texto con estilo `secundario`) | 33, 46 | 2 | Solo estilos |
 | 23 | **Tarjeta "Te escuché"** (transcripción de la voz) | `alert` | Componer | 21 | 1 | `tiendy/VoiceTranscript` |
 | 24 | **Aviso con Deshacer** ("Venta anotada · $11.500 · Deshacer") | `sonner` | Adaptar | 22 | 1 | `ui/sonner` (`toast` con `action`) |
 | 25 | **Código de verificación** (6 casillas) | `input-otp` | Adaptar | 04 | 1 | `ui/input-otp` |
@@ -75,4 +75,4 @@ Todos de `lucide-react` (es el que usa shadcn/ui). Lista completa en el UI kit, 
 - **Avatar** se usa mal en 7 pantallas (12, 17, 31, 35, 41, 43, 46) para cosas que no son personas: en código esas filas usan **Ícono en círculo**.
 - **Fila de lista, Tarjeta de monto, Alerta y Botón de voz** estaban dibujados a mano en Figma, no como componente. En código sí se construyen como componentes.
 - Los buscadores de 33 y 41 tienen "Filtros" y "+ Agregar" escritos dentro: en código van como botón aparte, junto al **Campo de texto**.
-- La **Barra inferior** de las pantallas y la del UI kit nuevo coinciden (Inicio · Fiados · Vender · Inventario · Caja), pero el CLAUDE.md (§6) dice otra cosa. Ver `specs/README.md`, inconsistencia 2.
+- La **Barra inferior** de las pantallas y la del UI kit nuevo coinciden (Inicio · Vender · Inventario · Caja), pero el CLAUDE.md (§6) dice otra cosa. Ver `specs/README.md`, inconsistencia 2.

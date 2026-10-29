@@ -18,7 +18,7 @@
 - **Las referencias se notan claramente:** el header verde oscuro con la hoja crema redondeada, los botones píldora, los chips, los íconos en círculo y una barra inferior con un botón central elevado, que es igual a la de HomePlate.
 - **Lo que falta:**
   - 4 de los 13 componentes del UI kit nunca se usan como componente; están dibujados a mano en las pantallas.
-  - Las reglas de color (naranja solo para alertas, rojo solo para gastos y deudas) no se cumplen en varias pantallas.
+  - Las reglas de color (naranja solo para alertas, rojo solo para gastos) no se cumplen en varias pantallas.
   - La barra inferior de la versión final no coincide con la del UI kit.
 
 ---
@@ -39,15 +39,15 @@
 
 | Referencia (Recursos) | Qué se tomó *(Figma)* | Dónde aparece en la versión final *(observado)* |
 |---|---|---|
-| **1 · Woolworths** | Verde de supermercado | Verde primario en toda la app. Chips de filtro arriba de las listas: **37 Lista de fiados** (Todos / Vencidos / Esta semana), **41 Mi inventario** (Todos / Abarrotes / Bebidas / Lácteos / Aseo). Pantalla de filtros completa en **34 Filtros del cuaderno**. |
+| **1 · Woolworths** | Verde de supermercado | Verde primario en toda la app. Chips de filtro arriba de las listas: **41 Mi inventario** (Todos / Abarrotes / Bebidas / Lácteos / Aseo). Pantalla de filtros completa en **34 Filtros del cuaderno**. |
 | **2 · Daily Basket** | Verde de supermercado | Botones píldora verdes de ancho completo en casi todas las pantallas. **Buscador con micrófono** en **20 Vender · hoja de venta** ("Busca un producto" + botón de mic). Botones − / + para la cantidad en **20** y **21**. Login con pantalla de celular y código (**03**, **04**). |
 | **3 · Jollofspace** | Acentos naranja/rojo | Naranja en la alerta "Se está acabando la leche" (**15 Home**) y en el ícono de "Llegó mercancía"; rojo en "Registrar gasto" y en los montos negativos de **33 Mi cuaderno** (−$184.000). |
-| **4 · Grab** | Verde de supermercado | **Header verde oscuro con decoración** en todas las pantallas (componente Header, 40 usos). Filas con el valor a la derecha: **37 Lista de fiados**, **17 Resumen de caja**, **33 Mi cuaderno**. |
+| **4 · Grab** | Verde de supermercado | **Header verde oscuro con decoración** en todas las pantallas (componente Header, 40 usos). Filas con el valor a la derecha: **17 Resumen de caja**, **33 Mi cuaderno**. |
 | **5 · HomePlate** | Acentos naranja | **Barra inferior con botón central elevado en círculo**: en la versión final es "Vender", en HomePlate es el botón naranja del medio. También la pestaña activa resaltada y los íconos de línea. Es la referencia que más se nota en la **Barra inferior final**. |
 | **6 · Amigo** | (No se menciona en el archivo) | No se nota en la versión final. Su azul se descartó. Lo único parecido: la Home con accesos grandes en tarjeta ("Registrar gasto", "Llegó mercancía"). |
 | **7 · Appointment Marketplace** | Estilo limpio, mucho blanco | Fondo crema/blanco con tarjetas blancas. **Ícono en círculo** para opciones: **10 Cómo cargar productos** (lápiz, cámara, lista) y **27 Registrar gasto** (voz, mano, foto). |
 | **8 · Foodzzy** | Verde de supermercado | Resumen tipo carrito en **20 Vender** ("Esta venta" con líneas, cantidades y Total). Bloques de totales en **17 Resumen de caja** y **18 Cierre de caja**. |
-| **9 · ekilu** | Estilo limpio, mucho blanco | Campos de texto grises simples (**03**, **06**, **11**, **18**). Opciones en pastilla, como los chips "Efectivo / Nequi / Fiado" en **20**. |
+| **9 · ekilu** | Estilo limpio, mucho blanco | Campos de texto grises simples (**03**, **06**, **11**, **18**). Opciones en pastilla, como los chips "Efectivo / Nequi" en **20**. |
 | **Pantallas de comida (Log In, Recommendations, Help Center)** | Header oscuro, hoja blanca redondeada, píldoras, íconos en círculo | Es la estructura base de casi todas las pantallas: header verde oscuro con la **hoja crema redondeada encima** (**10**, **15**, **18**, **28**, **33**, **37**, **41**…). *Estas pantallas no están en Recursos.* |
 
 ---
@@ -59,7 +59,6 @@
 | Registrar por voz | **20 / 21 Vender** ("Te escuché: 'dos gaseosas y unas papas…'"), **28 Gasto por voz** (micrófono grande, "Escuchando…"), **27** ("Di: 'pagué 20.000 de transporte'") | Esperanza y Marleny prefieren la voz. Las referencias solo traían un micrófono pequeño en el buscador; el **botón de voz grande es propio**. |
 | Cargar el inventario rápido | **10** (a mano, con fotos o desde un listado, "Recomendado: desde un listado"), **12 Carga por foto**, **13 Carga desde listado** | Gustavo y Jairo: cargar el inventario al principio es la barrera principal. |
 | Ayuda presencial | **10**: "Te ayudamos en tu tienda · Vamos y los cargamos por ti · $19.900" | Esperanza y Marleny necesitan que alguien les enseñe. |
-| Fiados ordenados | **23**, **37–40** (lista, detalle, abono, deuda saldada, comprobante por WhatsApp) | Esperanza, Herminio, Jairo y Marleny: los fiados se desordenan y se pierde plata. |
 | Saber qué se acaba antes de que el cliente lo pida | **15** (alerta de la leche), **43 Alertas de agotado**, **44 Sugerencias de compra** | Rosalba y Marleny se enteran de lo que falta cuando el cliente lo pide. |
 | Varias personas atienden la tienda | **16a ¿Quién atiende?**, **35 Turnos**, **47 Empleados** | Herminio y Jairo: el que usa la app puede ser un familiar. |
 | Teclado numérico grande para montos | **16 Abrir caja**, **29 Gasto manual** | Propio: uso rápido en el mostrador. |
@@ -70,15 +69,14 @@
 
 ### Reglas de color *(regla en Figma vs. lo observado)*
 
-La regla del UI kit dice: **"Naranja solo como acento de alerta (por agotarse, fiados vencidos). Rojo solo para gastos y deudas."**
+La regla del UI kit dice: **"Naranja solo como acento de alerta (por agotarse). Rojo solo para gastos."**
 
 | Pantalla | Qué pasa | Qué dice la regla |
 |---|---|---|
 | **41 Mi inventario** | La alerta "6 productos por agotarse" y "Quedan 2" están en **rojo**. | Por agotarse debería ir en **naranja** (y así está en **15 Home**). |
-| **37 Lista de fiados** | "Vencido hace 5 días" y "Último abono hace 12 días" en **rojo**. | Fiados vencidos debería ir en **naranja**. |
 | **10 Cómo cargar productos** | "Recomendado: desde un listado, es lo más rápido" en **naranja**. | No es una alerta: debería ir en verde o en gris. |
 | **33 Mi cuaderno** | El encabezado de fecha "Hoy, martes 23" en **naranja**. | No es una alerta. |
-| **18 Cierre de caja** | "Fiado del día $28.000" en **naranja**; "Faltan $5.000" en **rojo**. | **Decidido:** un faltante de caja es alerta y va en **naranja** (ya está en la regla del kit). Hay que cambiar "Faltan $5.000" a naranja en Figma. |
+| **18 Cierre de caja** | "Faltan $5.000" en **rojo**. | **Decidido:** un faltante de caja es alerta y va en **naranja** (ya está en la regla del kit). Hay que cambiar "Faltan $5.000" a naranja en Figma. |
 | **41 Mi inventario** | Los avatares de producto en tono **naranja**. | El naranja queda gastado en algo que no es alerta; mejor un tono neutro o verde. |
 
 ### Componentes
@@ -86,7 +84,7 @@ La regla del UI kit dice: **"Naranja solo como acento de alerta (por agotarse, f
 | Problema | Detalle |
 |---|---|
 | **Componentes del UI kit sin usar** | **Fila de lista**, **Tarjeta de monto**, **Alerta** y **Botón de voz** existen en el UI kit, pero en las pantallas están **dibujados a mano** (108 capas "Tarjeta"). Es el mismo problema #1 de la v1, ahora en menor escala. Ejemplos: la tarjeta "Vendido hoy" (**15**), la alerta de la leche (**15**), las filas de **37** y **41**, el micrófono de **28**. |
-| **Barra inferior distinta** | UI kit: Inicio · Cuaderno · Fiados · Inventario · Perfil. **Versión final:** Inicio · Fiados · **Vender** (central) · Inventario · **Caja** (+ "Ninguno"). **Decidido:** la oficial es la del UI kit. Hay que cambiar las pantallas v3 en Figma para que la usen. |
+| **Barra inferior distinta** | UI kit: Inicio · Cuaderno · Inventario · Perfil. **Versión final:** Inicio · **Vender** (central) · Inventario · **Caja** (+ "Ninguno"). **Decidido:** la oficial es la del UI kit. Hay que cambiar las pantallas v3 en Figma para que la usen. |
 | **Cuaderno y Perfil sin pestaña propia** | En **33 Mi cuaderno** la pestaña activa es "Caja". **46 Panel del tendero** y **47 Empleados** no tienen una pestaña activa clara. Se resuelve con la barra del UI kit, que tiene pestañas Cuaderno y Perfil (que en la app se llama "Mi tienda"). |
 | **Barra de estado** | El componente aparece solo en 2 pantallas; en las demás parece venir dentro del Header. Conviene unificarlo. |
 
@@ -95,7 +93,7 @@ La regla del UI kit dice: **"Naranja solo como acento de alerta (por agotarse, f
 - **Faltan números en la secuencia de pantallas:** 07, 08, 14, 24, 25, 26 y 45. **Resuelto:** existen en la v1 (página "Casos de uso" de Figma) y se quitaron en la v3. Se conservan los números para no romper las referencias.
   - 07 Activa tu ubicación · 08 Tipo de negocio · 45 Marketplace de proveedores: eliminadas.
   - 14 Carga presencial: eliminada como pantalla; la opción "Te ayudamos en tu tienda" sigue en 10.
-  - 24 Cómo te pagan · 25 Datos del cliente (fiado) · 26 Venta registrada: *(observado)* sus pasos quedaron dentro de la hoja de venta: el medio de pago en 20, el cliente del fiado en 23 y la confirmación en 22.
+  - 24 Cómo te pagan · 26 Venta registrada: *(observado)* sus pasos quedaron dentro de la hoja de venta: el medio de pago en 20 y la confirmación en 22.
 - **Nombre:** el archivo y los logos dicen **Tiendy**; las pantallas de la versión final dicen **Tiendi** ("Tiendi · Versión final"). **Decidido: el nombre es Tiendy.** Falta corregirlo en Figma: el rótulo de la página v3, el logotipo del 01 Splash v3, el rótulo de la página v2, los textos del UI kit y las colecciones de la biblioteca de variables.
 
 ---
@@ -107,10 +105,9 @@ La regla del UI kit dice: **"Naranja solo como acento de alerta (por agotarse, f
 | 1 · Registro e inicio de sesión | 01 Splash · 02 Bienvenida · 03 Ingresa tu celular · 04 Código de verificación · 05 No me llegó el código · 06 Nombre de la tienda |
 | 2 · Home y carga de productos | 09 Home por primera vez · 10 Cómo cargar productos · 11 Carga manual · 12 Carga por foto · 13 Carga desde listado · 15 Home |
 | 3 · Caja | 16a ¿Quién atiende? · 16 Abrir caja · 17 Resumen de caja · 18 Cierre de caja · 19 Resultado del cierre |
-| 4 · Venta | 20 Vender · hoja de venta · 21 Vender · lo que dijiste · 22 Venta anotada · deshacer · 23 Fiado: elegir cliente |
+| 4 · Venta | 20 Vender · hoja de venta · 21 Vender · lo que dijiste · 22 Venta anotada · deshacer |
 | 5 · Gasto | 27 Registrar gasto · 28 Gasto por voz · 29 Gasto manual · 30 Gasto por foto · 31 Cómo pagaste el gasto · 32 Gasto registrado |
 | 6 · Mi cuaderno | 33 Mi cuaderno · 34 Filtros del cuaderno · 35 Turnos · 36 Detalle de movimiento |
-| 7 · Fiados | 37 Lista de fiados · 38 Detalle del fiado · 39 Registrar abono · 40 Deuda saldada |
 | 8 · Inventario | 41 Mi inventario · 41a Llegó mercancía · 42 Ver y editar producto · 43 Alertas de agotado · 44 Sugerencias de compra |
 | 9 · Perfil | 46 Panel del tendero · 47 Empleados |
-| Componentes nuevos de la versión final | Barra inferior final (Inicio · Fiados · Inventario · Caja · Ninguno) |
+| Componentes nuevos de la versión final | Barra inferior final (Inicio · Inventario · Caja · Ninguno) |

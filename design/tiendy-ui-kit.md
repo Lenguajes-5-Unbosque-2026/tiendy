@@ -2,7 +2,7 @@
 
 > Tu tienda en orden, sin cuaderno.
 
-Tiendy es la app para que el tendero de barrio lleve ventas, gastos, fiados, caja e inventario sin cuaderno. Se usa de pie, con una mano, en el mostrador y con prisa. Todo en este kit sirve a eso: textos grandes y claros, áreas fáciles de tocar y muy pocos colores, cada uno con un significado.
+Tiendy es la app para que el tendero de barrio lleve ventas, gastos, caja e inventario sin cuaderno. Se usa de pie, con una mano, en el mostrador y con prisa. Todo en este kit sirve a eso: textos grandes y claros, áreas fáciles de tocar y muy pocos colores, cada uno con un significado.
 
 **Contenido**
 
@@ -25,14 +25,13 @@ El verde es la marca y la acción. El rojo y el naranja **solo** avisan de algo.
 | Color | Variables | Se usa para | Nunca para |
 |---|---|---|---|
 | **Verde** | `fondo/primario`, `fondo/primario-suave`, `texto/primario`, `fondo/encabezado` | Header, botones, chip seleccionado, enlaces, íconos de acciones, avatares, plata que entra (+$) | Avisar de un problema |
-| **Neutro** | `texto/principal`, `texto/secundario`, `fondo/tarjeta`, `fondo/sutil` | Gastos, fiados, deudas, saldos, títulos de sección, textos de apoyo | — |
-| **Naranja** | `fondo/advertencia`, `fondo/advertencia-suave`, `texto/advertencia` | Advertencia leve que pide atención pronto: "Se está acabando la leche", "Quedan 6" | Enlaces, avatares, íconos de mercancía o fotos, montos de fiado, títulos |
+| **Neutro** | `texto/principal`, `texto/secundario`, `fondo/tarjeta`, `fondo/sutil` | Gastos, saldos, títulos de sección, textos de apoyo | — |
+| **Naranja** | `fondo/advertencia`, `fondo/advertencia-suave`, `texto/advertencia` | Advertencia leve que pide atención pronto: "Se está acabando la leche", "Quedan 6" | Enlaces, avatares, íconos de mercancía o fotos, títulos |
 | **Rojo** | `fondo/peligro`, `fondo/peligro-suave`, `texto/peligro` | Un problema que ya pasó: "Faltan $5.000", diferencia de caja "−$5.000", "Vencido hace 5 días", "Quedan 2" (crítico) | Gastos, "Quedé debiendo", el ícono de Registrar gasto, botones de eliminar |
 
 **Prueba rápida** antes de pintar algo de rojo o naranja: ¿la persona tiene que hacer algo distinto por esto? Si no, va en verde o neutro.
 
 - Un gasto es parte normal del día: su monto va en `texto/principal` con signo "−", y su ícono en tono Primario o Neutro.
-- Un fiado es plata que te deben, no un error: monto en `texto/principal`. Solo el fiado **vencido** se marca en `texto/peligro`.
 - Cada aviso lleva palabras además del color ("Vencido", "Faltan", "Quedan 2"), para quien no distingue bien los colores.
 - Como máximo una Alerta por pantalla.
 
@@ -85,7 +84,7 @@ Los colores que se usan al diseñar. El nombre dice para qué sirven.
 | `fondo/exito-suave` | verde/100 | `#D7F5E1` | Área de confirmación en pantallas de éxito |
 | `fondo/advertencia` | naranja/500 | `#F97316` | **Solo** advertencia leve: producto por agotarse |
 | `fondo/advertencia-suave` | naranja/100 | `#FFEAD9` | **Solo** fondo de una Alerta de advertencia |
-| `fondo/peligro` | rojo/600 | `#D92D20` | **Solo** problemas reales: faltante de caja, fiado vencido, agotado crítico |
+| `fondo/peligro` | rojo/600 | `#D92D20` | **Solo** problemas reales: faltante de caja, agotado crítico |
 | `fondo/peligro-suave` | rojo/100 | `#FDE4E1` | **Solo** fondo de una Alerta de peligro o de la diferencia de caja negativa |
 | `fondo/placeholder` | neutro/300 | `#D5DACF` | Relleno de fotos todavía vacías |
 
@@ -100,7 +99,7 @@ Los colores que se usan al diseñar. El nombre dice para qué sirven.
 | `texto/inverso-suave` | verde/200 | `#AEE9C3` | Subtítulos del header |
 | `texto/primario` | verde/700 | `#0E6B34` | Enlaces, acciones de texto, montos de entrada (+$) |
 | `texto/advertencia` | naranja/600 | `#C2410C` | **Solo** texto de advertencia leve ("Quedan 6") |
-| `texto/exito` | verde/700 | `#0E6B34` | Confirmaciones en texto ("Pago de fiado", "Caja cuadró") |
+| `texto/exito` | verde/700 | `#0E6B34` | Confirmaciones en texto ("Venta anotada", "Caja cuadró") |
 | `texto/peligro` | rojo/700 | `#B42318` | **Solo** texto de problemas: "Faltan $5.000", "Vencido hace 5 días", "Quedan 2" |
 
 **Bordes**
@@ -127,7 +126,7 @@ Una sola familia: **Plus Jakarta Sans** (Google Fonts, ya viene en Figma), en pe
 | `valor` | 18 / 25 | Bold (700) | $11.500 | Totales dentro de una tarjeta |
 | `cuerpo-fuerte` | 16 / 22 | SemiBold (600) | Se está acabando la leche | Título de fila, de alerta y etiqueta de campo |
 | `boton` | 16 / 22 | Bold (700) | Anotar venta · $11.500 | Texto de todos los botones |
-| `cuerpo` | 15 / 21 | Regular (400) | Anota ventas, gastos y fiados… | Párrafos y valores de filas |
+| `cuerpo` | 15 / 21 | Regular (400) | Anota ventas y gastos… | Párrafos y valores de filas |
 | `chip` | 14 / 20 | SemiBold (600) | Quincena | Chips y opciones rápidas |
 | `secundario` | 13 / 18 | Medium (500) | Quedan 2 · ver sugerencia de compra | Detalles, ayudas, títulos de sección |
 | `caption` | 12 / 16 | Medium (500) | Al continuar aceptas los Términos | Textos legales y barra inferior |
@@ -176,14 +175,14 @@ Colección "Tiendy · Medidas".
 
 ## 5. Voz y textos
 
-- Tutea y habla como en la tienda: "plata", "fiado", "Doña Rosa", "¿A quién le fías?", "Pon la base para empezar el día".
+- Tutea y habla como en la tienda: "plata", "Doña Rosa", "Pon la base para empezar el día".
 - Frases cortas, con mayúscula solo al inicio: "Registrar gasto", no "Registrar Gasto".
 - Si la pantalla pide un dato, el título es una pregunta: "¿Cuál es tu número?", "¿Cuánto efectivo contaste?".
 - Los botones dicen verbo + objeto, con el monto cuando ayuda: "Anotar venta · $11.500", "Confirmar 3 productos".
 - Plata con signo pesos, punto de miles y sin decimales: "$385.000". Salidas con "−$184.000", entradas con "+$20.000".
 - Fechas y horas como se dicen: "Hoy, martes 23", "10:24 a.m.", "Lunes 22 sep.".
 - Separa datos con " · ": "Lácteos · $3.900".
-- Sin emoji y sin signos de exclamación, salvo en una celebración real ("¡Don Carlos quedó a paz y salvo!").
+- Sin emoji y sin signos de exclamación, salvo en una celebración real (una caja que cuadró).
 
 ---
 
@@ -192,7 +191,7 @@ Colección "Tiendy · Medidas".
 - Lienzo de **393 × 852** (iPhone 15), con `espacio/margen-pantalla` (28px) a cada lado.
 - Cada pantalla empieza con el **Header** (`fondo/encabezado`). Encima sube la hoja `fondo/app` con esquinas `radio/2xl`; el contenido empieza 40px antes del final del header.
 - La acción principal va abajo, en un **Botón Primario** a ancho completo. Solo una por pantalla.
-- Las pantallas principales de cada sección llevan la **Barra inferior** (Inicio, Fiados, Vender, Inventario, Caja). Los flujos paso a paso no la llevan.
+- Las pantallas principales de cada sección llevan la **Barra inferior** (Inicio, Vender, Inventario, Caja). Los flujos paso a paso no la llevan.
 - Entre bloques usa `espacio/4`; dentro de una tarjeta, relleno `espacio/4` o `espacio/5`; entre filas de una lista, `espacio/3`.
 - Nada importante debe quedar tapado por la barra inferior: deja al final un espacio igual a su alto.
 - Superficies planas: las tarjetas blancas se separan del fondo crema por color, sin sombras.
@@ -222,7 +221,7 @@ Encabezado verde oscuro con título centrado y la hoja crema que sube encima.
 | Subtítulo | Sí · No |
 
 - **Medidas:** 170px sin subtítulo, 200px con subtítulo.
-- **Título:** corto, 1–3 palabras ("Abrir caja", "Fiados"), en `texto/inverso`, estilo `monto-m`.
+- **Título:** corto, 1–3 palabras ("Abrir caja", "Inventario"), en `texto/inverso`, estilo `monto-m`.
 - **Subtítulo:** contexto ("Paso 1 de 3", "Turno de Doña Rosa · desde 7:02 a.m."), en `texto/inverso-suave`, estilo `secundario`.
 - **Botón volver:** círculo de 36px en `fondo/primario` con el ícono `chevron-left`.
 - En el Home lleva el saludo ("Hola, Doña Rosa") y no tiene botón volver.
@@ -230,15 +229,15 @@ Encabezado verde oscuro con título centrado y la hoja crema que sube encima.
 
 ### Barra inferior
 
-Navegación principal: **Inicio · Fiados · Vender · Inventario · Caja**.
+Navegación principal: **Inicio · Vender · Inventario · Caja**.
 
 | Propiedad | Valores |
 |---|---|
-| Activo | Inicio · Fiados · Inventario · Caja |
+| Activo | Inicio · Inventario · Caja |
 
 - La pestaña activa lleva una pastilla `fondo/primario-suave` con ícono y texto en `texto/primario`; las demás van en `texto/secundario`.
 - Vender siempre es el círculo `fondo/primario` de 56px que sobresale: es la acción más usada.
-- Va en las pantallas principales de cada sección (Home, Caja del día, Mi cuaderno, Fiados, Inventario y sus detalles).
+- Va en las pantallas principales de cada sección (Home, Caja del día, Mi cuaderno, Inventario y sus detalles).
 - **No** uses las pestañas viejas "Cuaderno" y "Perfil": Mi cuaderno se abre desde Caja y Mi tienda desde el Home.
 
 ### Botón
@@ -305,10 +304,10 @@ Debajo va una tarjeta "Entendí esto" para confirmar lo anotado. **No** lo ponga
 
 | Tono | Colores | Cuándo |
 |---|---|---|
-| **Primario** | `fondo/primario-suave` + `texto/primario` | El normal: Registrar gasto, Llegó mercancía, Cargar productos, fotos, ventas, abonos |
+| **Primario** | `fondo/primario-suave` + `texto/primario` | El normal: Registrar gasto, Llegó mercancía, Cargar productos, fotos, ventas |
 | **Primario sólido** | `fondo/primario` + `texto/inverso` | Destacar una sola opción (Vender) |
 | **Oscuro** | `fondo/encabezado` + `texto/inverso` | Destacar una sola opción (Caja del día) |
-| **Neutro** | `fondo/sutil` + `texto/secundario` | Movimientos que no son entrada de plata: un gasto, un fiado nuevo |
+| **Neutro** | `fondo/sutil` + `texto/secundario` | Movimientos que no son entrada de plata: un gasto |
 | **Éxito** | `fondo/exito-suave` + `texto/exito` | Confirmaciones |
 | **Advertencia** | `fondo/advertencia-suave` + `texto/advertencia` | **Solo** avisos leves |
 | **Advertencia sólido** | `fondo/advertencia` + `texto/inverso` | **Solo** dentro de una Alerta de advertencia |
@@ -318,7 +317,7 @@ Un gasto no es un error: nunca uses Peligro para el ícono de Registrar gasto, n
 
 ### Avatar
 
-Círculo con la inicial de una **persona**: clientes de fiado, empleados, la dueña.
+Círculo con la inicial de una **persona**: empleados, la dueña.
 
 | Propiedad | Valores |
 |---|---|
@@ -326,22 +325,21 @@ Círculo con la inicial de una **persona**: clientes de fiado, empleados, la due
 | Tamaño | **M** 40px (listas) · **L** 64px ("¿Quién atiende?") |
 
 - **No** uses avatares para cosas que no son personas (productos, "Movimientos de hoy", "Quedé debiendo", Notificaciones, Micrófono): para eso va Ícono en círculo.
-- **No** pongas avatares en naranja ni rojo: el estado del cliente se dice en el texto.
+- **No** pongas avatares en naranja ni rojo: el estado se dice en el texto.
 
 ### Fila de lista
 
-Tarjeta blanca (`fondo/tarjeta`, `radio/lg`) para movimientos, fiados, productos, turnos y opciones de menú.
+Tarjeta blanca (`fondo/tarjeta`, `radio/lg`) para movimientos, productos, turnos y opciones de menú.
 
 **Estructura:** ícono en círculo (M) **o** avatar si es una persona · título (`cuerpo-fuerte` 15px) · detalle (`secundario`) · a la derecha un valor, una flecha `chevron-right` o ambos.
 
 | Color del valor | Variable | Cuándo |
 |---|---|---|
-| Entrada | `texto/primario` | Plata que entra: ventas, abonos, "Entró" |
-| Neutro | `texto/principal` | Todo lo demás: gastos, fiados, deudas, saldos (salidas con "−") |
+| Entrada | `texto/primario` | Plata que entra: ventas, "Entró" |
+| Neutro | `texto/principal` | Todo lo demás: gastos, saldos (salidas con "−") |
 | Advertencia / Peligro | `texto/advertencia` / `texto/peligro` | **Solo** para un aviso: "Quedan 6" (bajo), "Quedan 2" (crítico) |
 
 - El detalle va en `texto/secundario`. Solo pásalo a `texto/peligro` cuando cuenta un problema real ("Vencido hace 5 días", "faltaron $3.000").
-- "Último abono hace 12 días", "Acordó pagar en quincena" o "Ya te debe $42.000" son información, no alertas: van en `texto/secundario`.
 - La opción elegida o recomendada lleva borde de 2px `borde/foco`.
 
 ### Tarjeta de monto
@@ -355,7 +353,7 @@ Muestra un monto grande con su etiqueta: vendido hoy, efectivo en caja, base del
 | Centrada | Monto y etiqueta centrados (efectivo esperado, base del día) |
 
 - Monto en `monto-xl`, en `texto/principal` (o `texto/inverso` en la oscura). Una venta en efectivo puede ir en `texto/primario`.
-- Los gastos y los fiados **no** van en rojo ni en naranja. La única cifra en `texto/peligro` es una diferencia de caja negativa ("−$5.000"), dentro de una tarjeta `fondo/peligro-suave`.
+- Los gastos **no** van en rojo ni en naranja. La única cifra en `texto/peligro` es una diferencia de caja negativa ("−$5.000"), dentro de una tarjeta `fondo/peligro-suave`.
 
 ### Alerta
 
@@ -364,7 +362,7 @@ Aviso destacado dentro del contenido. Es el **único** lugar donde el naranja y 
 | Tono | Fondo | Ícono | Cuándo |
 |---|---|---|---|
 | **Advertencia** | `fondo/advertencia-suave` | `triangle-alert` en Advertencia sólido | Algo que conviene atender pronto: un producto por agotarse |
-| **Peligro** | `fondo/peligro-suave` | `triangle-alert` en Peligro | Un problema que ya pasó: faltante de caja, agotado, fiado vencido |
+| **Peligro** | `fondo/peligro-suave` | `triangle-alert` en Peligro | Un problema que ya pasó: faltante de caja, agotado |
 | **Éxito** | `fondo/primario-suave` | `circle-check` en Primario sólido | Una confirmación con siguiente paso ("Sumamos 24 productos") |
 
 - **Título:** el hecho, corto ("Faltan $5.000"), en `cuerpo-fuerte`. **Detalle:** qué hacer ("Revisa si olvidaste anotar algún gasto").

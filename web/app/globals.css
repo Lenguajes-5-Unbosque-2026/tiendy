@@ -43,6 +43,8 @@
   --fondo-peligro: var(--rojo-600);
   --fondo-peligro-suave: var(--rojo-100);
   --fondo-placeholder: var(--neutro-300);
+  --fondo-velo: color-mix(in srgb, var(--fondo-encabezado) 80%, transparent);
+  --fondo-aviso: var(--neutro-900);
 
   /* 2. Colores del tema · textos */
   --texto-principal: var(--neutro-900);
@@ -133,6 +135,7 @@
   --alto-header: 170px;
   --alto-header-subtitulo: 200px;
   --alto-barra-estado: 44px;
+  --alto-grafica: 96px;
   --tamano-boton-volver: 36px;
   --tamano-boton-vender: 56px;
   --tamano-icono-circulo-m: 40px;
@@ -217,6 +220,8 @@
   --color-fondo-peligro: var(--fondo-peligro);
   --color-fondo-peligro-suave: var(--fondo-peligro-suave);
   --color-fondo-placeholder: var(--fondo-placeholder);
+  --color-fondo-velo: var(--fondo-velo);
+  --color-fondo-aviso: var(--fondo-aviso);
   --color-texto-principal: var(--texto-principal);
   --color-texto-secundario: var(--texto-secundario);
   --color-texto-sutil: var(--texto-sutil);
@@ -289,6 +294,7 @@
   --spacing-alto-header: var(--alto-header);
   --spacing-alto-header-subtitulo: var(--alto-header-subtitulo);
   --spacing-alto-barra-estado: var(--alto-barra-estado);
+  --spacing-alto-grafica: var(--alto-grafica);
   --spacing-boton-volver: var(--tamano-boton-volver);
   --spacing-boton-vender: var(--tamano-boton-vender);
   --spacing-icono-circulo-m: var(--tamano-icono-circulo-m);

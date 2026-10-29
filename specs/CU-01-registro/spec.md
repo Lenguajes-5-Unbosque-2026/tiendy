@@ -13,7 +13,7 @@
 | ID | Pantalla | Qué muestra |
 |---|---|---|
 | 01 | Splash | Logo de Tiendy (tienda con toldo), "Tiendy", "Tu tienda en orden, sin cuaderno", tres puntos de paginación y "Hecho para las tiendas de barrio". |
-| 02 | Bienvenida | Foto de un tendero en su mostrador, "Tu tienda en orden, sin cuaderno", "Anota ventas, gastos y fiados con un toque o hablando. Siempre sabrás cuánta plata tienes y qué se te está acabando.", botón "Empezar" y legal "Al continuar aceptas los Términos y la Política de datos." |
+| 02 | Bienvenida | Foto de un tendero en su mostrador, "Tu tienda en orden, sin cuaderno", "Anota ventas y gastos con un toque o hablando. Siempre sabrás cuánta plata tienes y qué se te está acabando.", botón "Empezar" y legal "Al continuar aceptas los Términos y la Política de datos." |
 | 03 | Ingresa tu celular | Header "Tu celular" con volver. "¿Cuál es tu número?", explicación del SMS, campo "Número de celular" con +57, ayuda "Sirve para crear cuenta o para iniciar sesión.", botón "Enviar código" y el legal. |
 | 04 | Código de verificación | Header "Verificación". "Escribe el código", "Lo enviamos por SMS al +57 300 ••• 4567", seis casillas, "Reenviar en 0:42", enlace "No me llegó el código" y botón "Verificar". |
 | 05 | No me llegó el código | Header "¿No te llegó?". Tarjeta "Causas comunes" (número mal escrito, sin señal, bandeja de SMS llena). Botones "Reenviar SMS (0:30)", "Llamarme con el código", "Cambiar mi número" y enlace "¿Sigues sin código? Escríbenos por WhatsApp". |

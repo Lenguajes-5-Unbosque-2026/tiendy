@@ -8,7 +8,7 @@
 
 **Para qué:**
 
-- **Home:** ver de un vistazo cómo va el día (vendido, ganancia, fiado, efectivo esperado, qué se está acabando) y llegar en un toque a lo que más se hace: vender, anotar un gasto, recibir mercancía y ver la caja.
+- **Home:** ver de un vistazo cómo va el día (vendido, ganancia, efectivo esperado, qué se está acabando) y llegar en un toque a lo que más se hace: vender, anotar un gasto, recibir mercancía y ver la caja.
 - **Carga de productos:** dejar el inventario listo en pocos minutos para poder vender. Sin productos no se puede vender (CU-04 · 20a).
 
 ## Pantallas
@@ -21,7 +21,7 @@
 | 11 | Carga manual | Header "Agregar producto". Área "Foto del producto (opcional)". Campos Nombre, Precio de venta y Costo. Chips de Categoría (Abarrotes, Bebidas, Aseo, Lácteos, Snacks). "Cantidad · Aviso cuando queden 5" con − y +. Botones "Guardar producto" y "Guardar y agregar otro". |
 | 12 | Carga por foto | Header "Cargar con foto". Chips "Productos" / "Factura del proveedor". Área de cámara "Toma la foto a un grupo de productos del estante". "Detectamos 3 productos · revisa y corrige" con filas (nombre, cantidad, precio). Botón "Confirmar 3 productos". |
 | 13 | Carga desde listado | Header "Listado sugerido". Buscador "Buscar producto", chips de categoría (Todos, Abarrotes, Bebidas, Aseo, Lácteos), "4 seleccionados", "Seleccionar todos" y filas con casilla, nombre y "Precio sugerido". Botón "Agregar 4 productos". |
-| 15 | Home | Header "Hola, Doña Rosa · Turno de Doña Rosa · desde 7:02 a.m.". Tarjeta oscura "Vendido hoy $385.000 · Ganancia $118.000 · Fiado $28.000". Alerta "Se está acabando la leche · Quedan 2 · ver sugerencia de compra". Tarjeta "Vender". "Registrar gasto" y "Llegó mercancía". Fila "Caja del día · Efectivo esperado $341.000". Barra inferior. |
+| 15 | Home | Header "Hola, Doña Rosa · Turno de Doña Rosa · desde 7:02 a.m.". Tarjeta oscura "Vendido hoy $385.000 · Ganancia $118.000". Alerta "Se está acabando la leche · Quedan 2 · ver sugerencia de compra". Tarjeta "Vender". "Registrar gasto" y "Llegó mercancía". Fila "Caja del día · Efectivo esperado $341.000". Barra inferior. |
 
 ## Paso a paso
 
@@ -53,7 +53,7 @@
 - **Llegó mercancía** → CU-08 · 41a.
 - **Caja del día** → resumen de caja (CU-03 · 17).
 - **Alerta "Se está acabando la leche"** → abre lo que se está acabando (CU-08 · 43 o 44, ver Preguntas abiertas).
-- **Barra inferior:** Inicio · Fiados · Vender · Inventario · Caja.
+- **Barra inferior:** Inicio · Vender · Inventario · Caja.
 
 ## Estados
 
@@ -74,12 +74,11 @@
 
 - **Productos cargados (11, 12, 13):** quedan en Mi inventario (CU-08 · 41) con nombre, categoría, precio, costo y cantidad. Desde ese momento se pueden vender (CU-04) y aparecen en el buscador y en las ventas rápidas.
 - **Caja abierta (09a):** empieza el turno de quien abre, con la base contada. El Home cambia a 15 y se puede ver el resumen de caja (CU-03 · 17).
-- **El Home (15) refleja en vivo** lo que pasa en los otros flujos: ventas (CU-04), fiados (CU-04 y CU-07), gastos en efectivo (CU-05, bajan el efectivo esperado) y productos por agotarse (CU-08).
+- **El Home (15) refleja en vivo** lo que pasa en los otros flujos: ventas (CU-04), gastos en efectivo (CU-05, bajan el efectivo esperado) y productos por agotarse (CU-08).
 
 **Cómo salen los números del Home** (con los valores de 15 y 17):
 
-- Vendido hoy = todas las ventas del día, incluidas las fiadas: $385.000.
-- Fiado = ventas fiadas del día: $28.000.
+- Vendido hoy = todas las ventas del día: $385.000.
 - Ganancia = vendido − costo de lo vendido: $118.000.
 - Efectivo esperado = base + ventas en efectivo − gastos en efectivo: $80.000 + $323.000 − $62.000 = $341.000.
 
@@ -92,7 +91,7 @@
 | Tienda: nombre | Subtítulo de 09 |
 | Persona que atiende: nombre | Saludo "Hola, Doña Rosa" |
 | Turno abierto: quién, hora de apertura, base | Header de 15 y si mostrar 09 o 15 |
-| Ventas del día con su medio de pago, precio y costo | Vendido hoy, Ganancia, Fiado |
+| Ventas del día con su medio de pago, precio y costo | Vendido hoy, Ganancia |
 | Gastos en efectivo del día | Efectivo esperado |
 | Productos por debajo de su mínimo | Alerta "Se está acabando…" |
 | Último cierre de caja | "Ayer cerraste con $76.500" e "Igual que ayer" en 09a |
@@ -124,7 +123,7 @@
 8. **Categorías.** 11 tiene Snacks; 13 y 41 no. ¿Cuál es la lista fija de categorías? ¿El tendero puede crear las suyas?
 9. **Destino de la alerta del Home.** "Quedan 2 · ver sugerencia de compra" ¿abre Por agotarse (43), Qué pedir (44) o el producto (42)?
 10. **Entrada a Mi tienda.** El Home no tiene acceso a Mi tienda (CU-09) y la barra inferior tampoco (auditoría, pantalla 46).
-11. **Barra inferior.** Las pantallas y el UI kit nuevo usan Inicio · Fiados · Vender · Inventario · Caja; el CLAUDE.md (§6) dice Inicio · Cuaderno · Fiados · Inventario · Mi tienda. ¿Cuál vale?
+11. **Barra inferior.** Las pantallas y el UI kit nuevo usan Inicio · Vender · Inventario · Caja; el CLAUDE.md (§6) dice Inicio · Cuaderno · Inventario · Mi tienda. ¿Cuál vale?
 12. **Íconos de color.** Registrar gasto (rojo), Llegó mercancía y Cargar productos (naranja) rompen la regla de color; Cargar productos repite el ícono `package` (auditoría).
 
 ## Cambios
