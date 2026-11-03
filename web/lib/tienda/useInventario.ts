@@ -32,6 +32,8 @@ export type ItemInventario = ReturnType<typeof useInventario>["items"][number];
 
 /** "Quedan 2", "Agotado" o "24 und." con su color. */
 export function textoUnidades({ producto, stock }: ItemInventario) {
+  if (producto.unidades === 0 && producto.minimo === 0)
+    return { texto: "Sin contar", tono: "secundario" as const };
   if (producto.unidades === 0) return { texto: "Agotado", tono: "peligro" as const };
   if (!stock.porAgotarse) return { texto: `${producto.unidades} und.`, tono: "principal" as const };
   return {

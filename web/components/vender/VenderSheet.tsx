@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mic, Package, Search } from "lucide-react";
+import { Mic, Package, Search, Wallet } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
@@ -43,6 +43,7 @@ export function VenderSheet() {
     venderAbierto,
     setVenderAbierto,
     anotarVenta,
+    turnoAbierto,
   } = useTienda();
   const [busqueda, setBusqueda] = useState("");
   const [dicho, setDicho] = useState<Dicho | null>(null);
@@ -152,11 +153,30 @@ export function VenderSheet() {
           className="flex min-h-0 flex-col gap-espacio-4 overflow-y-auto px-espacio-5 pt-espacio-3 pb-[max(var(--espacio-5),env(safe-area-inset-bottom))]"
         >
           <div className="flex items-center justify-between">
-            <DrawerTitle className="text-titulo-2 text-texto-principal">Nueva venta</DrawerTitle>
+            <DrawerTitle className="text-titulo-2 text-texto-principal">
+              {borrador.corrige ? "Corregir venta" : "Nueva venta"}
+            </DrawerTitle>
             <DrawerClose className="text-cuerpo-fuerte text-texto-primario">Cancelar</DrawerClose>
           </div>
 
-          {productos.length === 0 ? (
+          {!turnoAbierto && !borrador.corrige ? (
+            // Cada venta queda en un turno: sin caja abierta no hay dónde anotarla
+            <EmptyState
+              icon={Wallet}
+              titulo="La caja está cerrada"
+              texto="Para vender primero abre la caja con el efectivo que tienes."
+              accion={
+                <Button
+                  onClick={() => {
+                    setVenderAbierto(false);
+                    router.push("/caja/abrir");
+                  }}
+                >
+                  Abrir caja
+                </Button>
+              }
+            />
+          ) : productos.length === 0 ? (
             <EmptyState
               icon={Package}
               titulo="Aún no tienes productos"

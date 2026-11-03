@@ -1,0 +1,29 @@
+id,categoria_id,nombre,nombre_corto,precio_sugerido
+ls01,c01,Huevos AA x30,Huevos x30,18500
+ls02,c01,Harina P.A.N. 1 kg,Harina PAN,4500
+ls03,c01,Arroz Roa 1 kg,Arroz Roa,5200
+ls04,c01,Maizena 200 g,Maizena,3800
+ls05,c01,Salchichas Zenú x10,Salchichas,7900
+ls06,c01,Mayonesa Fruco 200 g,Mayonesa,4900
+ls07,c01,Salsa de tomate Fruco 200 g,Salsa de tomate,4200
+ls08,c01,Café Águila Roja 250 g,Café Águila Roja,9800
+ls09,c02,Gaseosa Postobón Manzana 400 ml,Manzana 400,2500
+ls10,c02,Agua Brisa 600 ml,Brisa,1800
+ls11,c02,Sprite 400 ml,Sprite,2500
+ls12,c02,Cerveza Poker lata 330 ml,Poker,3000
+ls13,c02,Jugo Del Valle 400 ml,Del Valle,2800
+ls14,c03,Leche Colanta 1 L,Leche Colanta,4200
+ls15,c03,Mantequilla Colanta 125 g,Mantequilla,4500
+ls16,c03,Avena Alpina 250 ml,Avena Alpina,2600
+ls17,c03,Queso doble crema 250 g,Queso doble crema,7500
+ls18,c04,Jabón Protex barra 110 g,Protex,3900
+ls19,c04,Lavaloza Axion 450 g,Axion,6500
+ls20,c04,Toallas higiénicas Nosotras x10,Nosotras,5900
+ls21,c04,Desodorante Rexona sobre,Rexona sobre,1200
+ls22,c05,Papas Super Ricas 30 g,Super Ricas,1800
+ls23,c05,Choclitos 40 g,Choclitos,1800
+ls24,c05,Jet chocolatina 12 g,Jet,1000
+ls25,c05,Galletas Saltín Noel,Saltín,3200
+ls26,c05,Chicles Trident,Trident,1500
+ls27,c06,Concentrado Dog Chow 500 g,Dog Chow,7900
+ls28,c06,Concentrado Gatsy 500 g,Gatsy,7200

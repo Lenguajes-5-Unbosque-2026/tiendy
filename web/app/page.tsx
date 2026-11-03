@@ -1,7 +1,10 @@
 "use client";
 
-import { Banknote, Package, Receipt, Wallet } from "lucide-react";
+import { Banknote, Package, PackagePlus, Receipt, Store, Wallet } from "lucide-react";
 
+import { useState } from "react";
+
+import { AbrirCajaSheet } from "@/components/caja/AbrirCajaSheet";
 import { AppScreen } from "@/components/layout/AppScreen";
 import { ActionCard } from "@/components/tiendy/ActionCard";
 import { AlertBanner } from "@/components/tiendy/AlertBanner";
@@ -13,8 +16,53 @@ import { cajaDelTurno, resumenDelDia } from "@/lib/tienda/calculos";
 import { useTienda } from "@/lib/tienda/store";
 import { useInventario } from "@/lib/tienda/useInventario";
 
-/** Home (15): resumen del día, alerta de inventario y accesos. */
+/** Mi tienda (46) se abre desde el Home: no tiene pestaña. */
+const MI_TIENDA = { href: "/mi-tienda", icon: Store, etiqueta: "Mi tienda" };
+
+/** Home: sin caja abierta (09) o con el resumen del turno (15). */
 export default function InicioPage() {
+  const { turnoAbierto } = useTienda();
+  return turnoAbierto ? <HomeDelDia /> : <HomeSinCaja />;
+}
+
+/** Home sin caja abierta (09): lo primero es abrir la caja. */
+function HomeSinCaja() {
+  const { tienda, personas, setVenderAbierto } = useTienda();
+  const [abriendo, setAbriendo] = useState(false);
+  const duena = personas.find((p) => p.rol === "duena");
+
+  return (
+    <AppScreen
+      title={`Hola, ${duena?.nombre_corto ?? ""}`}
+      subtitle={tienda.nombre}
+      accion={MI_TIENDA}
+    >
+      <ActionCard
+        variante="primaria"
+        icon={Wallet}
+        titulo="Abrir caja"
+        detalle="Pon la base para empezar el día"
+        onClick={() => setAbriendo(true)}
+      />
+      {/* Sin caja abierta, la hoja de venta pide abrirla primero */}
+      <ActionCard
+        icon={Banknote}
+        titulo="Vender"
+        detalle="Busca, toca o dilo en voz alta"
+        onClick={() => setVenderAbierto(true)}
+      />
+      <div className="grid grid-cols-2 gap-espacio-3">
+        <ActionCard vertical icon={Receipt} iconTono="peligro" titulo="Registrar gasto" href="/gasto" />
+        <ActionCard vertical icon={Package} titulo="Llegó mercancía" href="/inventario/llego" />
+      </div>
+      <ActionCard vertical icon={PackagePlus} titulo="Cargar productos" href="/inventario/cargar" />
+      <AbrirCajaSheet abierta={abriendo} onOpenChange={setAbriendo} />
+    </AppScreen>
+  );
+}
+
+/** Home del día (15): resumen del día, alerta de inventario y accesos. */
+function HomeDelDia() {
   const { ventas, ventaProductos, gastos, turnoAbierto, atiende, setVenderAbierto } = useTienda();
   const { porAgotarse } = useInventario();
 
@@ -26,9 +74,8 @@ export default function InicioPage() {
   return (
     <AppScreen
       title={`Hola, ${nombre}`}
-      subtitle={
-        turnoAbierto ? `Turno de ${nombre} · desde ${hora(turnoAbierto.abierto_en)}` : undefined
-      }
+      accion={MI_TIENDA}
+      subtitle={turnoAbierto ? `Turno de ${nombre} · desde ${hora(turnoAbierto.abierto_en)}` : undefined}
     >
       <AmountCard variante="oscura" etiqueta="Vendido hoy" monto={pesos(resumen.vendido)}>
         <span className="text-chip text-texto-inverso-suave">
@@ -57,10 +104,9 @@ export default function InicioPage() {
         onClick={() => setVenderAbierto(true)}
       />
 
-      {/* Registrar gasto (CU-05) y Llegó mercancía (CU-08 · 41a) quedan fuera del MVP */}
       <div className="grid grid-cols-2 gap-espacio-3">
-        <ActionCard vertical icon={Receipt} titulo="Registrar gasto" />
-        <ActionCard vertical icon={Package} titulo="Llegó mercancía" />
+        <ActionCard vertical icon={Receipt} iconTono="peligro" titulo="Registrar gasto" href="/gasto" />
+        <ActionCard vertical icon={Package} titulo="Llegó mercancía" href="/inventario/llego" />
       </div>
 
       {caja && (

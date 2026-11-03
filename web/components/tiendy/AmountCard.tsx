@@ -10,6 +10,8 @@ type AmountCardProps = {
   centrada?: boolean;
   /** El monto en verde cuando es plata que entra ("Ventas en efectivo"). */
   montoPrimario?: boolean;
+  /** El monto en naranja cuando es una alerta ("Diferencia de caja" con faltante, 19). */
+  montoAdvertencia?: boolean;
   /** Línea de detalle debajo del monto ("Ganancia $118.000"). */
   children?: React.ReactNode;
   className?: string;
@@ -23,6 +25,7 @@ export function AmountCard({
   compacta = false,
   centrada = false,
   montoPrimario = false,
+  montoAdvertencia = false,
   children,
   className,
 }: AmountCardProps) {
@@ -48,7 +51,13 @@ export function AmountCard({
       <span
         className={cn(
           compacta ? "text-monto-m" : "text-monto-xl",
-          oscura ? "text-texto-inverso" : montoPrimario ? "text-texto-primario" : "text-texto-principal"
+          oscura
+            ? "text-texto-inverso"
+            : montoAdvertencia
+              ? "text-texto-advertencia"
+              : montoPrimario
+                ? "text-texto-primario"
+                : "text-texto-principal"
         )}
       >
         {monto}
