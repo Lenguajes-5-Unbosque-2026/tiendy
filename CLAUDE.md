@@ -23,9 +23,9 @@
 | `docs/` | Contexto del producto: `Brief.md` (documento de corte 1: problema, objetivo, oportunidad, hipótesis, propuesta de valor, alcance y riesgos), `Guion entrevistas.md` y `Conclusiones de entrevistas.md` (discovery con 6 tenderos; las entrevistas 4 a 6 son simuladas). |
 | `design/` | `Tiendy_UI_kit.md` (tokens de color y medidas, tipografía, íconos Lucide, componentes con su equivalente en shadcn/ui y cómo se nombran los tokens en código) y `Auditoria de pantallas.md` (pantallas vs. auditoría v1 y referencias, con inconsistencias por corregir). |
 | `design/flujos/` | Pantallas exportadas de Figma (PNG), una carpeta por flujo. |
-| `specs/` | Una carpeta por caso de uso (`CU-01-registro/` … `CU-09-mi-tienda/`) con `spec.md`, `plan.md` y `tareas.md`. Todavía no hay ninguna spec escrita. |
-| `data/` | Modelo de datos (`modelo-datos.md`, aún no existe). |
-| `web/` | Todo el código de la app (Next.js). Se crea en la sesión 2. |
+| `specs/` | Una carpeta por caso de uso (`CU-01-registro/` … `CU-09-mi-tienda/`) con su `spec.md` (estados, datos y preguntas abiertas). `CU-07-fiados/` quedó vacía. |
+| `data/` | `mock/`: datos de prueba en CSV (tienda, personas, productos, turnos, ventas, gastos, proveedores, entradas de mercancía y el listado sugerido). Su `README.md` explica columnas, relaciones y casos difíciles. |
+| `web/` | Todo el código de la app (Next.js). `app/` tiene una ruta por pantalla; `components/` el kit (`ui/` de shadcn, `tiendy/` y `caja/` propios, `layout/` con header, barra y guardia de sesión); `lib/tienda/` el estado (`store.tsx`) y los cálculos; `scripts/mock-a-json.mjs` convierte `data/mock/` en `lib/mock/datos.json`. |
 | `.github/` | `CODEOWNERS`. |
 
 **Figma** (archivo Tiendy):
@@ -38,21 +38,22 @@
 | CU | Carpeta en `design/flujos/` | Flujo | Pantallas |
 |---|---|---|---|
 | CU-01 | `Registro e inicio de sesión/` | Registro e inicio de sesión | 01 Splash · 02 Bienvenida · 03 Ingresa tu celular · 04 Código de verificación · 05 No me llegó el código · 06 Nombre de la tienda |
-| CU-02 | `Home y carga de productos/` | Home y carga de productos | 09 Home por primera vez · 10 Cómo cargar productos · 11 Carga manual · 12 Carga por foto · 13 Carga desde listado · 15 Home |
+| CU-02 | `Home y carga de productos/` | Home y carga de productos | 09 Home por primera vez · 09a Abrir caja (hoja) · 10 Cómo cargar productos · 11 Carga manual · 12 Carga por foto · 13 Carga desde listado · 15 Home |
 | CU-03 | `Caja/` | Caja | 16 Abrir caja · 16a ¿Quién atiende? · 17 Resumen de caja · 18 Cierre de caja · 19 Resultado del cierre |
-| CU-04 | `Vender/` | Vender | 20 Vender · hoja de venta · 21 Vender · lo que dijiste · 22 Venta anotada · deshacer |
+| CU-04 | `Vender/` | Vender | 20 Vender · hoja de venta · 20a Vender sin productos · 21 Vender · lo que dijiste · 22 Venta anotada · deshacer |
 | CU-05 | `Gasto/` | Gasto | 27 Registrar gasto · 28 Gasto por voz · 29 Gasto manual · 30 Gasto por foto · 31 Cómo pagaste el gasto · 32 Gasto registrado |
 | CU-06 | `Mi cuaderno/` | Mi cuaderno | 33 Mi cuaderno · 34 Filtros del cuaderno · 35 Turnos · 36 Detalle de movimiento |
+| —  | `Fiados/` | Fiados (próximamente) | 37 Fiados próximamente |
 | CU-08 | `Inventario/` | Inventario | 41 Mi inventario · 41a Llegó mercancía · 42 Ver y editar producto · 43 Alertas de agotado · 44 Sugerencias de compra |
 | CU-09 | `Mi tienda/` | Mi tienda | 46 Panel del tendero · 47 Empleados |
 
-Los números que faltan (07, 08, 14, 24, 25, 26, 45) son pantallas de la v1 que se quitaron, y 23 y 37 a 40 eran de Fiados, que salió del producto; se conservan los números para no romper referencias. En los nombres de archivo, `:` y `?` aparecen como `_` porque Windows no los permite.
+Los números que faltan (07, 08, 14, 24, 25, 26, 45) son pantallas de la v1 que se quitaron, y 23 y 38 a 40 eran de Fiados, que salió del producto (37 ahora es "Fiados próximamente"); se conservan los números para no romper referencias. En los nombres de archivo, `:` y `?` aparecen como `_` porque Windows no los permite.
 
 ## 5. Cómo trabajamos
 
 - Construimos por vibe coding, por bloques de pantallas. La referencia principal son las imágenes de design/flujos/.
 - Las specs de specs/ son apoyo para entender estados y datos. Si una spec y una pantalla no coinciden, gana la pantalla.
-- Alcance del MVP: Inventario de productos (pantalla de lectura), Registrar venta (acción de escritura) y Resumen del día (complemento). No construyas flujos fuera de esta lista salvo que te lo pidamos.
+- Alcance: ya están construidas todas las pantallas de `design/flujos/`, con datos de prueba. Lo que sigue es conectar Supabase (login por SMS, base de datos y fotos). No agregues flujos nuevos salvo que te lo pidamos.
 - Mobile-first: todo se diseña para celular.
 - Componentes: shadcn/ui según design/componentes.md; los custom se crean como componentes reutilizables.
 - Estilos: siempre con los tokens del tema. Nunca valores sueltos.
@@ -65,5 +66,10 @@ Los números que faltan (07, 08, 14, 24, 25, 26, 45) son pantallas de la v1 que 
 - **Barra inferior oficial:** Inicio · Fiados · Vender · Inventario · Caja. Vender es el círculo verde y abre la hoja de venta (20); también se abre desde la tarjeta "Vender" del Home. Mi cuaderno se abre desde Caja y Mi tienda desde el Home (no tienen pestaña).
 - **Fiados próximamente:** Fiados salió del producto por ahora: no hay medio de pago, clientes ni abonos. La pestaña Fiados se queda en la barra y abre una pantalla "Pronto podrás agregar los fiados de tu negocio en esta sección" (`web/app/fiados/page.tsx`). Si una pantalla de `design/flujos/` todavía muestra fiado en Home, Caja o la hoja de venta, se ignora.
 - **Mi tienda:** es el nombre oficial de la sección que en Figma se llama "Perfil" (bloque 9, pestaña `Activo=Perfil` del kit). En la app el texto visible es "Mi tienda".
+- **Arranque y registro de prueba:** la app abre sin sesión en el Splash (01). Mientras no haya Supabase no se envía SMS: sirve cualquier código de 6 dígitos y la pantalla 04 lo dice. El celular de prueba +57 300 123 4567 entra a los datos de `data/mock/`; un número nuevo pasa por 06 y arranca con la tienda vacía. 06 también pide "¿Cómo te dicen?", porque el registro no pedía el nombre de la dueña. Cerrar sesión está en Mi tienda.
+- **Abrir caja:** desde el Home sin caja se abre la hoja 09a (base con montos rápidos, a nombre de la dueña). La pantalla completa 16a → 16 (quién atiende y teclado) se abre desde Caja, la hoja de venta y el enlace de 09a.
+- **Mercancía:** la mercancía para vender entra por Llegó mercancía (41a), que suma unidades y actualiza costos; no cuenta como gasto. Un gasto de categoría Mercancía no suma productos: 32 ofrece ir a 41a en vez de "Sumamos 24 productos".
+- **Fotos:** todavía no se leen solas ni se guardan (recibo en 30, productos en 11 y 12). La foto queda de referencia y los datos se escriben a mano.
+- **Listado sugerido (13):** los productos entran sin costo ni cantidad, como "Sin contar", y no disparan la alerta de agotado hasta que se cuentan (en 42 o con Llegó mercancía).
 - **Colores de estado:** naranja solo para alertas (por agotarse, faltante en el cierre de caja); rojo solo para gastos.
 - **Tokens en código:** mismos nombres que en Figma, con `-` en vez de `/` (`--fondo-primario`, `--espacio-4`, `--radio-lg`). Las variables de shadcn/ui apuntan a ellas. Detalle en `design/Tiendy_UI_kit.md`.

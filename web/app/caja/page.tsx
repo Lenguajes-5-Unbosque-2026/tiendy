@@ -1,24 +1,38 @@
 "use client";
 
-import { List } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { List, Wallet } from "lucide-react";
 
 import { AppScreen } from "@/components/layout/AppScreen";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { AmountCard } from "@/components/tiendy/AmountCard";
+import { EmptyState } from "@/components/tiendy/EmptyState";
 import { IconBadge } from "@/components/tiendy/IconBadge";
 import { ListItem } from "@/components/tiendy/ListItem";
 import { hora, plural, pesos } from "@/lib/formato";
 import { cajaDelTurno } from "@/lib/tienda/calculos";
+import { filtrosHoy } from "@/lib/tienda/cuaderno";
 import { useTienda } from "@/lib/tienda/store";
 
 /** Caja del día (17): cuánta plata debe haber en caja y por qué medio entró. */
 export default function CajaPage() {
-  const { ventas, gastos, turnoAbierto } = useTienda();
+  const router = useRouter();
+  const { ventas, gastos, turnoAbierto, setFiltros } = useTienda();
 
   if (!turnoAbierto) {
     return (
       <AppScreen title="Caja del día" back="/">
-        <p className="text-cuerpo text-texto-secundario">No hay una caja abierta.</p>
+        <EmptyState
+          icon={Wallet}
+          titulo="La caja está cerrada"
+          texto="Ábrela con el efectivo que tienes para empezar a anotar ventas."
+          accion={
+            <Link href="/caja/abrir" className={buttonVariants()}>
+              Abrir caja
+            </Link>
+          }
+        />
       </AppScreen>
     );
   }
@@ -30,8 +44,11 @@ export default function CajaPage() {
       title="Caja del día"
       subtitle={`Abierta ${hora(turnoAbierto.abierto_en)}`}
       back="/"
-      // Cerrar caja (18) es parte de CU-03 y queda fuera del MVP
-      footer={<Button disabled>Cerrar caja</Button>}
+      footer={
+        <Link href="/caja/cerrar" className={buttonVariants()}>
+          Cerrar caja
+        </Link>
+      }
     >
       <AmountCard centrada etiqueta="Efectivo esperado en caja" monto={pesos(caja.esperado)} />
 
@@ -68,7 +85,6 @@ export default function CajaPage() {
         </dl>
       </section>
 
-      {/* Mi cuaderno (CU-06) queda fuera del MVP: la fila solo resume */}
       <ListItem
         leading={<IconBadge icon={List} />}
         titulo="Movimientos de hoy"
@@ -77,6 +93,11 @@ export default function CajaPage() {
           "gasto",
           "gastos"
         )}`}
+        flecha
+        onClick={() => {
+          setFiltros({ ...filtrosHoy, turnoId: turnoAbierto.id });
+          router.push("/cuaderno");
+        }}
       />
     </AppScreen>
   );

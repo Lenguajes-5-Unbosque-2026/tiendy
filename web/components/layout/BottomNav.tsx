@@ -33,8 +33,11 @@ export function BottomNav() {
   const pathname = usePathname();
   const { setVenderAbierto } = useTienda();
 
+  // Mi cuaderno se abre desde Caja: ahí la pestaña activa sigue siendo Caja
   const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+    href === "/"
+      ? pathname === "/"
+      : pathname.startsWith(href) || (href === "/caja" && pathname.startsWith("/cuaderno"));
 
   const renderTab = ({ href, label, icon: Icon }: Tab) => {
     const active = isActive(href);

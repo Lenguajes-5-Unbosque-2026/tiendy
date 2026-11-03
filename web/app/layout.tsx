@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { GuardaSesion } from "@/components/layout/GuardaSesion";
 import { VenderSheet } from "@/components/vender/VenderSheet";
 import { TiendaProvider } from "@/lib/tienda/store";
 import "./globals.css";
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             {children}
           </div>
           <VenderSheet />
+          <GuardaSesion />
         </TiendaProvider>
       </body>
     </html>

@@ -21,6 +21,7 @@ Registros inventados pero realistas para una tienda de barrio en Kennedy (Bogot�
 | `gastos.csv` | 20 | Gastos y salidas de plata | 27–32, 33 |
 | `entradas_mercancia.csv` | 3 | Mercancía que llegó | 41a |
 | `entrada_productos.csv` | 7 | Los productos de cada entrada | 41a |
+| `listado_sugerido.csv` | 28 | Productos típicos de tienda que todavía no están en el inventario | 13 |
 
 ## Cómo se relacionan
 

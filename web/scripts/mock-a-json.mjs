@@ -17,6 +17,10 @@ const archivos = {
   ventas: "ventas.csv",
   ventaProductos: "venta_productos.csv",
   gastos: "gastos.csv",
+  proveedores: "proveedores.csv",
+  entradas: "entradas_mercancia.csv",
+  entradaProductos: "entrada_productos.csv",
+  listado: "listado_sugerido.csv",
 };
 
 // Columnas que son plata o cantidades
@@ -24,6 +28,7 @@ const numericas = new Set([
   "orden", "precio_venta", "costo", "unidades", "minimo", "base",
   "efectivo_esperado", "efectivo_contado", "diferencia", "total", "paga_con",
   "cantidad", "precio_unitario", "costo_unitario", "subtotal", "monto",
+  "precio_sugerido",
 ]);
 
 function separarLinea(linea) {

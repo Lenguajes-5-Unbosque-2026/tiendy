@@ -68,6 +68,37 @@ export function cajaDelTurno(turno: Turno, ventas: Venta[], gastos: Gasto[]) {
   };
 }
 
+/** El último turno cerrado: de ahí salen "Ayer cerraste con" e "Igual que ayer" (16). */
+export function ultimoCierre(turnos: Turno[]) {
+  return (
+    turnos
+      .filter((t) => t.estado === "cerrado" && t.cerrado_en)
+      .sort((a, b) => (a.cerrado_en! < b.cerrado_en! ? -1 : 1))
+      .at(-1) ?? null
+  );
+}
+
+/** Resultado del cierre (19): vendido, gastos y ganancia del turno. Ganancia = vendido − costo. */
+export function resultadoDelTurno(
+  turno: Turno,
+  ventas: Venta[],
+  lineas: VentaProducto[],
+  gastos: Gasto[]
+) {
+  const delTurno = ventasAnotadas(ventas).filter((v) => v.turno_id === turno.id);
+  const ids = new Set(delTurno.map((v) => v.id));
+  const ganancia = lineas
+    .filter((l) => ids.has(l.venta_id) && l.costo_unitario !== null)
+    .reduce((suma, l) => suma + (l.precio_unitario - (l.costo_unitario ?? 0)) * l.cantidad, 0);
+
+  return {
+    vendido: delTurno.reduce((s, v) => s + v.total, 0),
+    gastos: gastos.filter((g) => g.turno_id === turno.id).reduce((s, g) => s + g.monto, 0),
+    ganancia,
+    diferencia: turno.diferencia ?? 0,
+  };
+}
+
 /** Fechas (AAAA-MM-DD) de los últimos `n` días, terminando hoy. */
 function ultimosDias(n: number, hasta = HOY) {
   const fin = new Date(`${hasta}T12:00:00Z`);
@@ -119,7 +150,8 @@ export type NivelStock = "ok" | "bajo" | "critico";
 
 /** Estado del inventario de un producto: por agotarse si está en su mínimo o debajo. */
 export function estadoStock(producto: Producto, promedio: number) {
-  const porAgotarse = producto.unidades <= producto.minimo;
+  // Mínimo 0: todavía no se han contado las unidades (cargado desde el listado, 13)
+  const porAgotarse = producto.minimo > 0 && producto.unidades <= producto.minimo;
   const dias = promedio > 0 ? Math.floor(producto.unidades / promedio) : null;
   let nivel: NivelStock = "ok";
   if (porAgotarse) {

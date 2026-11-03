@@ -6,10 +6,9 @@ import { Package, TriangleAlert } from "lucide-react";
 
 import { AppScreen } from "@/components/layout/AppScreen";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { CampoPesos } from "@/components/tiendy/CampoPesos";
 import { IconBadge } from "@/components/tiendy/IconBadge";
 import { QuantityStepper } from "@/components/tiendy/QuantityStepper";
-import { leerPesos, pesos } from "@/lib/formato";
 import { ventasUltimos7Dias } from "@/lib/tienda/calculos";
 import { useTienda } from "@/lib/tienda/store";
 import { useInventario } from "@/lib/tienda/useInventario";
@@ -136,27 +135,5 @@ function EditarProducto({ item }: { item: ReturnType<typeof useInventario>["item
         </div>
       </section>
     </AppScreen>
-  );
-}
-
-function CampoPesos({
-  etiqueta,
-  valor,
-  onChange,
-}: {
-  etiqueta: string;
-  valor: number | null;
-  onChange: (valor: number | null) => void;
-}) {
-  return (
-    <label className="flex flex-col gap-espacio-2">
-      <span className="text-cuerpo-fuerte">{etiqueta}</span>
-      <Input
-        inputMode="numeric"
-        value={valor === null ? "" : pesos(valor)}
-        onChange={(e) => onChange(leerPesos(e.target.value))}
-        placeholder="$0"
-      />
-    </label>
   );
 }

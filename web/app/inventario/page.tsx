@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Plus, Search } from "lucide-react";
 
 import { AppScreen } from "@/components/layout/AppScreen";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertBanner } from "@/components/tiendy/AlertBanner";
 import { ChoiceChips } from "@/components/tiendy/ChoiceChips";
@@ -13,6 +14,7 @@ import { ListItem } from "@/components/tiendy/ListItem";
 import { inicial, plural, pesos } from "@/lib/formato";
 import { useTienda } from "@/lib/tienda/store";
 import { textoUnidades, useInventario } from "@/lib/tienda/useInventario";
+import { cn } from "@/lib/utils";
 
 const normalizar = (texto: string) =>
   texto.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -51,10 +53,12 @@ export default function InventarioPage() {
             className="pl-[calc(var(--espacio-4)+var(--icono-sm)+var(--espacio-2))]"
           />
         </div>
-        {/* Cargar productos (CU-02) queda fuera del MVP */}
-        <Button variant="secondary" size="sm" disabled className="h-alto-campo">
+        <Link
+          href="/inventario/cargar"
+          className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "h-alto-campo")}
+        >
           <Plus /> Agregar
-        </Button>
+        </Link>
       </div>
 
       <ChoiceChips

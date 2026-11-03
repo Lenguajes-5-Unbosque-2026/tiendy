@@ -1,19 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { CircleCheck } from "lucide-react";
+import { CircleCheck, Truck } from "lucide-react";
 
 import { AppScreen } from "@/components/layout/AppScreen";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/tiendy/EmptyState";
+import { IconBadge } from "@/components/tiendy/IconBadge";
+import { ListItem } from "@/components/tiendy/ListItem";
 import { QuantityStepper } from "@/components/tiendy/QuantityStepper";
 import { pesos } from "@/lib/formato";
 import { DIAS_SUGERENCIA, cantidadSugerida } from "@/lib/tienda/calculos";
+import { useTienda } from "@/lib/tienda/store";
 import { useInventario } from "@/lib/tienda/useInventario";
 
 /** Sugerencias de compra (44): qué pedir de lo que se está acabando. */
 export default function SugerenciasPage() {
   const { porAgotarse } = useInventario();
+  const { proveedores } = useTienda();
+  const [eligiendo, setEligiendo] = useState(false);
 
   const sugeridos = porAgotarse
     .map((i) => ({ ...i, sugerida: cantidadSugerida(i.producto, i.stock.promedio) }))
@@ -44,8 +49,40 @@ export default function SugerenciasPage() {
       footer={
         sugeridos.length > 0 && (
           <div className="flex flex-col gap-espacio-3">
-            {/* Pedir a un proveedor (41a · proveedores) queda fuera del MVP */}
-            <Button disabled>Pedir a un proveedor</Button>
+            {eligiendo ? (
+              // Pedir a un proveedor: el mismo mensaje, directo a su WhatsApp
+              <div className="flex flex-col gap-espacio-2">
+                <span className="text-secundario text-texto-secundario">¿A quién le pides?</span>
+                {proveedores.map((p) =>
+                  p.celular ? (
+                    <a
+                      key={p.id}
+                      href={`https://wa.me/${p.celular.replace(/\D/g, "")}?text=${encodeURIComponent(mensaje)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <ListItem
+                        leading={<IconBadge icon={Truck} />}
+                        titulo={p.nombre}
+                        detalle={p.dia_visita ? `Viene los ${p.dia_visita}` : undefined}
+                        flecha
+                      />
+                    </a>
+                  ) : (
+                    <ListItem
+                      key={p.id}
+                      leading={<IconBadge icon={Truck} tono="neutro" />}
+                      titulo={p.nombre}
+                      detalle="Sin celular anotado"
+                    />
+                  )
+                )}
+              </div>
+            ) : (
+              <Button disabled={!lista} onClick={() => setEligiendo(true)}>
+                Pedir a un proveedor
+              </Button>
+            )}
             <a
               href={`https://wa.me/?text=${encodeURIComponent(mensaje)}`}
               target="_blank"
