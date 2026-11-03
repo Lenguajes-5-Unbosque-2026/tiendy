@@ -467,7 +467,6 @@ function useTiendaState() {
   return {
     ...estado,
     categorias: mock.categorias,
-    listado: mock.listado,
     proveedores: mock.proveedores,
     turnoAbierto,
     atiende,
