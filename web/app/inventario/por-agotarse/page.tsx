@@ -8,9 +8,9 @@ import { AppScreen } from "@/components/layout/AppScreen";
 import { buttonVariants } from "@/components/ui/button";
 import { ChoiceChips } from "@/components/tiendy/ChoiceChips";
 import { EmptyState } from "@/components/tiendy/EmptyState";
-import { IconBadge } from "@/components/tiendy/IconBadge";
+import { FotoProducto } from "@/components/tiendy/FotoProducto";
 import { ListItem } from "@/components/tiendy/ListItem";
-import { inicial, plural } from "@/lib/formato";
+import { plural } from "@/lib/formato";
 import { useInventario } from "@/lib/tienda/useInventario";
 
 type Filtro = "todos" | "critico" | "bajo";
@@ -57,7 +57,7 @@ export default function PorAgotarsePage() {
             {visibles.map(({ producto, stock }) => (
               <li key={producto.id}>
                 <ListItem
-                  leading={<IconBadge letra={inicial(producto.nombre)} />}
+                  leading={<FotoProducto producto={producto} />}
                   titulo={producto.nombre}
                   detalle={
                     producto.unidades === 0

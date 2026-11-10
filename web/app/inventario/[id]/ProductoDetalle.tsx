@@ -7,6 +7,7 @@ import { Package, TriangleAlert } from "lucide-react";
 import { AppScreen } from "@/components/layout/AppScreen";
 import { Button } from "@/components/ui/button";
 import { CampoPesos } from "@/components/tiendy/CampoPesos";
+import { FotoProducto } from "@/components/tiendy/FotoProducto";
 import { IconBadge } from "@/components/tiendy/IconBadge";
 import { QuantityStepper } from "@/components/tiendy/QuantityStepper";
 import { ventasUltimos7Dias } from "@/lib/tienda/calculos";
@@ -66,7 +67,10 @@ function EditarProducto({ item }: { item: ReturnType<typeof useInventario>["item
       }
     >
       <div className="flex items-center gap-espacio-4 rounded-lg bg-fondo-tarjeta p-espacio-4">
-        {stock.porAgotarse ? (
+        {/* Con foto se muestra la foto; la alerta sigue en el color de las unidades */}
+        {producto.imagen?.startsWith("https://") ? (
+          <FotoProducto producto={producto} tamano="l" />
+        ) : stock.porAgotarse ? (
           <IconBadge icon={TriangleAlert} tono="peligro" tamano="l" />
         ) : (
           <IconBadge icon={Package} tamano="l" />

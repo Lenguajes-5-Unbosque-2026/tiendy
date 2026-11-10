@@ -10,9 +10,9 @@ import { Input } from "@/components/ui/input";
 import { AlertBanner } from "@/components/tiendy/AlertBanner";
 import { ChoiceChips } from "@/components/tiendy/ChoiceChips";
 import { EmptyState } from "@/components/tiendy/EmptyState";
-import { IconBadge } from "@/components/tiendy/IconBadge";
+import { FotoProducto } from "@/components/tiendy/FotoProducto";
 import { ListItem } from "@/components/tiendy/ListItem";
-import { inicial, plural, pesos } from "@/lib/formato";
+import { plural, pesos } from "@/lib/formato";
 import { useTienda } from "@/lib/tienda/store";
 import { textoUnidades, useInventario } from "@/lib/tienda/useInventario";
 import { cn } from "@/lib/utils";
@@ -112,7 +112,7 @@ export default function InventarioPage() {
               return (
                 <li key={item.producto.id}>
                   <ListItem
-                    leading={<IconBadge letra={inicial(item.producto.nombre)} />}
+                    leading={<FotoProducto producto={item.producto} />}
                     titulo={item.producto.nombre}
                     detalle={`${item.categoria} · ${pesos(item.producto.precio_venta)}`}
                     valor={unidades.texto}

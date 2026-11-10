@@ -9,6 +9,7 @@ import { Drawer, DrawerClose, DrawerContent, DrawerTitle } from "@/components/ui
 import { Input } from "@/components/ui/input";
 import { Chip, ChoiceChips } from "@/components/tiendy/ChoiceChips";
 import { EmptyState } from "@/components/tiendy/EmptyState";
+import { FotoProducto } from "@/components/tiendy/FotoProducto";
 import { IconBadge } from "@/components/tiendy/IconBadge";
 import { QuantityStepper } from "@/components/tiendy/QuantityStepper";
 import { leerPesos, pesos } from "@/lib/formato";
@@ -279,7 +280,10 @@ export function VenderSheet() {
                                 }}
                                 className="flex w-full items-center justify-between gap-espacio-3 px-espacio-4 py-espacio-3 text-left disabled:text-texto-sutil"
                               >
-                                <span className="text-cuerpo">{p.nombre}</span>
+                                <span className="flex min-w-0 items-center gap-espacio-3">
+                                  <FotoProducto producto={p} />
+                                  <span className="text-cuerpo">{p.nombre}</span>
+                                </span>
                                 <span className="shrink-0 text-secundario">
                                   {p.unidades === 0 ? "Agotado" : pesos(p.precio_venta)}
                                 </span>
