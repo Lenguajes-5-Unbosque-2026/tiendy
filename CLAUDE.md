@@ -25,6 +25,7 @@
 | `design/flujos/` | Pantallas exportadas de Figma (PNG), una carpeta por flujo. |
 | `specs/` | Una carpeta por caso de uso (`CU-01-registro/` … `CU-09-mi-tienda/`) con su `spec.md` (estados, datos y preguntas abiertas). `CU-07-fiados/` quedó vacía. |
 | `data/` | `mock/`: datos de prueba en CSV (tienda, personas, productos, turnos, ventas, gastos, proveedores, entradas de mercancía y el listado sugerido). Su `README.md` explica columnas, relaciones y casos difíciles. |
+| `supabase/` | SQL para correr en el SQL Editor de Supabase: `schema.sql` (tablas, datos de `data/mock/` y lectura pública), `imagenes.sql` (URLs de las fotos del bucket `imagenes`), `escritura.sql` (permisos de Registrar venta) y `reset.sql` (borra todo y corre los tres anteriores). |
 | `web/` | Todo el código de la app (Next.js). `app/` tiene una ruta por pantalla; `components/` el kit (`ui/` de shadcn, `tiendy/` y `caja/` propios, `layout/` con header, barra y guardia de sesión); `lib/tienda/` el estado (`store.tsx`) y los cálculos; `scripts/mock-a-json.mjs` convierte `data/mock/` en `lib/mock/datos.json`. |
 | `.github/` | `CODEOWNERS`. |
 
@@ -72,4 +73,5 @@ Los números que faltan (07, 08, 14, 24, 25, 26, 45) son pantallas de la v1 que 
 - **Fotos:** todavía no se leen solas ni se guardan (recibo en 30, productos en 11 y 12). La foto queda de referencia y los datos se escriben a mano.
 - **Listado sugerido (13):** los productos entran sin costo ni cantidad, como "Sin contar", y no disparan la alerta de agotado hasta que se cuentan (en 42 o con Llegó mercancía).
 - **Colores de estado:** naranja solo para alertas (por agotarse, faltante en el cierre de caja); rojo solo para gastos.
+- **Qué ya usa Supabase:** solo la tienda de prueba (t01). Mi inventario (41) y el resto de pantallas leen sus productos de la tabla `productos`; Registrar venta guarda en `ventas` y `venta_productos` y descuenta `productos.unidades` (deshacer, eliminar, 42 y 41a también actualizan productos). El listado sugerido (13) se lee de `listado_sugerido`. Todo lo demás (caja, gastos, entradas, cuentas nuevas) sigue en el navegador. El código está en `web/lib/tienda/nube.ts`.
 - **Tokens en código:** mismos nombres que en Figma, con `-` en vez de `/` (`--fondo-primario`, `--espacio-4`, `--radio-lg`). Las variables de shadcn/ui apuntan a ellas. Detalle en `design/Tiendy_UI_kit.md`.

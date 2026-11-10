@@ -73,6 +73,7 @@ export default function CargaListadoPage() {
           unidades: 0,
           minimo: 0,
           venta_rapida: false,
+          origen: "listado",
           imagen: null,
         }))
     );

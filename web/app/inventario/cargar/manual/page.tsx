@@ -45,6 +45,7 @@ export default function CargaManualPage() {
         unidades: form.cantidad,
         minimo: MINIMO_INICIAL,
         venta_rapida: false,
+        origen: "manual",
         // Las fotos todavía no se guardan: llegan con Supabase Storage
         imagen: null,
       },

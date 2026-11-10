@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, Search } from "lucide-react";
+import { LoaderCircle, Plus, Search, WifiOff } from "lucide-react";
 
 import { AppScreen } from "@/components/layout/AppScreen";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertBanner } from "@/components/tiendy/AlertBanner";
 import { ChoiceChips } from "@/components/tiendy/ChoiceChips";
+import { EmptyState } from "@/components/tiendy/EmptyState";
 import { IconBadge } from "@/components/tiendy/IconBadge";
 import { ListItem } from "@/components/tiendy/ListItem";
 import { inicial, plural, pesos } from "@/lib/formato";
@@ -19,9 +20,9 @@ import { cn } from "@/lib/utils";
 const normalizar = (texto: string) =>
   texto.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-/** Mi inventario (41): qué queda en el estante. */
+/** Mi inventario (41): qué queda en el estante, leído de la tabla productos de Supabase. */
 export default function InventarioPage() {
-  const { categorias } = useTienda();
+  const { categorias, estadoProductos, recargarProductos } = useTienda();
   const { items, porAgotarse } = useInventario();
   const [busqueda, setBusqueda] = useState("");
   const [categoria, setCategoria] = useState("todos");
@@ -40,7 +41,10 @@ export default function InventarioPage() {
   );
 
   return (
-    <AppScreen title="Mi inventario" subtitle={plural(items.length, "producto", "productos")}>
+    <AppScreen
+      title="Mi inventario"
+      subtitle={estadoProductos === "listo" ? plural(items.length, "producto", "productos") : undefined}
+    >
       <div className="flex items-center gap-espacio-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-espacio-4 size-icono-sm -translate-y-1/2 text-texto-sutil" />
@@ -61,48 +65,72 @@ export default function InventarioPage() {
         </Link>
       </div>
 
-      <ChoiceChips
-        etiqueta="Categoría"
-        valor={categoria}
-        onChange={setCategoria}
-        opciones={[
-          { valor: "todos", etiqueta: "Todos" },
-          ...conProductos.map((c) => ({ valor: c.id, etiqueta: c.nombre })),
-        ]}
-      />
+      {estadoProductos === "cargando" && (
+        <p role="status" className="flex items-center gap-espacio-2 text-cuerpo text-texto-secundario">
+          <LoaderCircle className="size-icono-sm animate-spin" />
+          Cargando tu inventario…
+        </p>
+      )}
 
-      {porAgotarse.length > 0 && (
-        <AlertBanner
-          tono="peligro"
-          titulo={`${plural(porAgotarse.length, "producto", "productos")} por agotarse`}
-          detalle="Revisa y pide antes de quedarte sin"
-          href="/inventario/por-agotarse"
+      {estadoProductos === "error" && (
+        <EmptyState
+          icon={WifiOff}
+          titulo="No pudimos cargar tu inventario"
+          texto="Revisa tu conexión a internet e intenta de nuevo."
+          accion={
+            <Button variant="secondary" className="w-full" onClick={recargarProductos}>
+              Intentar de nuevo
+            </Button>
+          }
         />
       )}
 
-      <ul className="flex flex-col gap-espacio-3">
-        {visibles.map((item) => {
-          const unidades = textoUnidades(item);
-          return (
-            <li key={item.producto.id}>
-              <ListItem
-                leading={<IconBadge letra={inicial(item.producto.nombre)} />}
-                titulo={item.producto.nombre}
-                detalle={`${item.categoria} · ${pesos(item.producto.precio_venta)}`}
-                valor={unidades.texto}
-                valorTono={unidades.tono}
-                flecha
-                href={`/inventario/${item.producto.id}`}
-              />
-            </li>
-          );
-        })}
-      </ul>
+      {estadoProductos === "listo" && (
+        <>
+          <ChoiceChips
+            etiqueta="Categoría"
+            valor={categoria}
+            onChange={setCategoria}
+            opciones={[
+              { valor: "todos", etiqueta: "Todos" },
+              ...conProductos.map((c) => ({ valor: c.id, etiqueta: c.nombre })),
+            ]}
+          />
 
-      {visibles.length === 0 && (
-        <p className="text-cuerpo text-texto-secundario">
-          No hay productos que coincidan con tu búsqueda.
-        </p>
+          {porAgotarse.length > 0 && (
+            <AlertBanner
+              tono="peligro"
+              titulo={`${plural(porAgotarse.length, "producto", "productos")} por agotarse`}
+              detalle="Revisa y pide antes de quedarte sin"
+              href="/inventario/por-agotarse"
+            />
+          )}
+
+          <ul className="flex flex-col gap-espacio-3">
+            {visibles.map((item) => {
+              const unidades = textoUnidades(item);
+              return (
+                <li key={item.producto.id}>
+                  <ListItem
+                    leading={<IconBadge letra={inicial(item.producto.nombre)} />}
+                    titulo={item.producto.nombre}
+                    detalle={`${item.categoria} · ${pesos(item.producto.precio_venta)}`}
+                    valor={unidades.texto}
+                    valorTono={unidades.tono}
+                    flecha
+                    href={`/inventario/${item.producto.id}`}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+
+          {visibles.length === 0 && (
+            <p className="text-cuerpo text-texto-secundario">
+              No hay productos que coincidan con tu búsqueda.
+            </p>
+          )}
+        </>
       )}
     </AppScreen>
   );
