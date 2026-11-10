@@ -37,6 +37,8 @@ export type Producto = {
   unidades: number;
   minimo: number;
   venta_rapida: boolean;
+  /** Cómo se cargó (11 manual, 12 foto, 13 listado). */
+  origen?: "listado" | "manual" | "foto";
   imagen: string | null;
 };
 

@@ -1,7 +1,9 @@
 "use client";
 
 // Estado de la tienda en el celular. Arranca con data/mock/ y guarda lo que
-// cambia (ventas, gastos, inventario, turnos) en el navegador hasta que llegue Supabase.
+// cambia (ventas, gastos, inventario, turnos) en el navegador. La tienda de
+// prueba ya vive en Supabase: sus productos se leen de allá y cada venta se
+// guarda allá (ver nube.ts). Lo demás sigue solo en el navegador por ahora.
 import {
   createContext,
   useCallback,
@@ -30,6 +32,7 @@ import type {
 } from "@/lib/mock/tipos";
 import { cajaDelTurno, HOY } from "@/lib/tienda/calculos";
 import { type Filtros, filtrosHoy } from "@/lib/tienda/cuaderno";
+import * as nube from "@/lib/tienda/nube";
 
 const mock = datos as unknown as DatosMock;
 // Cambia la versión si cambia la forma de lo guardado
@@ -80,7 +83,15 @@ export type LineaEntrada = { productoId: string; cantidad: number; costo: number
 
 export type ProductoNuevo = Omit<Producto, "id">;
 
-export type Aviso = { ventaId: string; total: number; medioPago: MedioPago };
+/** Cómo va el guardado de la venta en Supabase ("local": la tienda no está en la base). */
+export type Guardado = "guardando" | "listo" | "error" | "local";
+
+export type Aviso =
+  | { tipo: "venta"; ventaId: string; total: number; medioPago: MedioPago; guardado: Guardado }
+  | { tipo: "error"; texto: string };
+
+/** Productos de Mi inventario (41) leídos de Supabase. */
+export type EstadoProductos = "cargando" | "error" | "listo";
 
 const borradorVacio: Borrador = {
   lineas: [],
@@ -133,6 +144,34 @@ function quitarVenta(e: Mutable, ventaId: string, estado: "deshecha" | "eliminad
   };
 }
 
+/** Anota la venta y descuenta el inventario; si corrige otra, esa se elimina primero. */
+function sumarVenta(e: Mutable, nueva: Venta, lineas: VentaProducto[], corrige?: string): Mutable {
+  const base = corrige ? quitarVenta(e, corrige, "eliminada") : e;
+  return {
+    ...base,
+    ventas: [...base.ventas, nueva],
+    ventaProductos: [...base.ventaProductos, ...lineas],
+    productos: base.productos.map((p) => {
+      const vendida = lineas.find((l) => l.producto_id === p.id);
+      return vendida ? { ...p, unidades: Math.max(0, p.unidades - vendida.cantidad) } : p;
+    }),
+  };
+}
+
+/** Los productos de esas ventas, como quedaron en el estado. */
+function productosDe(e: Mutable, ventaIds: (string | undefined)[]) {
+  const ids = new Set(
+    e.ventaProductos.filter((l) => ventaIds.includes(l.venta_id)).map((l) => l.producto_id)
+  );
+  return e.productos.filter((p) => ids.has(p.id));
+}
+
+/** Lo de Supabase manda; los productos creados en este celular que aún no están allá se conservan. */
+function unirProductos(deLaNube: Producto[], locales: Producto[]) {
+  const enLaNube = new Set(deLaNube.map((p) => p.id));
+  return [...deLaNube, ...locales.filter((p) => p.id.startsWith("p-") && !enLaNube.has(p.id))];
+}
+
 function useTiendaState() {
   const [estado, setEstado] = useState<Mutable>(inicial);
   const [cargado, setCargado] = useState(false);
@@ -144,6 +183,15 @@ function useTiendaState() {
   /** Celular escrito en 03 mientras se verifica el código (04, 05). */
   const [celularPendiente, setCelularPendiente] = useState("");
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [estadoProductos, setEstadoProductos] = useState<EstadoProductos>("cargando");
+  const [intentoProductos, setIntentoProductos] = useState(0);
+  // Lo que se escribe en Supabase va en fila, para que deshacer no se adelante a guardar
+  const cola = useRef<Promise<unknown>>(Promise.resolve());
+  // Ventas que no se pudieron guardar en Supabase, para reintentar desde el aviso (22)
+  const pendientes = useRef(new Map<string, nube.VentaParaGuardar>());
+
+  /** Solo la tienda de prueba existe en Supabase; una cuenta nueva sigue en el navegador. */
+  const enLaNube = estado.tienda.id === mock.tienda.id;
 
   // Lo guardado en este celular reemplaza a los datos de prueba
   useEffect(() => {
@@ -166,19 +214,99 @@ function useTiendaState() {
     }
   }, [estado, cargado]);
 
+  // Mi inventario (41): los productos de la tienda de prueba se leen de Supabase
+  const tiendaId = estado.tienda.id;
+  const conSesion = estado.sesion !== null;
+  useEffect(() => {
+    if (!cargado || !conSesion) return;
+    if (!enLaNube) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sin base, los productos son los del celular
+      setEstadoProductos("listo");
+      return;
+    }
+    let vigente = true;
+    setEstadoProductos("cargando");
+    nube
+      .leerProductos(tiendaId)
+      .then((deLaNube) => {
+        if (!vigente) return;
+        setEstado((e) => ({ ...e, productos: unirProductos(deLaNube, e.productos) }));
+        setEstadoProductos("listo");
+      })
+      .catch((error) => {
+        console.error("No se pudieron leer los productos de Supabase", error);
+        if (vigente) setEstadoProductos("error");
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [cargado, conSesion, enLaNube, tiendaId, intentoProductos]);
+
+  const recargarProductos = useCallback(() => setIntentoProductos((n) => n + 1), []);
+
   const turnoAbierto = estado.turnos.find((t) => t.estado === "abierto") ?? null;
   const atiende = estado.personas.find((p) => p.id === turnoAbierto?.persona_id) ?? null;
 
-  const mostrarAviso = useCallback((nuevo: Aviso) => {
+  const mostrarAviso = useCallback((nuevo: Aviso, sinTiempo = false) => {
     if (temporizador.current) clearTimeout(temporizador.current);
     setAviso(nuevo);
-    temporizador.current = setTimeout(() => setAviso(null), DURACION_AVISO);
+    if (!sinTiempo) temporizador.current = setTimeout(() => setAviso(null), DURACION_AVISO);
   }, []);
 
   const cerrarAviso = useCallback(() => {
     if (temporizador.current) clearTimeout(temporizador.current);
     setAviso(null);
   }, []);
+
+  /** Pone una escritura en la fila de Supabase; si falla, avisa con ese texto. */
+  const escribirEnNube = useCallback(
+    (escritura: () => Promise<void>, textoError: string) => {
+      const paso = cola.current.then(escritura);
+      cola.current = paso.catch((error) => {
+        console.error(textoError, error);
+        mostrarAviso({ tipo: "error", texto: textoError });
+      });
+    },
+    [mostrarAviso]
+  );
+
+  /** Registrar venta en Supabase; el aviso (22) pasa de "guardando" a anotada o a error. */
+  const guardarVentaEnNube = useCallback(
+    (datos: nube.VentaParaGuardar, aviso: Extract<Aviso, { tipo: "venta" }>) => {
+      pendientes.current.set(datos.venta.id, datos);
+      // Solo se actualiza el aviso si sigue siendo el de esta venta
+      const actualizar = (guardado: Guardado, sinTiempo = false) =>
+        setAviso((actual) => {
+          if (actual?.tipo !== "venta" || actual.ventaId !== datos.venta.id) return actual;
+          if (temporizador.current) clearTimeout(temporizador.current);
+          if (!sinTiempo) temporizador.current = setTimeout(() => setAviso(null), DURACION_AVISO);
+          return { ...actual, guardado };
+        });
+      mostrarAviso({ ...aviso, guardado: "guardando" }, true);
+      const paso = cola.current.then(() => nube.guardarVenta(datos));
+      cola.current = paso.then(
+        () => {
+          pendientes.current.delete(datos.venta.id);
+          actualizar("listo");
+        },
+        (error) => {
+          console.error("No se pudo guardar la venta en Supabase", error);
+          // El error se queda a la vista hasta reintentar
+          actualizar("error", true);
+        }
+      );
+    },
+    [mostrarAviso]
+  );
+
+  /** Reintentar (22): vuelve a guardar en Supabase la venta que falló. */
+  const reintentarVenta = useCallback(
+    (ventaId: string) => {
+      const datos = pendientes.current.get(ventaId);
+      if (datos && aviso?.tipo === "venta") guardarVentaEnNube(datos, aviso);
+    },
+    [aviso, guardarVentaEnNube]
+  );
 
   /** Anota la venta: suma a la caja y descuenta el inventario. */
   const anotarVenta = useCallback(
@@ -211,25 +339,53 @@ function useTiendaState() {
         estado: "anotada",
       };
 
-      setEstado((e) => {
-        // Al corregir, la venta anterior se elimina y sus productos vuelven antes de descontar
-        const base = venta.corrige ? quitarVenta(e, venta.corrige, "eliminada") : e;
-        return {
-          ...base,
-          ventas: [...base.ventas, nueva],
-          ventaProductos: [...base.ventaProductos, ...lineas],
-          productos: base.productos.map((p) => {
-            const vendida = lineas.find((l) => l.producto_id === p.id);
-            return vendida ? { ...p, unidades: Math.max(0, p.unidades - vendida.cantidad) } : p;
-          }),
-        };
-      });
+      // Al corregir, la venta anterior se elimina y sus productos vuelven antes de descontar
+      setEstado((e) => sumarVenta(e, nueva, lineas, venta.corrige));
 
-      mostrarAviso({ ventaId: id, total, medioPago: venta.medioPago });
+      const aviso = {
+        tipo: "venta" as const,
+        ventaId: id,
+        total,
+        medioPago: venta.medioPago,
+        guardado: "local" as const,
+      };
+      if (enLaNube) {
+        const despues = sumarVenta(estado, nueva, lineas, venta.corrige);
+        guardarVentaEnNube(
+          {
+            tiendaId: estado.tienda.id,
+            venta: nueva,
+            lineas,
+            turno: estado.turnos.find((t) => t.id === nueva.turno_id) ?? null,
+            persona: estado.personas.find((p) => p.id === nueva.persona_id) ?? null,
+            productos: productosDe(despues, [id, venta.corrige]),
+            corrige: venta.corrige,
+          },
+          aviso
+        );
+      } else {
+        mostrarAviso(aviso);
+      }
       setBorrador(borradorVacio);
       return id;
     },
-    [estado.productos, estado.ventas, turnoAbierto, atiende, mostrarAviso]
+    [estado, turnoAbierto, atiende, enLaNube, guardarVentaEnNube, mostrarAviso]
+  );
+
+  /** Deshacer (22) o eliminar (36) en Supabase: la venta deja de contar y vuelven las unidades. */
+  const quitarVentaEnNube = useCallback(
+    (ventaId: string, motivo: "deshecha" | "eliminada") => {
+      if (!enLaNube) return;
+      pendientes.current.delete(ventaId);
+      const despues = quitarVenta(estado, ventaId, motivo);
+      escribirEnNube(
+        () => nube.quitarVenta(ventaId, motivo, productosDe(despues, [ventaId])),
+        motivo === "deshecha"
+          ? "No pudimos deshacer la venta en la base de datos"
+          : "No pudimos eliminar la venta en la base de datos"
+      );
+    },
+    [estado, enLaNube, escribirEnNube]
   );
 
   /** Deshacer (22): la venta queda "deshecha" y los productos vuelven al inventario. */
@@ -237,8 +393,9 @@ function useTiendaState() {
     (ventaId: string) => {
       setEstado((e) => quitarVenta(e, ventaId, "deshecha"));
       cerrarAviso();
+      quitarVentaEnNube(ventaId, "deshecha");
     },
-    [cerrarAviso]
+    [cerrarAviso, quitarVentaEnNube]
   );
 
   /** Abrir caja (16a → 16): empieza el turno con quién atiende y la base contada. */
@@ -319,9 +476,13 @@ function useTiendaState() {
   );
 
   /** Eliminar registro (36): la venta deja de contar y sus productos vuelven al inventario. */
-  const eliminarVenta = useCallback((ventaId: string) => {
-    setEstado((e) => quitarVenta(e, ventaId, "eliminada"));
-  }, []);
+  const eliminarVenta = useCallback(
+    (ventaId: string) => {
+      setEstado((e) => quitarVenta(e, ventaId, "eliminada"));
+      quitarVentaEnNube(ventaId, "eliminada");
+    },
+    [quitarVentaEnNube]
+  );
 
   const eliminarGasto = useCallback((gastoId: string) => {
     setEstado((e) => ({ ...e, gastos: e.gastos.filter((g) => g.id !== gastoId) }));
@@ -350,20 +511,31 @@ function useTiendaState() {
         pagar_antes_de: pago.medio === "quede_debiendo" ? pago.pagarAntesDe : null,
         imagen: null,
       };
+      const sumarLlegada = (p: Producto) => {
+        const llego = productosEntrada.find((l) => l.producto_id === p.id);
+        return llego
+          ? { ...p, unidades: p.unidades + llego.cantidad, costo: llego.costo_unitario }
+          : p;
+      };
       setEstado((e) => ({
         ...e,
         entradas: [...e.entradas, entrada],
         entradaProductos: [...e.entradaProductos, ...productosEntrada],
-        productos: e.productos.map((p) => {
-          const llego = productosEntrada.find((l) => l.producto_id === p.id);
-          return llego
-            ? { ...p, unidades: p.unidades + llego.cantidad, costo: llego.costo_unitario }
-            : p;
-        }),
+        productos: e.productos.map(sumarLlegada),
       }));
+      // Las unidades y el costo nuevos también quedan en Supabase, para que la venta descuente bien
+      if (enLaNube) {
+        const cambiados = estado.productos
+          .filter((p) => productosEntrada.some((l) => l.producto_id === p.id))
+          .map(sumarLlegada);
+        escribirEnNube(
+          () => nube.guardarCambiosProductos(cambiados),
+          "No pudimos actualizar el inventario en la base de datos"
+        );
+      }
       return id;
     },
-    [turnoAbierto, atiende]
+    [turnoAbierto, atiende, enLaNube, estado.productos, escribirEnNube]
   );
 
   /** Cargar productos (11, 12, 13): los suma al inventario. */
@@ -460,14 +632,21 @@ function useTiendaState() {
         ...e,
         productos: e.productos.map((p) => (p.id === id ? { ...p, ...cambios } : p)),
       }));
+      // Un producto creado en este celular llega a Supabase con su primera venta;
+      // mientras tanto este cambio no encuentra fila y no hace nada
+      if (enLaNube) {
+        escribirEnNube(
+          () => nube.guardarCambiosProductos([{ id, ...cambios }]),
+          "No pudimos guardar el producto en la base de datos"
+        );
+      }
     },
-    []
+    [enLaNube, escribirEnNube]
   );
 
   return {
     ...estado,
     categorias: mock.categorias,
-    listado: mock.listado,
     proveedores: mock.proveedores,
     turnoAbierto,
     atiende,
@@ -482,6 +661,9 @@ function useTiendaState() {
     cerrarAviso,
     anotarVenta,
     deshacerVenta,
+    reintentarVenta,
+    estadoProductos,
+    recargarProductos,
     abrirTurno,
     cerrarTurno,
     filtros,

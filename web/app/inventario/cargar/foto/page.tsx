@@ -54,6 +54,7 @@ export default function CargaFotoPage() {
           // Sin cantidad contada no hay aviso de agotado (ver estadoStock)
           minimo: f.cantidad ? 5 : 0,
           venta_rapida: false,
+          origen: "foto",
           imagen: null,
         };
       })
