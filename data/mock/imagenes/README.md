@@ -10,13 +10,10 @@ Fotos del empaque real de cada producto, que dio el equipo (noviembre de 2026). 
 
 **Cuidado:** muestran marcas y empaques de terceros (Alquería, Diana, Postobón, Bimbo, Alpina…), que tienen derechos de autor y de marca. Sirven para el prototipo; si la app se publica de verdad, hay que reemplazarlas por fotos propias o con licencia libre.
 
-## Recibos y facturas
+## Factura de gasto
 
-Son de [Wikimedia Commons](https://commons.wikimedia.org), con licencia libre. Las licencias CC BY y CC BY-SA piden nombrar al autor y la licencia; si las fotos se muestran en la app publicada, esta tabla debe quedar enlazada desde algún lugar visible.
+Es de [Wikimedia Commons](https://commons.wikimedia.org), con licencia libre. Las licencias CC BY y CC BY-SA piden nombrar al autor y la licencia; si las fotos se muestran en la app publicada, esta tabla debe quedar enlazada desde algún lugar visible.
 
 | Archivo | Foto original · autor · licencia |
 |---|---|
-| `g04-recibo-bimbo.jpg` | [Cash-receipt-sampleasdf.jpg](https://commons.wikimedia.org/wiki/File:Cash-receipt-sampleasdf.jpg) · Faiyazmca · CC BY-SA 4.0 |
-| `g08-factura-alpina.jpg` | [CWT48 ticket uniform invoice AV01798476.jpg](https://commons.wikimedia.org/wiki/File:CWT48_ticket_uniform_invoice_AV01798476.jpg) · Solomon203 · CC BY-SA 4.0 |
 | `g18-factura-distribuidora-el-sol.jpg` | [Invoice from The French Gallery (DPLA).jpg](https://commons.wikimedia.org/wiki/File:Invoice_from_The_French_Gallery_-_DPLA_-_19fe291896d2bdd0a68728d27df727c2.jpg) · The French Gallery · Dominio público |
-| `e02-factura-alpina.jpg` | [Paid bill for coffee.jpg](https://commons.wikimedia.org/wiki/File:Paid_bill_for_coffee.jpg) · Kritzolina · CC BY-SA 4.0 |
