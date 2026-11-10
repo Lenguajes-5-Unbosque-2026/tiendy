@@ -94,4 +94,4 @@ Estas salen de preguntas abiertas de las specs (`specs/README.md`). Si el equipo
 
 ## Imágenes
 
-La columna `imagen` dice el nombre exacto del archivo que está en [`imagenes/`](imagenes/). Son 44 fotos: 40 de productos (empaques reales, que dio el equipo) y 4 de recibos y facturas de Wikimedia Commons; el origen de cada una está en [`imagenes/README.md`](imagenes/README.md).
+La columna `imagen` dice el nombre exacto del archivo que está en [`imagenes/`](imagenes/). Son 41 fotos: 40 de productos (empaques reales, que dio el equipo) y 1 factura de Wikimedia Commons; el origen de cada una está en [`imagenes/README.md`](imagenes/README.md).

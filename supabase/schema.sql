@@ -464,11 +464,11 @@ insert into public.gastos (id, tienda_id, turno_id, persona_id, fecha_hora, mont
   ('g01', 't01', 'tu01', 'pe01', '2026-09-19T07:30:00-05:00', 8000, 'transporte', null, null, 'voz', 'pagué 8 mil de transporte', 'efectivo', null, null),
   ('g02', 't01', 'tu01', 'pe01', '2026-09-19T10:15:00-05:00', 45000, 'servicios', 'Recibo de la luz (Enel)', null, 'manual', null, 'transferencia', null, null),
   ('g03', 't01', 'tu02', 'pe02', '2026-09-19T15:40:00-05:00', 12000, 'otro', 'Almuerzo', null, 'manual', null, 'efectivo', null, null),
-  ('g04', 't01', 'tu02', 'pe02', '2026-09-19T18:20:00-05:00', 96000, 'mercancia', null, 'pr04', 'foto', null, 'efectivo', null, 'g04-recibo-bimbo.jpg'),
+  ('g04', 't01', 'tu02', 'pe02', '2026-09-19T18:20:00-05:00', 96000, 'mercancia', null, 'pr04', 'foto', null, 'efectivo', null, null),
   ('g05', 't01', 'tu03', 'pe01', '2026-09-20T06:45:00-05:00', 6000, 'transporte', null, null, 'voz', 'pagué 6 mil de transporte', 'efectivo', null, null),
   ('g06', 't01', 'tu03', 'pe01', '2026-09-20T09:10:00-05:00', 20000, 'otro', 'Saqué para el mercado de la casa', null, 'voz', 'pagué 20 mil de otros', 'efectivo', null, null),
   ('g07', 't01', 'tu03', 'pe01', '2026-09-20T12:30:00-05:00', 38500, 'servicios', 'Internet del local', null, 'manual', null, 'transferencia', null, null),
-  ('g08', 't01', 'tu03', 'pe01', '2026-09-20T16:00:00-05:00', 54000, 'mercancia', null, 'pr03', 'foto', null, 'quede_debiendo', '2026-09-27', 'g08-factura-alpina.jpg'),
+  ('g08', 't01', 'tu03', 'pe01', '2026-09-20T16:00:00-05:00', 54000, 'mercancia', null, 'pr03', 'foto', null, 'quede_debiendo', '2026-09-27', null),
   ('g09', 't01', 'tu04', 'pe02', '2026-09-21T08:00:00-05:00', 10000, 'transporte', null, null, 'manual', null, 'efectivo', null, null),
   ('g10', 't01', 'tu04', 'pe02', '2026-09-21T13:45:00-05:00', 5000, 'otro', 'Bolsas plásticas y servilletas', null, 'manual', null, 'efectivo', null, null),
   ('g11', 't01', 'tu04', 'pe02', '2026-09-21T19:30:00-05:00', 850000, 'arriendo', 'Arriendo del local de septiembre, pagado a Don Hernando por Nequi; queda pendiente la parte del agua, que él manda el recibo la otra semana', null, 'manual', null, 'transferencia', null, null),
@@ -485,7 +485,7 @@ insert into public.gastos (id, tienda_id, turno_id, persona_id, fecha_hora, mont
 -- entradas_mercancia (3)
 insert into public.entradas_mercancia (id, tienda_id, proveedor_id, turno_id, persona_id, fecha_hora, total, medio_pago, pagar_antes_de, imagen) values
   ('e01', 't01', 'pr02', 'tu04', 'pe02', '2026-09-21T10:30:00-05:00', 144000, 'efectivo', null, null),
-  ('e02', 't01', 'pr03', 'tu05', 'pe01', '2026-09-22T09:30:00-05:00', 50400, 'quede_debiendo', '2026-09-29', 'e02-factura-alpina.jpg'),
+  ('e02', 't01', 'pr03', 'tu05', 'pe01', '2026-09-22T09:30:00-05:00', 50400, 'quede_debiendo', '2026-09-29', null),
   ('e03', 't01', 'pr02', 'tu08', 'pe01', '2026-09-23T11:30:00-05:00', 90000, 'quede_debiendo', '2026-09-25', null);
 
 -- entrada_productos (7)
