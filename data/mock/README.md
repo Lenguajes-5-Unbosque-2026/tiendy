@@ -72,7 +72,7 @@ tienda ─┬─ personas ─── turnos ─┬─ ventas ── venta_product
 |---|---|
 | Nombres muy largos | Producto `p31` ("Detergente en polvo Fab Floral bolsa ahorradora 2 kg + 500 g gratis"), persona `pe03`, proveedor `pr05`, nota del gasto `g11` |
 | Texto con coma | `p04` "Gaseosa Postobón 1,5 L", nota de `g11` |
-| Registros sin foto | 8 productos sin imagen (`p09`, `p12`, `p20`, `p27`, `p34`, `p38`, `p39`, `p40`) y la mayoría de gastos |
+| Registros sin foto | La mayoría de gastos (los 40 productos sí tienen foto) |
 | Valores en cero | Productos agotados con 0 unidades (`p39`, `p40`); costo $0 (`p40`, hielo); turno `tu06` con base $0 y sin ventas |
 | Dato faltante | `p36` sin costo (cargado desde el listado sugerido, que no pide costo: no se puede calcular su ganancia) |
 | Listas vacías | Categoría `c06` Mascotas sin productos; empleada `pe03` sin turnos; proveedor `pr06` sin compras; turno `tu06` sin ventas ni gastos |
@@ -94,4 +94,4 @@ Estas salen de preguntas abiertas de las specs (`specs/README.md`). Si el equipo
 
 ## Imágenes
 
-La columna `imagen` dice el nombre exacto del archivo que está en [`imagenes/`](imagenes/). Son 36 fotos libres de Wikimedia Commons; el autor y la licencia de cada una están en [`imagenes/README.md`](imagenes/README.md).
+La columna `imagen` dice el nombre exacto del archivo que está en [`imagenes/`](imagenes/). Son 44 fotos: 40 de productos (empaques reales, que dio el equipo) y 4 de recibos y facturas de Wikimedia Commons; el origen de cada una está en [`imagenes/README.md`](imagenes/README.md).
