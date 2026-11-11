@@ -139,6 +139,8 @@ export type ProductoSugerido = {
   nombre: string;
   nombre_corto: string;
   precio_sugerido: number;
+  /** URL de la foto en el bucket "imagenes" (la misma del producto del catálogo). */
+  imagen: string | null;
 };
 
 export type DatosMock = {

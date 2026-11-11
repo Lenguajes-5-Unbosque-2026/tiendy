@@ -18,6 +18,7 @@ export default function TuTiendaPage() {
   const { celularPendiente, crearTienda } = useTienda();
   const [tienda, setTienda] = useState("");
   const [nombre, setNombre] = useState("");
+  const [creando, setCreando] = useState(false);
   const valido = tienda.trim() !== "" && nombre.trim() !== "";
 
   if (!celularPendiente) {
@@ -37,13 +38,14 @@ export default function TuTiendaPage() {
       withNav={false}
       footer={
         <Button
-          disabled={!valido}
-          onClick={() => {
-            crearTienda(celularPendiente, tienda, nombre);
+          disabled={!valido || creando}
+          onClick={async () => {
+            setCreando(true);
+            await crearTienda(celularPendiente, tienda, nombre);
             router.push("/");
           }}
         >
-          Continuar
+          {creando ? "Creando tu tienda…" : "Continuar"}
         </Button>
       }
     >

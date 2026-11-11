@@ -19,7 +19,7 @@ export function useListadoSugerido() {
     let vigente = true;
     supabase
       .from("listado_sugerido")
-      .select("id, categoria_id, nombre, nombre_corto, precio_sugerido")
+      .select("id, categoria_id, nombre, nombre_corto, precio_sugerido, imagen")
       .order("id")
       .then(({ data, error }) => {
         if (!vigente) return;

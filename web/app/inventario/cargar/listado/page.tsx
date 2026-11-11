@@ -74,7 +74,8 @@ export default function CargaListadoPage() {
           minimo: 0,
           venta_rapida: false,
           origen: "listado",
-          imagen: null,
+          // La foto del listado queda como foto del producto
+          imagen: s.imagen,
         }))
     );
     router.push("/inventario");

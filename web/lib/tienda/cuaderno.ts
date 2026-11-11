@@ -41,21 +41,32 @@ export type Filtros = {
   busqueda: string;
 };
 
+// Con getters: "hoy" cambia según la tienda (ver HOY en calculos.ts)
 export const filtrosHoy: Filtros = {
   tipos: [],
   medios: [],
-  desde: HOY,
-  hasta: HOY,
+  get desde() {
+    return HOY;
+  },
+  get hasta() {
+    return HOY;
+  },
   franja: "todos",
   turnoId: null,
   busqueda: "",
 };
 
 export const PERIODOS = {
-  hoy: { desde: HOY, hasta: HOY },
-  semana: { desde: enDias(-6), hasta: HOY },
-  mes: { desde: `${HOY.slice(0, 8)}01`, hasta: HOY },
-} as const;
+  get hoy() {
+    return { desde: HOY, hasta: HOY };
+  },
+  get semana() {
+    return { desde: enDias(-6), hasta: HOY };
+  },
+  get mes() {
+    return { desde: `${HOY.slice(0, 8)}01`, hasta: HOY };
+  },
+};
 
 export const nombreMedio: Record<MedioPagoGasto, string> = {
   efectivo: "Efectivo",

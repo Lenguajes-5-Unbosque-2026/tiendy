@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Store } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { useTienda } from "@/lib/tienda/store";
 
 // La misma foto de Fiados próximamente (37): el tendero atendiendo a un cliente
 import foto from "@/public/img/fiados-proximamente.jpg";
@@ -52,6 +53,7 @@ function Splash() {
 }
 
 function Bienvenida() {
+  const { setModoEntrada } = useTienda();
   return (
     <div className="flex flex-1 flex-col bg-fondo-encabezado pt-alto-barra-estado">
       <main className="flex flex-1 flex-col gap-espacio-4 rounded-t-2xl bg-fondo-app px-margen-pantalla pt-espacio-6 pb-espacio-6">
@@ -66,8 +68,16 @@ function Bienvenida() {
           te está acabando.
         </p>
         <div className="mt-auto flex flex-col gap-espacio-3">
-          <Link href="/registro/celular" className={buttonVariants()}>
+          <Link href="/registro/celular" onClick={() => setModoEntrada("crear")} className={buttonVariants()}>
             Empezar
+          </Link>
+          {/* Quien ya tiene tienda solo inicia sesión: no pasa por Tu tienda (06) */}
+          <Link
+            href="/registro/celular"
+            onClick={() => setModoEntrada("entrar")}
+            className={buttonVariants({ variant: "secondary" })}
+          >
+            Ya tengo cuenta · Iniciar sesión
           </Link>
           <p className="text-center text-caption text-texto-secundario">
             Al continuar aceptas los Términos y la Política de datos.

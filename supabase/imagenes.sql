@@ -19,4 +19,8 @@ update public.entradas_mercancia
 set imagen = 'https://dtrdbutpvutmxpapmbjw.supabase.co/storage/v1/object/public/imagenes/' || imagen
 where imagen is not null and imagen not like 'https://%';
 
+update public.listado_sugerido
+set imagen = 'https://dtrdbutpvutmxpapmbjw.supabase.co/storage/v1/object/public/imagenes/' || imagen
+where imagen is not null and imagen not like 'https://%';
+
 commit;

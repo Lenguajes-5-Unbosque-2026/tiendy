@@ -13,8 +13,8 @@ p11,t01,c02,Agua Cristal 600 ml,Agua,agua|una agua,2000,1100,20,6,false,manual,p
 p12,t01,c01,Pan francés,Pan,pan|un pan,500,300,40,15,true,manual,p12-pan-frances.jpg,2026-09-01T09:33:00-05:00
 p13,t01,c01,Café Sello Rojo 250 g,Café,café|un café,9800,8100,8,3,false,listado,p13-cafe-sello-rojo.jpg,2026-09-01T09:00:00-05:00
 p14,t01,c01,Chocolate Corona 250 g,Chocolate,chocolate|un chocolate,6900,5600,6,3,false,listado,p14-chocolate-corona.jpg,2026-09-01T09:00:00-05:00
-p15,t01,c01,Lentejas 500 g,Lentejas,lentejas|una libra de lentejas,3600,2800,10,4,false,listado,p15-lentejas.jpg,2026-09-01T09:00:00-05:00
-p16,t01,c01,Fríjol bola roja 500 g,Fríjol,fríjol|una libra de fríjol,6200,5000,7,3,false,listado,p16-frijol-bola-roja.jpg,2026-09-01T09:00:00-05:00
+p15,t01,c01,Lentejas Diana 500 g,Lentejas,lentejas|una libra de lentejas,3600,2800,10,4,false,listado,p15-lentejas.jpg,2026-09-01T09:00:00-05:00
+p16,t01,c01,Fríjol Diana bola roja 500 g,Fríjol,fríjol|una libra de fríjol,6200,5000,7,3,false,listado,p16-frijol-bola-roja.jpg,2026-09-01T09:00:00-05:00
 p17,t01,c01,Pasta Doria spaghetti 250 g,Pasta,pasta|una pasta,2300,1800,14,5,false,listado,p17-pasta-doria.jpg,2026-09-01T09:00:00-05:00
 p18,t01,c01,Atún Van Camp's en aceite 160 g,Atún,atún|un atún,6500,5300,9,3,false,listado,p18-atun-van-camps.jpg,2026-09-01T09:00:00-05:00
 p19,t01,c01,Sal Refisal 1 kg,Sal,sal|un kilo de sal,2200,1600,10,3,false,listado,p19-sal-refisal.jpg,2026-09-01T09:00:00-05:00
@@ -25,11 +25,11 @@ p23,t01,c02,Pony Malta 330 ml,Pony Malta,pony|una pony,2200,1600,18,6,false,foto
 p24,t01,c02,Jugo Hit caja 200 ml,Hit,hit|un hit|jugo,1500,1050,24,8,false,listado,p24-jugo-hit.jpg,2026-09-01T09:00:00-05:00
 p25,t01,c02,Gatorade 500 ml,Gatorade,gatorade|un gatorade,4200,3300,6,3,false,listado,p25-gatorade.jpg,2026-09-01T09:00:00-05:00
 p26,t01,c03,Kumis Alpina 200 g,Kumis,kumis|un kumis,2600,2000,8,4,false,listado,p26-kumis-alpina.jpg,2026-09-01T09:00:00-05:00
-p27,t01,c03,Queso campesino 250 g,Queso,queso|un queso,7500,6000,4,3,false,manual,p27-queso-campesino.jpg,2026-09-01T09:40:00-05:00
+p27,t01,c03,Queso campesino Alpina 250 g,Queso,queso|un queso,7500,6000,4,3,false,manual,p27-queso-campesino.jpg,2026-09-01T09:40:00-05:00
 p28,t01,c03,Yogur Alpina fresa 200 g,Yogur,yogur|un yogur,2800,2200,10,4,false,listado,p28-yogur-alpina.jpg,2026-09-01T09:00:00-05:00
 p29,t01,c03,Margarina La Fina 125 g,Margarina,margarina|una la fina,3200,2500,6,3,false,listado,p29-margarina-la-fina.jpg,2026-09-01T09:00:00-05:00
 p30,t01,c04,Jabón Rey barra 300 g,Jabón Rey,jabón|un jabón rey,3000,2300,12,4,false,listado,p30-jabon-rey.jpg,2026-09-01T09:00:00-05:00
-p31,t01,c04,Detergente en polvo Fab Floral bolsa ahorradora 2 kg + 500 g gratis,Fab 2 kg,fab|un fab|detergente,18900,15600,3,2,false,manual,p31-detergente-fab-2kg.jpg,2026-09-01T09:45:00-05:00
+p31,t01,c04,Detergente en polvo Fab Ultra Flash bolsa ahorradora 2 kg,Fab 2 kg,fab|un fab|detergente,18900,15600,3,2,false,manual,p31-detergente-fab-2kg.jpg,2026-09-01T09:45:00-05:00
 p32,t01,c04,Límpido 1 L,Límpido,límpido|un límpido,4900,3800,6,3,false,listado,p32-limpido-1l.jpg,2026-09-01T09:00:00-05:00
 p33,t01,c04,Crema dental Colgate Triple Acción 75 ml,Colgate,crema dental|una colgate,6500,5200,5,2,false,listado,p33-crema-dental-colgate.jpg,2026-09-01T09:00:00-05:00
 p34,t01,c04,Champú Sedal sobre 18 ml,Sedal sobre,champú|un sobre de sedal,1000,650,40,10,false,manual,p34-champu-sedal.jpg,2026-09-01T09:50:00-05:00
