@@ -153,7 +153,7 @@ create table public.entradas_mercancia (
   id              text primary key,
   tienda_id       text not null references public.tienda (id),
   proveedor_id    text references public.proveedores (id),
-  turno_id        text not null references public.turnos (id),
+  turno_id        text references public.turnos (id),         -- vacío si llegó con la caja cerrada
   persona_id      text not null references public.personas (id),
   fecha_hora      timestamptz not null,
   total           integer not null check (total >= 0),

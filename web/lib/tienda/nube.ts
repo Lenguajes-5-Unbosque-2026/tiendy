@@ -1,8 +1,18 @@
 // Lectura y escritura en Supabase de lo que ya vive en la base: la tienda y sus
 // personas (registro, inicio de sesión, Mi tienda), los productos (41), los turnos
-// (Caja) y las ventas (20 → 22). Los permisos están en supabase/escritura.sql y
-// supabase/cuentas.sql. Gastos y entradas de mercancía siguen en el navegador.
-import type { Persona, Producto, Tienda, Turno, Venta, VentaProducto } from "@/lib/mock/tipos";
+// (Caja), las ventas (20 → 22), los gastos (27 → 32) y las entradas de mercancía
+// (41a). Los permisos están en supabase/escritura.sql, cuentas.sql y gastos.sql.
+import type {
+  Entrada,
+  EntradaProducto,
+  Gasto,
+  Persona,
+  Producto,
+  Tienda,
+  Turno,
+  Venta,
+  VentaProducto,
+} from "@/lib/mock/tipos";
 import { supabase } from "@/lib/supabase";
 
 const COLUMNAS_PRODUCTO =
@@ -176,11 +186,15 @@ export type DatosTienda = {
   turnos: Turno[];
   ventas: Venta[];
   ventaProductos: VentaProducto[];
+  gastos: Gasto[];
+  entradas: Entrada[];
+  entradaProductos: EntradaProducto[];
 };
 
 /** Todo lo de una tienda que vive en Supabase, para entrar desde cualquier celular. */
 export async function leerTienda(tiendaId: string): Promise<DatosTienda> {
-  const [tienda, personas, productos, turnos, ventas, ventaProductos] = await Promise.all([
+  const [tienda, personas, productos, turnos, ventas, ventaProductos, gastos, entradas, entradaProductos] =
+    await Promise.all([
     supabase
       .from("tienda")
       .select("id, nombre, tipo, barrio, direccion, ciudad, horario_apertura, horario_cierre, nit, celular")
@@ -207,8 +221,24 @@ export async function leerTienda(tiendaId: string): Promise<DatosTienda> {
       .from("venta_productos")
       .select("id, venta_id, producto_id, cantidad, precio_unitario, costo_unitario, subtotal, ventas!inner(tienda_id)")
       .eq("ventas.tienda_id", tiendaId),
+    supabase
+      .from("gastos")
+      .select(
+        "id, turno_id, persona_id, fecha_hora, monto, categoria, nota, proveedor_id, canal, lo_que_dijo, medio_pago, pagar_antes_de, imagen"
+      )
+      .eq("tienda_id", tiendaId),
+    supabase
+      .from("entradas_mercancia")
+      .select("id, proveedor_id, turno_id, persona_id, fecha_hora, total, medio_pago, pagar_antes_de, imagen")
+      .eq("tienda_id", tiendaId),
+    // Los productos de cada entrada se filtran por la tienda de su entrada
+    supabase
+      .from("entrada_productos")
+      .select("id, entrada_id, producto_id, cantidad, costo_unitario, subtotal, entradas_mercancia!inner(tienda_id)")
+      .eq("entradas_mercancia.tienda_id", tiendaId),
   ]);
-  for (const r of [tienda, personas, turnos, ventas, ventaProductos]) if (r.error) throw r.error;
+  for (const r of [tienda, personas, turnos, ventas, ventaProductos, gastos, entradas, entradaProductos])
+    if (r.error) throw r.error;
 
   const t = tienda.data!;
   return {
@@ -235,6 +265,23 @@ export async function leerTienda(tiendaId: string): Promise<DatosTienda> {
         producto_id,
         cantidad,
         precio_unitario,
+        costo_unitario,
+        subtotal,
+      })
+    ),
+    gastos: (gastos.data as Gasto[])
+      .map((g) => ({ ...g, fecha_hora: aColombia(g.fecha_hora) }))
+      .sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora)),
+    entradas: (entradas.data as (Omit<Entrada, "turno_id"> & { turno_id: string | null })[])
+      // En la app, "sin turno" es "" (la mercancía llegó con la caja cerrada)
+      .map((e) => ({ ...e, turno_id: e.turno_id ?? "", fecha_hora: aColombia(e.fecha_hora) }))
+      .sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora)),
+    entradaProductos: (entradaProductos.data ?? []).map(
+      ({ id, entrada_id, producto_id, cantidad, costo_unitario, subtotal }) => ({
+        id,
+        entrada_id,
+        producto_id,
+        cantidad,
         costo_unitario,
         subtotal,
       })
@@ -300,4 +347,45 @@ export async function cerrarTurno(turno: Turno) {
     })
     .eq("id", turno.id);
   if (error) throw error;
+}
+
+/** Lo que necesita la base para guardar un gasto o una entrada: su turno y quién atendía. */
+type Contexto = { tiendaId: string; turno: Turno | null; persona: Persona | null };
+
+async function asegurarContexto({ tiendaId, turno, persona }: Contexto) {
+  if (persona) await guardarPersona(tiendaId, persona);
+  if (turno) await abrirTurno(tiendaId, turno);
+}
+
+/** Registrar gasto (31). Al corregir desde el cuaderno (36), el gasto anterior se borra. */
+export async function guardarGasto(gasto: Gasto, contexto: Contexto & { corrige?: string }) {
+  await asegurarContexto(contexto);
+  if (contexto.corrige) await borrarGasto(contexto.corrige);
+  // Al reintentar, lo que ya quedó guardado no se duplica
+  const { error } = await supabase
+    .from("gastos")
+    .upsert({ ...gasto, tienda_id: contexto.tiendaId }, { onConflict: "id", ignoreDuplicates: true });
+  if (error) throw error;
+}
+
+/** Eliminar registro (36): el gasto deja de contar. */
+export async function borrarGasto(gastoId: string) {
+  const { error } = await supabase.from("gastos").delete().eq("id", gastoId);
+  if (error) throw error;
+}
+
+/** Llegó mercancía (41a): la entrada y sus productos (las unidades se guardan aparte). */
+export async function guardarEntrada(entrada: Entrada, lineas: EntradaProducto[], contexto: Contexto) {
+  await asegurarContexto(contexto);
+  const { error } = await supabase
+    .from("entradas_mercancia")
+    .upsert(
+      { ...entrada, turno_id: entrada.turno_id || null, tienda_id: contexto.tiendaId },
+      { onConflict: "id", ignoreDuplicates: true }
+    );
+  if (error) throw error;
+  const { error: errorLineas } = await supabase
+    .from("entrada_productos")
+    .upsert(lineas, { onConflict: "id", ignoreDuplicates: true });
+  if (errorLineas) throw errorLineas;
 }

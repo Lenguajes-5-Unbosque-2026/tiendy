@@ -2,9 +2,9 @@
 
 // Estado de la tienda en el celular. Guarda lo que cambia en el navegador y, si la
 // tienda existe en Supabase, también allá (ver nube.ts): al iniciar sesión se traen
-// la tienda, sus personas, productos, turnos y ventas; cada venta, apertura y
-// cierre de caja, empleado y cambio de producto se escribe allá. Gastos y entradas
-// de mercancía siguen solo en el navegador por ahora.
+// la tienda, sus personas, productos, turnos, ventas, gastos y entradas de
+// mercancía; cada venta, gasto, entrada, apertura y cierre de caja, empleado y
+// cambio de producto se escribe allá.
 import {
   createContext,
   Fragment,
@@ -512,10 +512,22 @@ function useTiendaState() {
         ...e,
         gastos: [...e.gastos.filter((g) => g.id !== b.corrige), gasto],
       }));
+      if (enLaNube) {
+        escribirEnNube(
+          () =>
+            nube.guardarGasto(gasto, {
+              tiendaId: estado.tienda.id,
+              turno: estado.turnos.find((t) => t.id === gasto.turno_id) ?? null,
+              persona: estado.personas.find((p) => p.id === gasto.persona_id) ?? null,
+              corrige: b.corrige,
+            }),
+          "No pudimos guardar el gasto en la base de datos"
+        );
+      }
       setBorradorGasto(borradorGastoVacio);
       return id;
     },
-    [borradorGasto, estado.gastos, turnoAbierto, atiende]
+    [borradorGasto, estado, turnoAbierto, atiende, enLaNube, escribirEnNube]
   );
 
   /** Eliminar registro (36): la venta deja de contar y sus productos vuelven al inventario. */
@@ -527,9 +539,18 @@ function useTiendaState() {
     [quitarVentaEnNube]
   );
 
-  const eliminarGasto = useCallback((gastoId: string) => {
-    setEstado((e) => ({ ...e, gastos: e.gastos.filter((g) => g.id !== gastoId) }));
-  }, []);
+  const eliminarGasto = useCallback(
+    (gastoId: string) => {
+      setEstado((e) => ({ ...e, gastos: e.gastos.filter((g) => g.id !== gastoId) }));
+      if (enLaNube) {
+        escribirEnNube(
+          () => nube.borrarGasto(gastoId),
+          "No pudimos eliminar el gasto en la base de datos"
+        );
+      }
+    },
+    [enLaNube, escribirEnNube]
+  );
 
   /** Llegó mercancía (41a): suma unidades y actualiza el costo de cada producto. */
   const anotarEntrada = useCallback(
@@ -546,8 +567,9 @@ function useTiendaState() {
       const entrada: Entrada = {
         id,
         proveedor_id: proveedorId,
+        // Sin caja abierta la entrada queda sin turno y a nombre de la dueña
         turno_id: turnoAbierto?.id ?? "",
-        persona_id: atiende?.id ?? "",
+        persona_id: atiende?.id ?? estado.personas.find((p) => p.rol === "duena")?.id ?? "",
         fecha_hora: horaDeHoy(),
         total: productosEntrada.reduce((s, l) => s + l.subtotal, 0),
         medio_pago: pago.medio,
@@ -566,19 +588,23 @@ function useTiendaState() {
         entradaProductos: [...e.entradaProductos, ...productosEntrada],
         productos: e.productos.map(sumarLlegada),
       }));
-      // Las unidades y el costo nuevos también quedan en Supabase, para que la venta descuente bien
+      // La entrada y las unidades y costos nuevos quedan en Supabase
       if (enLaNube) {
         const cambiados = estado.productos
           .filter((p) => productosEntrada.some((l) => l.producto_id === p.id))
           .map(sumarLlegada);
-        escribirEnNube(
-          () => nube.guardarCambiosProductos(cambiados),
-          "No pudimos actualizar el inventario en la base de datos"
-        );
+        escribirEnNube(async () => {
+          await nube.guardarEntrada(entrada, productosEntrada, {
+            tiendaId: estado.tienda.id,
+            turno: turnoAbierto,
+            persona: estado.personas.find((p) => p.id === entrada.persona_id) ?? null,
+          });
+          await nube.guardarCambiosProductos(cambiados);
+        }, "No pudimos guardar la mercancía en la base de datos");
       }
       return id;
     },
-    [turnoAbierto, atiende, enLaNube, estado.productos, escribirEnNube]
+    [turnoAbierto, atiende, enLaNube, estado, escribirEnNube]
   );
 
   /** Cargar productos (11, 12, 13): los suma al inventario. */
@@ -609,17 +635,50 @@ function useTiendaState() {
         const tiendaId = await nube.buscarTienda(cel);
         if (tiendaId) {
           const datos = await nube.leerTienda(tiendaId);
-          // Gastos y entradas todavía no están en Supabase: se quedan los de este celular
-          const propios = <T,>(locales: T[], deMock: T[]) =>
-            estado.tienda.id === tiendaId ? locales : tiendaId === mock.tienda.id ? deMock : [];
-          setEstado((e) => ({
+          // Gastos y entradas anotados en este celular antes de guardarse en Supabase:
+          // se conservan y se suben ahora
+          const mismaTienda = estado.tienda.id === tiendaId;
+          const gastosEnBase = new Set(datos.gastos.map((g) => g.id));
+          const entradasEnBase = new Set(datos.entradas.map((x) => x.id));
+          const gastosPendientes = mismaTienda
+            ? estado.gastos.filter((g) => g.id.startsWith("g-") && !gastosEnBase.has(g.id))
+            : [];
+          const entradasPendientes = mismaTienda
+            ? estado.entradas.filter((x) => x.id.startsWith("e-") && !entradasEnBase.has(x.id))
+            : [];
+          const lineasPendientes = estado.entradaProductos.filter((l) =>
+            entradasPendientes.some((x) => x.id === l.entrada_id)
+          );
+          setEstado({
             ...datos,
-            gastos: propios(e.gastos, mock.gastos),
-            entradas: propios(e.entradas, mock.entradas),
-            entradaProductos: propios(e.entradaProductos, mock.entradaProductos),
+            gastos: [...datos.gastos, ...gastosPendientes],
+            entradas: [...datos.entradas, ...entradasPendientes],
+            entradaProductos: [...datos.entradaProductos, ...lineasPendientes],
             sesion: cel,
             enNube: true,
-          }));
+          });
+          const contexto = (turnoId: string, personaId: string) => ({
+            tiendaId,
+            turno: estado.turnos.find((t) => t.id === turnoId) ?? null,
+            persona: estado.personas.find((p) => p.id === personaId) ?? null,
+          });
+          for (const g of gastosPendientes) {
+            escribirEnNube(
+              () => nube.guardarGasto(g, contexto(g.turno_id, g.persona_id)),
+              "No pudimos guardar un gasto en la base de datos"
+            );
+          }
+          for (const x of entradasPendientes) {
+            escribirEnNube(
+              () =>
+                nube.guardarEntrada(
+                  x,
+                  lineasPendientes.filter((l) => l.entrada_id === x.id),
+                  contexto(x.turno_id, x.persona_id)
+                ),
+              "No pudimos guardar una entrada de mercancía en la base de datos"
+            );
+          }
           return true;
         }
       } catch (error) {
@@ -636,7 +695,7 @@ function useTiendaState() {
       }
       return false;
     },
-    [estado.tienda.celular, estado.tienda.id]
+    [estado, escribirEnNube]
   );
 
   /**

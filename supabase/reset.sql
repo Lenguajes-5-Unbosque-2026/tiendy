@@ -14,9 +14,10 @@
 --      lectura (contenido de schema.sql).
 --   3. Cambia el nombre de cada foto por su URL pública (contenido de imagenes.sql).
 --   4. Abre los permisos de escritura de Registrar venta (contenido de escritura.sql)
---      y los de crear tienda, caja y empleados (contenido de cuentas.sql).
+--      los de crear tienda, caja y empleados (cuentas.sql) y los de gastos y
+--      mercancía (gastos.sql).
 --
--- Si cambian schema.sql, imagenes.sql, escritura.sql o cuentas.sql, este archivo se arma otra
+-- Si cambian schema.sql, imagenes.sql, escritura.sql, cuentas.sql o gastos.sql, este archivo se arma otra
 -- vez con ellos.
 
 begin;
@@ -196,7 +197,7 @@ create table public.entradas_mercancia (
   id              text primary key,
   tienda_id       text not null references public.tienda (id),
   proveedor_id    text references public.proveedores (id),
-  turno_id        text not null references public.turnos (id),
+  turno_id        text references public.turnos (id),         -- vacío si llegó con la caja cerrada
   persona_id      text not null references public.personas (id),
   fecha_hora      timestamptz not null,
   total           integer not null check (total >= 0),
@@ -604,7 +605,7 @@ where imagen is not null and imagen not like 'https://%';
 
 
 -- ═════════════════════════════════════════════════════════════
--- 4. Permisos de escritura (escritura.sql y cuentas.sql)
+-- 4. Permisos de escritura (escritura.sql, cuentas.sql y gastos.sql)
 -- ═════════════════════════════════════════════════════════════
 
 -- Tiendy · permisos de escritura para Registrar venta (20 → 22)
@@ -702,5 +703,42 @@ create policy "Cualquiera puede cerrar turnos"
   on public.turnos for update to anon, authenticated
   using (true) with check (true);
 
+
+-- Tiendy · gastos y entradas de mercancía en Supabase
+--
+-- Se corre después de cuentas.sql (SQL Editor → pegar → Run).
+-- Se puede correr más de una vez: cada política se borra antes de crearla.
+--
+-- Hasta ahora los gastos (27 → 32) y Llegó mercancía (41a) se guardaban solo en
+-- el celular. Estas políticas dejan que la app los guarde aquí, para verlos desde
+-- cualquier celular y que la caja cuadre igual en todos.
+
+
+-- La mercancía puede llegar con la caja cerrada: la entrada no siempre tiene turno.
+
+-- gastos · insertar: registrar un gasto (31).
+drop policy if exists "Cualquiera puede anotar gastos" on public.gastos;
+create policy "Cualquiera puede anotar gastos"
+  on public.gastos for insert to anon, authenticated
+  with check (true);
+
+-- gastos · borrar: eliminar un gasto desde el cuaderno (36) o reemplazarlo al corregirlo.
+-- A diferencia de la venta, el gasto no tiene estado: se borra.
+drop policy if exists "Cualquiera puede borrar gastos" on public.gastos;
+create policy "Cualquiera puede borrar gastos"
+  on public.gastos for delete to anon, authenticated
+  using (true);
+
+-- entradas_mercancia · insertar: Llegó mercancía (41a), con proveedor, total y pago.
+drop policy if exists "Cualquiera puede anotar entradas de mercancía" on public.entradas_mercancia;
+create policy "Cualquiera puede anotar entradas de mercancía"
+  on public.entradas_mercancia for insert to anon, authenticated
+  with check (true);
+
+-- entrada_productos · insertar: qué productos llegaron, cuántos y a qué costo.
+drop policy if exists "Cualquiera puede anotar productos que llegaron" on public.entrada_productos;
+create policy "Cualquiera puede anotar productos que llegaron"
+  on public.entrada_productos for insert to anon, authenticated
+  with check (true);
 
 commit;
