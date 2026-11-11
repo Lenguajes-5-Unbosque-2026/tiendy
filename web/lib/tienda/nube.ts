@@ -116,6 +116,17 @@ export async function quitarVenta(
   await guardarUnidades(productos);
 }
 
+/** Cargar productos (11, 12, 13): los nuevos quedan en la tabla productos de su tienda. */
+export async function agregarProductos(tiendaId: string, productos: Producto[]) {
+  const { error } = await supabase
+    .from("productos")
+    .upsert(
+      productos.map((p) => filaProducto(tiendaId, p)),
+      { onConflict: "id", ignoreDuplicates: true }
+    );
+  if (error) throw error;
+}
+
 /** Ver y editar producto (42) y Llegó mercancía (41a): precio, costo y unidades. */
 export async function guardarCambiosProductos(
   productos: Pick<Producto, "id" | "precio_venta" | "costo" | "unidades">[]

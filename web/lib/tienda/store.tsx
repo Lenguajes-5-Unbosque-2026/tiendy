@@ -229,7 +229,12 @@ function useTiendaState() {
     }
   }, [estado, cargado]);
 
-  // Mi inventario (41): los productos de la tienda de prueba se leen de Supabase
+  const productosActuales = useRef(estado.productos);
+  useEffect(() => {
+    productosActuales.current = estado.productos;
+  }, [estado.productos]);
+
+  // Mi inventario (41): los productos de la tienda se leen de Supabase
   const tiendaId = estado.tienda.id;
   const conSesion = estado.sesion !== null;
   useEffect(() => {
@@ -245,6 +250,15 @@ function useTiendaState() {
       .leerProductos(tiendaId)
       .then((deLaNube) => {
         if (!vigente) return;
+        // Productos cargados en este celular que todavía no están en Supabase
+        // (por ejemplo, de antes de guardarlos al agregarlos): se suben ahora
+        const enBase = new Set(deLaNube.map((p) => p.id));
+        const pendientes = productosActuales.current.filter((p) => p.id.startsWith("p-") && !enBase.has(p.id));
+        if (pendientes.length > 0) {
+          nube
+            .agregarProductos(tiendaId, pendientes)
+            .catch((error) => console.warn("No se pudieron subir productos pendientes", error));
+        }
         setEstado((e) => ({ ...e, productos: unirProductos(deLaNube, e.productos) }));
         setEstadoProductos("listo");
       })
@@ -568,13 +582,21 @@ function useTiendaState() {
   );
 
   /** Cargar productos (11, 12, 13): los suma al inventario. */
-  const agregarProductos = useCallback((nuevos: ProductoNuevo[]) => {
-    const base = Date.now();
-    setEstado((e) => ({
-      ...e,
-      productos: [...e.productos, ...nuevos.map((p, i) => ({ ...p, id: `p-${base}-${i}` }))],
-    }));
-  }, []);
+  const agregarProductos = useCallback(
+    (nuevos: ProductoNuevo[]) => {
+      const base = Date.now();
+      const conId = nuevos.map((p, i) => ({ ...p, id: `p-${base}-${i}` }));
+      setEstado((e) => ({ ...e, productos: [...e.productos, ...conId] }));
+      // Se guardan ya en Supabase, no solo con su primera venta
+      if (enLaNube) {
+        escribirEnNube(
+          () => nube.agregarProductos(estado.tienda.id, conId),
+          "No pudimos guardar los productos en la base de datos"
+        );
+      }
+    },
+    [enLaNube, estado.tienda.id, escribirEnNube]
+  );
 
   /**
    * Verificación (04): si el celular ya tiene tienda en Supabase, trae sus datos
@@ -735,8 +757,6 @@ function useTiendaState() {
         ...e,
         productos: e.productos.map((p) => (p.id === id ? { ...p, ...cambios } : p)),
       }));
-      // Un producto creado en este celular llega a Supabase con su primera venta;
-      // mientras tanto este cambio no encuentra fila y no hace nada
       if (enLaNube) {
         escribirEnNube(
           () => nube.guardarCambiosProductos([{ id, ...cambios }]),
