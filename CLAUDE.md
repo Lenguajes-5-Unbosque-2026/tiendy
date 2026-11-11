@@ -41,7 +41,7 @@
 | CU-01 | `Registro e inicio de sesión/` | Registro e inicio de sesión | 01 Splash · 02 Bienvenida · 03 Ingresa tu celular · 04 Código de verificación · 05 No me llegó el código · 06 Nombre de la tienda |
 | CU-02 | `Home y carga de productos/` | Home y carga de productos | 09 Home por primera vez · 09a Abrir caja (hoja) · 10 Cómo cargar productos · 11 Carga manual · 12 Carga por foto · 13 Carga desde listado · 15 Home |
 | CU-03 | `Caja/` | Caja | 16 Abrir caja · 16a ¿Quién atiende? · 17 Resumen de caja · 18 Cierre de caja · 19 Resultado del cierre |
-| CU-04 | `Vender/` | Vender | 20 Vender · hoja de venta · 20a Vender sin productos · 21 Vender · lo que dijiste · 22 Venta anotada · deshacer |
+| CU-04 | `Vender/` | Vender | 20 Vender · hoja de venta · 20a Vender sin productos · 20b Vender · varios productos · 21 Vender · lo que dijiste · 21a Vender · escuchando · 22 Venta anotada · deshacer |
 | CU-05 | `Gasto/` | Gasto | 27 Registrar gasto · 28 Gasto por voz · 29 Gasto manual · 30 Gasto por foto · 31 Cómo pagaste el gasto · 32 Gasto registrado |
 | CU-06 | `Mi cuaderno/` | Mi cuaderno | 33 Mi cuaderno · 34 Filtros del cuaderno · 35 Turnos · 36 Detalle de movimiento |
 | —  | `Fiados/` | Fiados (próximamente) | 37 Fiados próximamente |
@@ -63,7 +63,7 @@ Los números que faltan (07, 08, 14, 24, 25, 26, 45) son pantallas de la v1 que 
 
 ## 6. Decisiones tomadas
 
-- **Diseño definitivo:** la página "📱 Diseño v3 · propuesta" de Figma está aprobada; es la que se implementa.
+- **Diseño definitivo:** la página "📱 Diseño v3 · propuesta" de Figma está aprobada; es la que se implementa. El 10 nov. 2026 el equipo mandó la versión mejorada de los flujos y reemplazó los PNG de `design/flujos/` (con 20b y 21a nuevas): esos PNG son la referencia vigente. La pantalla "Venta fiada" que venía en ese envío no se guardó, porque Fiados sigue fuera.
 - **Barra inferior oficial:** Inicio · Fiados · Vender · Inventario · Caja. Vender es el círculo verde y abre la hoja de venta (20); también se abre desde la tarjeta "Vender" del Home. Mi cuaderno se abre desde Caja y Mi tienda desde el Home (no tienen pestaña).
 - **Fiados próximamente:** Fiados salió del producto por ahora: no hay medio de pago, clientes ni abonos. La pestaña Fiados se queda en la barra y abre una pantalla "Pronto podrás agregar los fiados de tu negocio en esta sección" (`web/app/fiados/page.tsx`). Si una pantalla de `design/flujos/` todavía muestra fiado en Home, Caja o la hoja de venta, se ignora.
 - **Mi tienda:** es el nombre oficial de la sección que en Figma se llama "Perfil" (bloque 9, pestaña `Activo=Perfil` del kit). En la app el texto visible es "Mi tienda".
@@ -71,8 +71,8 @@ Los números que faltan (07, 08, 14, 24, 25, 26, 45) son pantallas de la v1 que 
 - **Abrir caja:** desde el Home sin caja se abre la hoja 09a (base con montos rápidos, a nombre de la dueña). La pantalla completa 16a → 16 (quién atiende y teclado) se abre desde Caja, la hoja de venta y el enlace de 09a.
 - **Mercancía:** la mercancía para vender entra por Llegó mercancía (41a), que suma unidades y actualiza costos; no cuenta como gasto. Un gasto de categoría Mercancía no suma productos: 32 ofrece ir a 41a en vez de "Sumamos 24 productos".
 - **Fotos:** todavía no se leen solas ni se guardan (recibo en 30, productos en 11 y 12). La foto queda de referencia y los datos se escriben a mano.
-- **Fotos de productos:** las del bucket `imagenes` de Supabase se muestran en 41, 43, 42 y en la búsqueda de la hoja de venta (20), con `FotoProducto`. Aunque Figma muestra la inicial, se decidió mostrar la foto; sin foto (o si no carga) se ve la inicial.
+- **Fotos de productos:** las del bucket `imagenes` de Supabase se muestran en 41, 43, 42 y en la búsqueda de la hoja de venta (20), con `FotoProducto` (en 42, si el producto se está acabando, va la alerta en vez de la foto, como en el diseño). Aunque Figma muestra la inicial, se decidió mostrar la foto; sin foto (o si no carga) se ve la inicial.
 - **Listado sugerido (13):** los productos entran sin costo ni cantidad, como "Sin contar", y no disparan la alerta de agotado hasta que se cuentan (en 42 o con Llegó mercancía).
-- **Colores de estado:** naranja solo para alertas (por agotarse, faltante en el cierre de caja); rojo solo para gastos.
+- **Colores de estado:** naranja solo para alertas (por agotarse, faltante en el cierre de caja); rojo para lo crítico (agotado, banner de por agotarse en 41, alerta de 42). Desde los flujos mejorados, el ícono de gasto ya no va en rojo: verde en Home y 27, neutro en el cuaderno.
 - **Qué ya usa Supabase:** solo la tienda de prueba (t01). Mi inventario (41) y el resto de pantallas leen sus productos de la tabla `productos`; Registrar venta guarda en `ventas` y `venta_productos` y descuenta `productos.unidades` (deshacer, eliminar, 42 y 41a también actualizan productos). El listado sugerido (13) se lee de `listado_sugerido`. Todo lo demás (caja, gastos, entradas, cuentas nuevas) sigue en el navegador. El código está en `web/lib/tienda/nube.ts`.
 - **Tokens en código:** mismos nombres que en Figma, con `-` en vez de `/` (`--fondo-primario`, `--espacio-4`, `--radio-lg`). Las variables de shadcn/ui apuntan a ellas. Detalle en `design/Tiendy_UI_kit.md`.

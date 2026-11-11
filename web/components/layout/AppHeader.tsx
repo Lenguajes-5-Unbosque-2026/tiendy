@@ -10,13 +10,23 @@ type AppHeaderProps = {
   back?: string | (() => void);
   /** Botón redondo a la derecha (Mi tienda desde el Home). */
   accion?: { href: string; icon: LucideIcon; etiqueta: string };
+  /** Header bajo sin título visible (Mi tienda, 46): la tarjeta de la tienda hace de título. */
+  compacto?: boolean;
 };
 
 /**
  * Header verde oscuro con título centrado (UI kit §7 · Header).
  * La hoja crema que sube encima la pone AppScreen.
  */
-export function AppHeader({ title, subtitle, back, accion }: AppHeaderProps) {
+export function AppHeader({ title, subtitle, back, accion, compacto = false }: AppHeaderProps) {
+  if (compacto) {
+    return (
+      <header className="min-h-[calc(var(--alto-barra-estado)+var(--espacio-solape-hoja)+var(--espacio-6))] bg-fondo-encabezado pt-alto-barra-estado">
+        <h1 className="sr-only">{title}</h1>
+      </header>
+    );
+  }
+
   const claseBoton =
     "absolute top-alto-barra-estado mt-espacio-5 flex size-boton-volver items-center justify-center rounded-full bg-fondo-primario text-texto-inverso";
   const claseVolver = `${claseBoton} left-margen-pantalla`;

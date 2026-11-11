@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LoaderCircle, Plus, Search, WifiOff } from "lucide-react";
+import { LoaderCircle, Search, WifiOff } from "lucide-react";
 
 import { AppScreen } from "@/components/layout/AppScreen";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertBanner } from "@/components/tiendy/AlertBanner";
 import { ChoiceChips } from "@/components/tiendy/ChoiceChips";
@@ -15,7 +15,6 @@ import { ListItem } from "@/components/tiendy/ListItem";
 import { plural, pesos } from "@/lib/formato";
 import { useTienda } from "@/lib/tienda/store";
 import { textoUnidades, useInventario } from "@/lib/tienda/useInventario";
-import { cn } from "@/lib/utils";
 
 const normalizar = (texto: string) =>
   texto.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -59,9 +58,9 @@ export default function InventarioPage() {
         </div>
         <Link
           href="/inventario/cargar"
-          className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "h-alto-campo")}
+          className="flex h-alto-campo shrink-0 items-center px-espacio-1 text-cuerpo-fuerte text-texto-primario"
         >
-          <Plus /> Agregar
+          + Agregar
         </Link>
       </div>
 

@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 import { AppScreen } from "@/components/layout/AppScreen";
-import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AmountCard } from "@/components/tiendy/AmountCard";
 import { Chip } from "@/components/tiendy/ChoiceChips";
@@ -22,7 +21,6 @@ import {
   totales,
 } from "@/lib/tienda/cuaderno";
 import { useTienda } from "@/lib/tienda/store";
-import { cn } from "@/lib/utils";
 
 /** Mi cuaderno (33): todo lo que entró y salió, por día. */
 export default function CuadernoPage() {
@@ -103,12 +101,11 @@ export default function CuadernoPage() {
         </div>
         <Link
           href="/cuaderno/filtros"
-          className={cn(
-            buttonVariants({ variant: masFiltros ? "default" : "secondary", size: "sm" }),
-            "h-alto-campo"
-          )}
+          className="flex h-alto-campo shrink-0 items-center gap-espacio-1 px-espacio-1 text-cuerpo-fuerte text-texto-primario"
         >
-          <SlidersHorizontal /> Filtros
+          Filtros
+          {/* Punto cuando hay filtros además del periodo */}
+          {masFiltros && <span aria-label="activos" className="size-espacio-2 rounded-full bg-fondo-primario" />}
         </Link>
       </div>
 

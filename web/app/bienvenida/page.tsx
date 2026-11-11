@@ -7,7 +7,8 @@ import { Store } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 
-import foto from "@/public/img/bienvenida.jpg";
+// La misma foto de Fiados próximamente (37): el tendero atendiendo a un cliente
+import foto from "@/public/img/fiados-proximamente.jpg";
 
 const DURACION_SPLASH = 1800;
 
@@ -54,8 +55,12 @@ function Bienvenida() {
   return (
     <div className="flex flex-1 flex-col bg-fondo-encabezado pt-alto-barra-estado">
       <main className="flex flex-1 flex-col gap-espacio-4 rounded-t-2xl bg-fondo-app px-margen-pantalla pt-espacio-6 pb-espacio-6">
-        <Image src={foto} alt="Tendero anotando en el celular" priority className="h-auto w-full rounded-xl" />
-        <h1 className="text-titulo-1 text-texto-principal">Tu tienda en orden, sin cuaderno</h1>
+        <Image src={foto} alt="Tendero atendiendo a un cliente con el celular en la mano" priority className="h-auto w-full rounded-xl" />
+        <h1 className="text-titulo-1 text-texto-principal">
+          Tu tienda en orden,
+          <br />
+          sin cuaderno
+        </h1>
         <p className="text-cuerpo text-texto-secundario">
           Anota ventas y gastos con un toque o hablando. Siempre sabrás cuánta plata tienes y qué se
           te está acabando.

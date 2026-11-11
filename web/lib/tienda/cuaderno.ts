@@ -191,6 +191,13 @@ export function totales(lista: Movimiento[]) {
 const DIAS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const MESES = ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "sep.", "oct.", "nov.", "dic."];
 
+/** "Lun 21 sep." (Turnos, 35). */
+export function diaCorto(fecha: string) {
+  const d = new Date(`${fecha}T12:00:00Z`);
+  const dia = DIAS[d.getUTCDay()].slice(0, 3);
+  return `${dia.charAt(0).toUpperCase()}${dia.slice(1)} ${d.getUTCDate()} ${MESES[d.getUTCMonth()]}`;
+}
+
 /** "Hoy, miércoles 23" o "Lunes 21 sep.". */
 export function nombreDia(fecha: string) {
   const d = new Date(`${fecha}T12:00:00Z`);

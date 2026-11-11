@@ -67,11 +67,11 @@ function EditarProducto({ item }: { item: ReturnType<typeof useInventario>["item
       }
     >
       <div className="flex items-center gap-espacio-4 rounded-lg bg-fondo-tarjeta p-espacio-4">
-        {/* Con foto se muestra la foto; la alerta sigue en el color de las unidades */}
-        {producto.imagen?.startsWith("https://") ? (
-          <FotoProducto producto={producto} tamano="l" />
-        ) : stock.porAgotarse ? (
+        {/* Por agotarse manda la alerta (diseño v4); si no, la foto o el ícono de caja */}
+        {stock.porAgotarse ? (
           <IconBadge icon={TriangleAlert} tono="peligro" tamano="l" />
+        ) : producto.imagen?.startsWith("https://") ? (
+          <FotoProducto producto={producto} tamano="l" />
         ) : (
           <IconBadge icon={Package} tamano="l" />
         )}

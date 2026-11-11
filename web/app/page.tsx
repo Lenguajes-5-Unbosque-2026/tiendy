@@ -52,7 +52,7 @@ function HomeSinCaja() {
         onClick={() => setVenderAbierto(true)}
       />
       <div className="grid grid-cols-2 gap-espacio-3">
-        <ActionCard vertical icon={Receipt} iconTono="peligro" titulo="Registrar gasto" href="/gasto" />
+        <ActionCard vertical icon={Receipt} titulo="Registrar gasto" href="/gasto" />
         <ActionCard vertical icon={Package} titulo="Llegó mercancía" href="/inventario/llego" />
       </div>
       <ActionCard vertical icon={PackagePlus} titulo="Cargar productos" href="/inventario/cargar" />
@@ -89,10 +89,10 @@ function HomeDelDia() {
           titulo={`Se está acabando: ${masUrgente.producto.nombre_corto}`}
           detalle={
             masUrgente.producto.unidades === 0
-              ? "Agotado · ver productos por agotarse"
-              : `Quedan ${masUrgente.producto.unidades} · ver productos por agotarse`
+              ? "Agotado · ver sugerencia de compra"
+              : `Quedan ${masUrgente.producto.unidades} · ver sugerencia de compra`
           }
-          href="/inventario/por-agotarse"
+          href="/inventario/sugerencias"
         />
       )}
 
@@ -105,7 +105,7 @@ function HomeDelDia() {
       />
 
       <div className="grid grid-cols-2 gap-espacio-3">
-        <ActionCard vertical icon={Receipt} iconTono="peligro" titulo="Registrar gasto" href="/gasto" />
+        <ActionCard vertical icon={Receipt} titulo="Registrar gasto" href="/gasto" />
         <ActionCard vertical icon={Package} titulo="Llegó mercancía" href="/inventario/llego" />
       </div>
 
