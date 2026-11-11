@@ -231,9 +231,18 @@ export async function leerTienda(tiendaId: string): Promise<DatosTienda> {
   };
 }
 
-/** Tu tienda (06): la tienda nueva y su dueña. */
+/** El celular ya tiene tienda: la base no deja registrar otra (supabase/celular-unico.sql). */
+export class CelularRegistrado extends Error {}
+
+/** Postgres: valor repetido en una columna única. */
+const REPETIDO = "23505";
+
+/** Tu tienda (06): la tienda nueva y su dueña. Un celular, una tienda. */
 export async function crearTienda(tienda: Tienda, duena: Persona) {
+  // Se revisa antes por si la base todavía no tiene la regla de celular único
+  if (tienda.celular && (await buscarTienda(tienda.celular))) throw new CelularRegistrado();
   const { error } = await supabase.from("tienda").insert(tienda);
+  if (error?.code === REPETIDO) throw new CelularRegistrado();
   if (error) throw error;
   await guardarPersona(tienda.id, duena);
 }

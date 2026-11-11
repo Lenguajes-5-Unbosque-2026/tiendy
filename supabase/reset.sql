@@ -71,7 +71,7 @@ create table public.tienda (
   horario_apertura  time,
   horario_cierre    time,
   nit               text,
-  celular           text not null,
+  celular           text not null unique,         -- un celular, una tienda: con él se inicia sesión
   creada_en         timestamptz not null default now()
 );
 

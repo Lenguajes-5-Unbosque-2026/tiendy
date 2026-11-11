@@ -14,7 +14,9 @@ const conEspacios = (d: string) => [d.slice(0, 3), d.slice(3, 6), d.slice(6, 10)
 
 /**
  * Tu celular (03): crea cuenta ("Empezar") o inicia sesión ("Ya tengo cuenta").
- * Al iniciar sesión primero revisa en Supabase que el número tenga tienda.
+ * Un celular, una tienda: antes de seguir revisa en Supabase si el número ya
+ * tiene tienda. Al crear, si ya la tiene, solo deja iniciar sesión; al iniciar
+ * sesión, si no la tiene, ofrece crearla.
  */
 export default function CelularPage() {
   const router = useRouter();
@@ -22,6 +24,7 @@ export default function CelularPage() {
   const [digitos, setDigitos] = useState(celularPendiente.replace(/^\+57/, ""));
   const [buscando, setBuscando] = useState(false);
   const [sinTienda, setSinTienda] = useState(false);
+  const [yaRegistrado, setYaRegistrado] = useState(false);
   const entrar = modoEntrada === "entrar";
   // Los celulares en Colombia tienen 10 dígitos y empiezan por 3
   const valido = /^3\d{9}$/.test(digitos);
@@ -32,11 +35,12 @@ export default function CelularPage() {
   };
 
   const enviar = async () => {
-    if (!entrar) return seguir();
     setBuscando(true);
     try {
-      if (await buscarTienda(`+57${digitos}`)) seguir();
-      else setSinTienda(true);
+      const tieneTienda = Boolean(await buscarTienda(`+57${digitos}`));
+      if (entrar === tieneTienda) seguir();
+      else if (entrar) setSinTienda(true);
+      else setYaRegistrado(true);
     } catch {
       // Sin conexión no se puede revisar: 04 entra con lo guardado en este celular
       seguir();
@@ -52,7 +56,7 @@ export default function CelularPage() {
       withNav={false}
       footer={
         <div className="flex flex-col gap-espacio-3">
-          <Button disabled={!valido || buscando} onClick={enviar}>
+          <Button disabled={!valido || buscando || yaRegistrado} onClick={enviar}>
             {buscando ? "Buscando tu tienda…" : "Enviar código"}
           </Button>
           <p className="text-center text-caption text-texto-secundario">
@@ -87,12 +91,29 @@ export default function CelularPage() {
             onChange={(e) => {
               setDigitos(e.target.value.replace(/\D/g, "").slice(0, 10));
               setSinTienda(false);
+              setYaRegistrado(false);
             }}
             className="pl-[calc(var(--espacio-4)+var(--espacio-6)+var(--espacio-3))]"
           />
         </div>
       </label>
-      {sinTienda ? (
+      {yaRegistrado ? (
+        <div role="alert" className="flex flex-col gap-espacio-3 rounded-lg bg-fondo-tarjeta p-espacio-4">
+          <p className="text-cuerpo-fuerte text-texto-principal">Este número ya tiene una tienda</p>
+          <p className="text-secundario text-texto-secundario">
+            Cada tienda se registra con un solo celular. Si es tuya, entra con este número; si no,
+            escribe otro.
+          </p>
+          <Button
+            onClick={() => {
+              setModoEntrada("entrar");
+              seguir();
+            }}
+          >
+            Iniciar sesión con este número
+          </Button>
+        </div>
+      ) : sinTienda ? (
         <div role="alert" className="flex flex-col gap-espacio-3 rounded-lg bg-fondo-tarjeta p-espacio-4">
           <p className="text-cuerpo-fuerte text-texto-principal">No hay ninguna tienda con este número</p>
           <p className="text-secundario text-texto-secundario">

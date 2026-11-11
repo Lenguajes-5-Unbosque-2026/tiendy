@@ -15,10 +15,11 @@ import { useTienda } from "@/lib/tienda/store";
  */
 export default function TuTiendaPage() {
   const router = useRouter();
-  const { celularPendiente, crearTienda } = useTienda();
+  const { celularPendiente, crearTienda, iniciarSesion, setModoEntrada } = useTienda();
   const [tienda, setTienda] = useState("");
   const [nombre, setNombre] = useState("");
   const [creando, setCreando] = useState(false);
+  const [yaRegistrado, setYaRegistrado] = useState(false);
   const valido = tienda.trim() !== "" && nombre.trim() !== "";
 
   if (!celularPendiente) {
@@ -38,11 +39,14 @@ export default function TuTiendaPage() {
       withNav={false}
       footer={
         <Button
-          disabled={!valido || creando}
+          disabled={!valido || creando || yaRegistrado}
           onClick={async () => {
             setCreando(true);
-            await crearTienda(celularPendiente, tienda, nombre);
-            router.push("/");
+            const resultado = await crearTienda(celularPendiente, tienda, nombre);
+            if (resultado === "creada") return router.push("/");
+            // Un celular, una tienda: no se crea otra
+            setCreando(false);
+            setYaRegistrado(true);
           }}
         >
           {creando ? "Creando tu tienda…" : "Continuar"}
@@ -65,6 +69,25 @@ export default function TuTiendaPage() {
         <Input value={nombre} placeholder="Doña Rosa" onChange={(e) => setNombre(e.target.value)} />
         <span className="text-secundario text-texto-secundario">Así te saludamos y apareces al abrir la caja.</span>
       </label>
+
+      {yaRegistrado && (
+        <div role="alert" className="flex flex-col gap-espacio-3 rounded-lg bg-fondo-tarjeta p-espacio-4">
+          <p className="text-cuerpo-fuerte text-texto-principal">Este número ya tiene una tienda</p>
+          <p className="text-secundario text-texto-secundario">
+            Cada tienda se registra con un solo celular, así que no creamos otra. Entra a la que ya
+            tienes.
+          </p>
+          <Button
+            onClick={async () => {
+              // El código ya se verificó en 04: entra directo a su tienda
+              setModoEntrada("entrar");
+              if (await iniciarSesion(celularPendiente)) router.push("/");
+            }}
+          >
+            Entrar a mi tienda
+          </Button>
+        </div>
+      )}
     </AppScreen>
   );
 }

@@ -619,9 +619,14 @@ function useTiendaState() {
 
   /**
    * Tu tienda (06): cuenta nueva con la tienda vacía y la dueña como primera persona.
-   * Se guarda en Supabase; si falla, la tienda queda solo en este celular.
+   * Se guarda en Supabase; si no hay conexión, la tienda queda solo en este celular.
+   * Si el celular ya tiene tienda no crea otra: devuelve "ya-registrado".
    */
-  const crearTienda = useCallback(async (cel: string, nombreTienda: string, nombreDuena: string) => {
+  const crearTienda = useCallback(async (
+    cel: string,
+    nombreTienda: string,
+    nombreDuena: string
+  ): Promise<"creada" | "ya-registrado"> => {
     const nombre = nombreDuena.trim().replace(/\s+/g, " ");
     const tienda: Tienda = {
       id: `t-${Date.now()}`,
@@ -646,6 +651,7 @@ function useTiendaState() {
     try {
       await nube.crearTienda(tienda, duena);
     } catch (error) {
+      if (error instanceof nube.CelularRegistrado) return "ya-registrado";
       // Advertencia y no error: la app sigue con la tienda en este celular
       console.warn("No se pudo crear la tienda en Supabase; queda en este celular", error);
       enNube = false;
@@ -663,6 +669,7 @@ function useTiendaState() {
       entradas: [],
       entradaProductos: [],
     });
+    return "creada";
   }, []);
 
   const cerrarSesion = useCallback(() => {
