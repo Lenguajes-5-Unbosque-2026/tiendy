@@ -30,8 +30,9 @@ export function ActionCard({
 }: ActionCardProps) {
   const primaria = variante === "primaria";
   const clases = cn(
-    "flex rounded-xl p-espacio-5 text-left",
-    vertical ? "flex-col items-start gap-espacio-3" : "items-center gap-espacio-4",
+    "flex rounded-xl text-left",
+    // La vertical va más angosta para que "Llegó mercancía" quepa en una línea (diseño v4)
+    vertical ? "flex-col items-start gap-espacio-3 p-espacio-4" : "items-center gap-espacio-4 p-espacio-5",
     primaria ? "bg-fondo-primario text-texto-inverso" : "bg-fondo-tarjeta text-texto-principal"
   );
   const contenido = (

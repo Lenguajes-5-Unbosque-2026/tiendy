@@ -9,7 +9,7 @@ import { IconBadge } from "@/components/tiendy/IconBadge";
 import { ListItem } from "@/components/tiendy/ListItem";
 import { hora, iniciales, pesos } from "@/lib/formato";
 import { HOY, resultadoDelTurno } from "@/lib/tienda/calculos";
-import { filtrosHoy, nombreDia, PERIODOS, resultadoCaja } from "@/lib/tienda/cuaderno";
+import { diaCorto, filtrosHoy, PERIODOS, resultadoCaja } from "@/lib/tienda/cuaderno";
 import { useTienda } from "@/lib/tienda/store";
 
 /** Turnos (35): cada apertura y cierre, con quién atendió y cómo quedó la caja. */
@@ -58,8 +58,8 @@ export default function TurnosPage() {
                   <ListItem
                     elegida
                     leading={<IconBadge letra={iniciales(persona?.nombre_corto ?? "")} tono="oscuro" />}
-                    titulo={`${t.fecha === HOY ? "Hoy" : nombreDia(t.fecha)} · abierto ${hora(t.abierto_en)}`}
-                    detalle={`${persona?.nombre_corto} · base ${pesos(t.base)} · vendido ${pesos(vendido)}`}
+                    titulo={`${t.fecha === HOY ? "Hoy" : diaCorto(t.fecha)} · ${hora(t.abierto_en)}`}
+                    detalle={`Base ${pesos(t.base)} · vendido ${pesos(vendido)}`}
                     trailing={<span className="shrink-0 text-cuerpo-fuerte font-bold text-texto-primario">En curso</span>}
                     href="/caja"
                   />
@@ -72,7 +72,7 @@ export default function TurnosPage() {
               <li key={t.id}>
                 <ListItem
                   leading={<IconBadge letra={iniciales(persona?.nombre_corto ?? "")} />}
-                  titulo={`${nombreDia(t.fecha)}${franja}`}
+                  titulo={`${diaCorto(t.fecha)}${franja}`}
                   detalle={
                     // Naranja solo cuando faltó plata (alerta)
                     <span className={diferencia < 0 ? "text-texto-advertencia" : undefined}>

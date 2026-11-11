@@ -48,7 +48,7 @@ export default function RegistrarGastoPage() {
       <div className="flex flex-col gap-espacio-3">
         <ListItem
           elegida
-          leading={<IconBadge icon={Mic} tono="exito" />}
+          leading={<IconBadge icon={Mic} />}
           titulo="Por voz"
           detalle='Di: "pagué 20.000 de transporte"'
           flecha
@@ -62,7 +62,7 @@ export default function RegistrarGastoPage() {
           onClick={() => empezar("/gasto/manual", "manual")}
         />
         <ListItem
-          leading={<IconBadge icon={Camera} tono="peligro" />}
+          leading={<IconBadge icon={Camera} />}
           titulo="Foto del recibo"
           detalle="Toma la foto y revisa el monto"
           flecha

@@ -8,7 +8,9 @@ type Reconocimiento = {
   lang: string;
   interimResults: boolean;
   maxAlternatives: number;
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onresult:
+    | ((e: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }> }) => void)
+    | null;
   onerror: ((e: { error: string }) => void) | null;
   onend: (() => void) | null;
   start: () => void;
@@ -29,11 +31,12 @@ const nada = () => () => {};
 
 export type EstadoVoz = "listo" | "escuchando" | "error";
 
-/** Escucha una frase y devuelve el texto. */
+/** Escucha una frase y devuelve el texto; mientras tanto, lo que va entendiendo (21a). */
 export function useReconocimientoVoz(alEscuchar: (texto: string) => void) {
   // En el servidor no hay micrófono; en el navegador se revisa una vez
   const disponible = useSyncExternalStore(nada, () => constructor() !== null, () => false);
   const [estado, setEstado] = useState<EstadoVoz>("listo");
+  const [parcial, setParcial] = useState("");
   const actual = useRef<Reconocimiento | null>(null);
   const callback = useRef(alEscuchar);
 
@@ -48,15 +51,22 @@ export function useReconocimientoVoz(alEscuchar: (texto: string) => void) {
     if (!Clase) return;
     const r = new Clase();
     r.lang = "es-CO";
-    r.interimResults = false;
+    r.interimResults = true;
     r.maxAlternatives = 1;
     r.onresult = (e) => {
-      const texto = e.results[0]?.[0]?.transcript ?? "";
-      if (texto) callback.current(texto);
+      const resultados = Array.from(e.results);
+      const texto = resultados.map((x) => x[0]?.transcript ?? "").join(" ").trim();
+      if (resultados.every((x) => x.isFinal)) {
+        setParcial("");
+        if (texto) callback.current(texto);
+      } else {
+        setParcial(texto);
+      }
     };
     r.onerror = () => setEstado("error");
     r.onend = () => setEstado((s) => (s === "escuchando" ? "listo" : s));
     actual.current = r;
+    setParcial("");
     setEstado("escuchando");
     r.start();
   }, []);
@@ -66,5 +76,5 @@ export function useReconocimientoVoz(alEscuchar: (texto: string) => void) {
     setEstado("listo");
   }, []);
 
-  return { disponible, estado, escuchar, detener };
+  return { disponible, estado, parcial, escuchar, detener };
 }

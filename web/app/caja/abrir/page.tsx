@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, Wallet } from "lucide-react";
 
 import { BaseDelDia } from "@/components/caja/BaseDelDia";
 import { AppScreen } from "@/components/layout/AppScreen";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/tiendy/EmptyState";
 import { NumberPad } from "@/components/tiendy/NumberPad";
 import { iniciales } from "@/lib/formato";
 import type { Persona } from "@/lib/mock/tipos";
@@ -24,9 +25,16 @@ export default function AbrirCajaPage() {
   if (turnoAbierto) {
     return (
       <AppScreen title="Abrir caja" back="/caja" withNav={false}>
-        <p className="text-cuerpo text-texto-secundario">
-          Ya hay una caja abierta. Ciérrala antes de abrir otra.
-        </p>
+        <EmptyState
+          icon={Wallet}
+          titulo="Ya hay una caja abierta"
+          texto="Ciérrala antes de abrir otra."
+          accion={
+            <Button className="w-full" onClick={() => router.push("/caja")}>
+              Ir a la caja
+            </Button>
+          }
+        />
       </AppScreen>
     );
   }

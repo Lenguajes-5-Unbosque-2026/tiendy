@@ -21,7 +21,7 @@ Registros inventados pero realistas para una tienda de barrio en Kennedy (Bogot�
 | `gastos.csv` | 20 | Gastos y salidas de plata | 27–32, 33 |
 | `entradas_mercancia.csv` | 3 | Mercancía que llegó | 41a |
 | `entrada_productos.csv` | 7 | Los productos de cada entrada | 41a |
-| `listado_sugerido.csv` | 28 | Productos típicos de tienda que todavía no están en el inventario | 13 |
+| `listado_sugerido.csv` | 40 | Productos típicos que se ofrecen al cargar el inventario: los mismos 40 del catálogo, con su foto (el huevo se ofrece por panal x30). En la pantalla 13 no salen los que ya están en el inventario | 13 |
 
 ## Cómo se relacionan
 
@@ -70,7 +70,7 @@ tienda ─┬─ personas ─── turnos ─┬─ ventas ── venta_product
 
 | Caso | Dónde |
 |---|---|
-| Nombres muy largos | Producto `p31` ("Detergente en polvo Fab Floral bolsa ahorradora 2 kg + 500 g gratis"), persona `pe03`, proveedor `pr05`, nota del gasto `g11` |
+| Nombres muy largos | Producto `p31` ("Detergente en polvo Fab Ultra Flash bolsa ahorradora 2 kg"), persona `pe03`, proveedor `pr05`, nota del gasto `g11` |
 | Texto con coma | `p04` "Gaseosa Postobón 1,5 L", nota de `g11` |
 | Registros sin foto | La mayoría de gastos (los 40 productos sí tienen foto) |
 | Valores en cero | Productos agotados con 0 unidades (`p39`, `p40`); costo $0 (`p40`, hielo); turno `tu06` con base $0 y sin ventas |
@@ -94,4 +94,4 @@ Estas salen de preguntas abiertas de las specs (`specs/README.md`). Si el equipo
 
 ## Imágenes
 
-La columna `imagen` dice el nombre exacto del archivo que está en [`imagenes/`](imagenes/). Son 44 fotos: 40 de productos (empaques reales, que dio el equipo) y 4 de recibos y facturas de Wikimedia Commons; el origen de cada una está en [`imagenes/README.md`](imagenes/README.md).
+La columna `imagen` dice el nombre exacto del archivo que está en [`imagenes/`](imagenes/). Son 41 fotos: 40 de productos (empaques reales, que dio el equipo) y 1 factura de Wikimedia Commons; el origen de cada una está en [`imagenes/README.md`](imagenes/README.md).

@@ -9,7 +9,23 @@ import type {
 } from "@/lib/mock/tipos";
 
 /** "Hoy" en los datos de prueba: el 23 de septiembre, como en Figma. */
-export const HOY = "2026-09-23";
+export const HOY_PRUEBA = "2026-09-23";
+
+/** La fecha de hoy en Colombia ("2026-11-10"). */
+export function hoyEnColombia() {
+  return new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+/**
+ * "Hoy" para los cálculos: la tienda de prueba vive en su 23 de septiembre, para
+ * que sus datos se vean del día; una tienda real usa la fecha de verdad. Lo fija
+ * el estado de la tienda (store.tsx) con fijarHoy.
+ */
+export let HOY = HOY_PRUEBA;
+
+export function fijarHoy(fecha: string) {
+  HOY = fecha;
+}
 
 const DIAS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 

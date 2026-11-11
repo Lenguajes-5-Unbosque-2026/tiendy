@@ -18,8 +18,10 @@ const enmascarar = (cel: string) => `+57 ${cel.slice(3, 6)} ••• ${cel.slic
 /** Verificación (04): seis dígitos del SMS. */
 export default function CodigoPage() {
   const router = useRouter();
-  const { celularPendiente, iniciarSesion } = useTienda();
+  const { celularPendiente, iniciarSesion, modoEntrada } = useTienda();
   const [codigo, setCodigo] = useState("");
+  const [verificando, setVerificando] = useState(false);
+  const [error, setError] = useState(false);
   const [enfocado, setEnfocado] = useState(true);
   const campo = useRef<HTMLInputElement>(null);
   const reenvio = useCuentaRegresiva(45);
@@ -34,9 +36,16 @@ export default function CodigoPage() {
     );
   }
 
-  const verificar = () => {
-    // Si el número ya tiene tienda entra al Home; si es nuevo, sigue a Tu tienda (06)
-    router.push(iniciarSesion(celularPendiente) ? "/" : "/registro/tienda");
+  const verificar = async () => {
+    setVerificando(true);
+    setError(false);
+    // Si el número ya tiene tienda entra al Home con sus datos; si es nuevo, sigue a Tu tienda (06)
+    const entro = await iniciarSesion(celularPendiente);
+    if (entro) return router.push("/");
+    if (modoEntrada === "crear") return router.push("/registro/tienda");
+    // Iniciar sesión nunca crea tienda: sin encontrarla se queda aquí
+    setVerificando(false);
+    setError(true);
   };
 
   return (
@@ -45,8 +54,8 @@ export default function CodigoPage() {
       back="/registro/celular"
       withNav={false}
       footer={
-        <Button disabled={codigo.length < LARGO} onClick={verificar}>
-          Verificar
+        <Button disabled={codigo.length < LARGO || verificando} onClick={verificar}>
+          {verificando ? "Entrando a tu tienda…" : "Verificar"}
         </Button>
       }
     >
@@ -103,6 +112,12 @@ export default function CodigoPage() {
           No me llegó el código
         </Link>
       </div>
+
+      {error && (
+        <p role="alert" className="text-secundario text-texto-peligro">
+          No pudimos encontrar tu tienda. Revisa tu conexión a internet e intenta de nuevo.
+        </p>
+      )}
 
       {/* Todavía no hay servicio de SMS (llega con Supabase Auth) */}
       <p className="rounded-lg bg-fondo-primario-suave p-espacio-4 text-secundario text-texto-primario">

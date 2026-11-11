@@ -6,33 +6,58 @@ import { useRouter } from "next/navigation";
 import { AppScreen } from "@/components/layout/AppScreen";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { buscarTienda } from "@/lib/tienda/nube";
 import { useTienda } from "@/lib/tienda/store";
 
 /** "3001234567" → "300 123 4567" mientras se escribe. */
 const conEspacios = (d: string) => [d.slice(0, 3), d.slice(3, 6), d.slice(6, 10)].filter(Boolean).join(" ");
 
-/** Tu celular (03): sirve para crear cuenta o para iniciar sesión. */
+/**
+ * Tu celular (03): crea cuenta ("Empezar") o inicia sesión ("Ya tengo cuenta").
+ * Un celular, una tienda: antes de seguir revisa en Supabase si el número ya
+ * tiene tienda. Al crear, si ya la tiene, solo deja iniciar sesión; al iniciar
+ * sesión, si no la tiene, ofrece crearla.
+ */
 export default function CelularPage() {
   const router = useRouter();
-  const { celularPendiente, setCelularPendiente } = useTienda();
+  const { celularPendiente, setCelularPendiente, modoEntrada, setModoEntrada } = useTienda();
   const [digitos, setDigitos] = useState(celularPendiente.replace(/^\+57/, ""));
+  const [buscando, setBuscando] = useState(false);
+  const [sinTienda, setSinTienda] = useState(false);
+  const [yaRegistrado, setYaRegistrado] = useState(false);
+  const entrar = modoEntrada === "entrar";
   // Los celulares en Colombia tienen 10 dígitos y empiezan por 3
   const valido = /^3\d{9}$/.test(digitos);
 
-  const enviar = () => {
+  const seguir = () => {
     setCelularPendiente(`+57${digitos}`);
     router.push("/registro/codigo");
   };
 
+  const enviar = async () => {
+    setBuscando(true);
+    try {
+      const tieneTienda = Boolean(await buscarTienda(`+57${digitos}`));
+      if (entrar === tieneTienda) seguir();
+      else if (entrar) setSinTienda(true);
+      else setYaRegistrado(true);
+    } catch {
+      // Sin conexión no se puede revisar: 04 entra con lo guardado en este celular
+      seguir();
+    } finally {
+      setBuscando(false);
+    }
+  };
+
   return (
     <AppScreen
-      title="Tu celular"
+      title={entrar ? "Iniciar sesión" : "Tu celular"}
       back="/bienvenida"
       withNav={false}
       footer={
         <div className="flex flex-col gap-espacio-3">
-          <Button disabled={!valido} onClick={enviar}>
-            Enviar código
+          <Button disabled={!valido || buscando || yaRegistrado} onClick={enviar}>
+            {buscando ? "Buscando tu tienda…" : "Enviar código"}
           </Button>
           <p className="text-center text-caption text-texto-secundario">
             Al continuar aceptas los Términos y la Política de datos.
@@ -41,10 +66,13 @@ export default function CelularPage() {
       }
     >
       <div className="flex flex-col gap-espacio-2">
-        <h2 className="text-titulo-1 text-texto-principal">¿Cuál es tu número?</h2>
+        <h2 className="text-titulo-1 text-texto-principal">
+          {entrar ? "Entra a tu tienda" : "¿Cuál es tu número?"}
+        </h2>
         <p className="text-cuerpo text-texto-secundario">
-          Te enviaremos un código por SMS para verificar que eres tú. Con este número también
-          recuperas tu cuenta.
+          {entrar
+            ? "Escribe el número con el que creaste tu tienda. Te enviaremos un código por SMS."
+            : "Te enviaremos un código por SMS para verificar que eres tú. Con este número también recuperas tu cuenta."}
         </p>
       </div>
 
@@ -60,12 +88,52 @@ export default function CelularPage() {
             autoComplete="tel-national"
             placeholder="300 123 4567"
             value={conEspacios(digitos)}
-            onChange={(e) => setDigitos(e.target.value.replace(/\D/g, "").slice(0, 10))}
+            onChange={(e) => {
+              setDigitos(e.target.value.replace(/\D/g, "").slice(0, 10));
+              setSinTienda(false);
+              setYaRegistrado(false);
+            }}
             className="pl-[calc(var(--espacio-4)+var(--espacio-6)+var(--espacio-3))]"
           />
         </div>
       </label>
-      <p className="text-secundario text-texto-secundario">Sirve para crear cuenta o para iniciar sesión.</p>
+      {yaRegistrado ? (
+        <div role="alert" className="flex flex-col gap-espacio-3 rounded-lg bg-fondo-tarjeta p-espacio-4">
+          <p className="text-cuerpo-fuerte text-texto-principal">Este número ya tiene una tienda</p>
+          <p className="text-secundario text-texto-secundario">
+            Cada tienda se registra con un solo celular. Si es tuya, entra con este número; si no,
+            escribe otro.
+          </p>
+          <Button
+            onClick={() => {
+              setModoEntrada("entrar");
+              seguir();
+            }}
+          >
+            Iniciar sesión con este número
+          </Button>
+        </div>
+      ) : sinTienda ? (
+        <div role="alert" className="flex flex-col gap-espacio-3 rounded-lg bg-fondo-tarjeta p-espacio-4">
+          <p className="text-cuerpo-fuerte text-texto-principal">No hay ninguna tienda con este número</p>
+          <p className="text-secundario text-texto-secundario">
+            Revisa que esté bien escrito o crea tu tienda con este número.
+          </p>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setModoEntrada("crear");
+              seguir();
+            }}
+          >
+            Crear mi tienda
+          </Button>
+        </div>
+      ) : (
+        <p className="text-secundario text-texto-secundario">
+          {entrar ? "Es el mismo número con el que te registraste." : "Sirve para crear cuenta o para iniciar sesión."}
+        </p>
+      )}
     </AppScreen>
   );
 }

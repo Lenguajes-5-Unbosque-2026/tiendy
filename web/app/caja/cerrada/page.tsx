@@ -9,7 +9,7 @@ import { AmountCard } from "@/components/tiendy/AmountCard";
 import { SuccessHero } from "@/components/tiendy/SuccessHero";
 import { hora, pesos } from "@/lib/formato";
 import { HOY, resultadoDelTurno, ultimoCierre } from "@/lib/tienda/calculos";
-import { filtrosHoy } from "@/lib/tienda/cuaderno";
+import { diaCorto, filtrosHoy } from "@/lib/tienda/cuaderno";
 import { useTienda } from "@/lib/tienda/store";
 
 /** Resultado del cierre (19): el turno que se acaba de cerrar. */
@@ -29,7 +29,7 @@ export default function CajaCerradaPage() {
   const persona = personas.find((p) => p.id === turno.persona_id);
   const resultado = resultadoDelTurno(turno, ventas, ventaProductos, gastos);
   const { diferencia } = resultado;
-  const dia = turno.fecha === HOY ? "Hoy" : turno.fecha;
+  const dia = turno.fecha === HOY ? "Hoy" : diaCorto(turno.fecha);
 
   return (
     <AppScreen

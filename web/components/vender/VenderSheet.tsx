@@ -9,6 +9,7 @@ import { Drawer, DrawerClose, DrawerContent, DrawerTitle } from "@/components/ui
 import { Input } from "@/components/ui/input";
 import { Chip, ChoiceChips } from "@/components/tiendy/ChoiceChips";
 import { EmptyState } from "@/components/tiendy/EmptyState";
+import { FotoProducto } from "@/components/tiendy/FotoProducto";
 import { IconBadge } from "@/components/tiendy/IconBadge";
 import { QuantityStepper } from "@/components/tiendy/QuantityStepper";
 import { leerPesos, pesos } from "@/lib/formato";
@@ -32,7 +33,10 @@ const SEGUNDOS_AUTOGUARDADO = 3;
 
 type Dicho = { texto: string; medio: MedioPago | null; entendido: boolean };
 
-/** Hoja "Nueva venta" (20), lo que dijiste (21) y el estado sin productos (20a). */
+/** Barras del micrófono mientras escucha (21a), de alturas distintas. */
+const ONDA = ["h-espacio-3", "h-espacio-6", "h-espacio-4", "h-espacio-5", "h-espacio-3", "h-espacio-6", "h-espacio-4", "h-espacio-2", "h-espacio-5", "h-espacio-3"];
+
+/** Hoja "Nueva venta" (20), escuchando (21a), lo que dijiste (21) y el estado sin productos (20a). */
 export function VenderSheet() {
   const router = useRouter();
   const {
@@ -62,6 +66,7 @@ export function VenderSheet() {
     [productos, setBorrador],
   );
   const voz = useReconocimientoVoz(alEscuchar);
+  const escuchando = voz.estado === "escuchando";
 
   const porId = useMemo(() => new Map(productos.map((p) => [p.id, p])), [productos]);
   const ventasRapidas = productos.filter((p) => p.venta_rapida);
@@ -80,6 +85,7 @@ export function VenderSheet() {
     .map((l) => ({ ...l, producto: porId.get(l.productoId) }))
     .filter((l): l is typeof l & { producto: Producto } => Boolean(l.producto));
   const total = lineas.reduce((s, l) => s + l.producto.precio_venta * l.cantidad, 0);
+  const unidades = lineas.reduce((s, l) => s + l.cantidad, 0);
   const vueltas =
     borrador.medioPago === "efectivo" && borrador.pagaCon !== null && borrador.pagaCon >= total
       ? borrador.pagaCon - total
@@ -194,7 +200,36 @@ export function VenderSheet() {
             />
           ) : (
             <>
-              {dicho?.entendido ? (
+              {escuchando ? (
+                // 21a · Escuchando: lo que va entendiendo y, abajo, dónde aparecerá la venta
+                <>
+                  <div role="status" className="flex items-center gap-espacio-3 rounded-lg bg-fondo-primario-suave p-espacio-4">
+                    <IconBadge icon={Mic} tono="exito" tamano="l" />
+                    <div className="flex min-w-0 flex-col gap-espacio-1">
+                      <span className="text-secundario font-bold text-texto-primario">Escuchando…</span>
+                      {voz.parcial && (
+                        <span className="text-cuerpo text-texto-principal">“{voz.parcial}…”</span>
+                      )}
+                      <span aria-hidden="true" className="flex items-center gap-espacio-1">
+                        {ONDA.map((alto, i) => (
+                          <span key={i} className={`w-espacio-1 animate-pulse rounded-full bg-fondo-primario ${alto}`} />
+                        ))}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-secundario text-texto-secundario">
+                    Di qué lleva, cuántos y cómo te paga. Por ejemplo: “dos gaseosas y unas papas, en
+                    efectivo, me paga con veinte”.
+                  </p>
+                  <div className="flex flex-col items-center gap-espacio-1 rounded-lg border-2 border-dashed border-borde-foco p-espacio-6 text-center">
+                    <span className="text-cuerpo-fuerte text-texto-secundario">Esta venta</span>
+                    <span className="text-secundario text-texto-secundario">
+                      Aquí van apareciendo los productos que digas
+                    </span>
+                  </div>
+                  <Button onClick={voz.detener}>Listo, ya terminé</Button>
+                </>
+              ) : dicho?.entendido ? (
                 <div className="flex flex-col gap-espacio-2">
                   <div className="flex items-center gap-espacio-3 rounded-lg bg-fondo-primario-suave p-espacio-4">
                     <IconBadge icon={Mic} tono="exito" tamano="l" />
@@ -247,11 +282,6 @@ export function VenderSheet() {
                       </Button>
                     </div>
 
-                    {voz.estado === "escuchando" && (
-                      <p role="status" className="text-cuerpo-fuerte text-texto-primario">
-                        Escuchando… di los productos y cómo te pagan.
-                      </p>
-                    )}
                     {voz.estado === "error" && (
                       <p role="status" className="text-secundario text-texto-secundario">
                         No pudimos usar el micrófono. Revisa el permiso o busca a mano.
@@ -279,7 +309,10 @@ export function VenderSheet() {
                                 }}
                                 className="flex w-full items-center justify-between gap-espacio-3 px-espacio-4 py-espacio-3 text-left disabled:text-texto-sutil"
                               >
-                                <span className="text-cuerpo">{p.nombre}</span>
+                                <span className="flex min-w-0 items-center gap-espacio-3">
+                                  <FotoProducto producto={p} />
+                                  <span className="text-cuerpo">{p.nombre}</span>
+                                </span>
                                 <span className="shrink-0 text-secundario">
                                   {p.unidades === 0 ? "Agotado" : pesos(p.precio_venta)}
                                 </span>
@@ -300,7 +333,8 @@ export function VenderSheet() {
                     <h2 className="text-secundario text-texto-secundario">
                       Ventas rápidas · un toque suma 1
                     </h2>
-                    <div className="flex flex-wrap gap-espacio-2">
+                    {/* Dos filas que se deslizan de lado, de borde a borde de la hoja */}
+                    <div className="-mx-espacio-5 grid auto-cols-max grid-flow-col grid-rows-2 gap-espacio-2 overflow-x-auto px-espacio-5 [scrollbar-width:none]">
                       {ventasRapidas.map((p) => (
                         <Chip
                           key={p.id}
@@ -315,9 +349,11 @@ export function VenderSheet() {
                 </>
               )}
 
-              {lineas.length > 0 && (
+              {!escuchando && lineas.length > 0 && (
                 <section className="flex flex-col gap-espacio-3 rounded-lg bg-fondo-tarjeta p-espacio-4">
-                  <h2 className="text-secundario text-texto-secundario">Esta venta</h2>
+                  <h2 className="text-secundario text-texto-secundario">
+                    Esta venta{lineas.length > 2 && ` · ${unidades} productos`}
+                  </h2>
                   <ul className="flex flex-col gap-espacio-3">
                     {lineas.map((l) => (
                       <li key={l.productoId} className="flex items-center gap-espacio-3">
@@ -344,46 +380,50 @@ export function VenderSheet() {
                 </section>
               )}
 
-              <section className="flex flex-col gap-espacio-2">
-                <h2 className="text-secundario text-texto-secundario">
-                  ¿Cómo te pagan?
-                  {dicho?.entendido && dicho.medio && ` · lo dijiste: ${nombreMedio[dicho.medio]}`}
-                </h2>
-                <ChoiceChips
-                  etiqueta="¿Cómo te pagan?"
-                  opciones={mediosPago}
-                  valor={borrador.medioPago}
-                  onChange={elegirMedio}
-                />
-              </section>
-
-              {borrador.medioPago === "efectivo" && (
-                <div className="flex items-center justify-between gap-espacio-3">
-                  <label className="flex min-w-0 flex-1 items-center gap-espacio-1 text-cuerpo whitespace-nowrap">
-                    Paga con
-                    <input
-                      inputMode="numeric"
-                      value={borrador.pagaCon === null ? "" : pesos(borrador.pagaCon)}
-                      onChange={(e) => actualizar({ pagaCon: leerPesos(e.target.value) })}
-                      placeholder="$0"
-                      className="w-full min-w-0 rounded-sm bg-transparent text-cuerpo-fuerte outline-none placeholder:text-texto-sutil focus-visible:bg-fondo-sutil"
+              {!escuchando && (
+                <>
+                  <section className="flex flex-col gap-espacio-2">
+                    <h2 className="text-secundario text-texto-secundario">
+                      ¿Cómo te pagan?
+                      {dicho?.entendido && dicho.medio && ` · lo dijiste: ${nombreMedio[dicho.medio]}`}
+                    </h2>
+                    <ChoiceChips
+                      etiqueta="¿Cómo te pagan?"
+                      opciones={mediosPago}
+                      valor={borrador.medioPago}
+                      onChange={elegirMedio}
                     />
-                  </label>
-                  {vueltas !== null && (
-                    <span className="shrink-0 text-cuerpo-fuerte font-bold text-texto-primario">
-                      Vueltas {pesos(vueltas)}
-                    </span>
-                  )}
-                </div>
-              )}
+                  </section>
 
-              <Button disabled={lineas.length === 0} onClick={anotar}>
-                {lineas.length === 0
-                  ? "Anotar venta"
-                  : cuenta !== null
-                    ? `Anotar · se guarda en ${cuenta} s`
-                    : `Anotar venta · ${pesos(total)}`}
-              </Button>
+                  {borrador.medioPago === "efectivo" && (
+                    <div className="flex items-center justify-between gap-espacio-3">
+                      <label className="flex min-w-0 flex-1 items-center gap-espacio-1 text-cuerpo whitespace-nowrap">
+                        Paga con
+                        <input
+                          inputMode="numeric"
+                          value={borrador.pagaCon === null ? "" : pesos(borrador.pagaCon)}
+                          onChange={(e) => actualizar({ pagaCon: leerPesos(e.target.value) })}
+                          placeholder="$0"
+                          className="w-full min-w-0 rounded-sm bg-transparent text-cuerpo-fuerte outline-none placeholder:text-texto-sutil focus-visible:bg-fondo-sutil"
+                        />
+                      </label>
+                      {vueltas !== null && (
+                        <span className="shrink-0 text-cuerpo-fuerte font-bold text-texto-primario">
+                          Vueltas {pesos(vueltas)}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  <Button disabled={lineas.length === 0} onClick={anotar}>
+                    {lineas.length === 0
+                      ? "Anotar venta"
+                      : cuenta !== null
+                        ? `Anotar · se guarda en ${cuenta} s`
+                        : `Anotar venta · ${pesos(total)}`}
+                  </Button>
+                </>
+              )}
             </>
           )}
         </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, Mic, Users } from "lucide-react";
+import { MessageSquare, Mic, Users } from "lucide-react";
 
 import { AppScreen } from "@/components/layout/AppScreen";
 import { Button } from "@/components/ui/button";
@@ -40,7 +40,7 @@ export default function MiTiendaPage() {
   return (
     <AppScreen
       title="Mi tienda"
-      back="/"
+      compacto
       footer={
         <Button
           variant="outline"
@@ -92,12 +92,12 @@ export default function MiTiendaPage() {
       />
       {/* Notificaciones y Micrófono no tienen pantalla todavía */}
       <ListItem
-        leading={<IconBadge icon={Bell} tono="neutro" />}
+        leading={<IconBadge icon={MessageSquare} />}
         titulo="Notificaciones"
         detalle="Agotados · pronto podrás elegirlas"
       />
       <ListItem
-        leading={<IconBadge icon={Mic} tono="neutro" />}
+        leading={<IconBadge icon={Mic} />}
         titulo="Micrófono"
         detalle="Se activa al tocar"
       />

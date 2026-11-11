@@ -6,6 +6,7 @@ type AppScreenProps = {
   subtitle?: string;
   back?: string | (() => void);
   accion?: React.ComponentProps<typeof AppHeader>["accion"];
+  compacto?: boolean;
   /** Las pantallas principales llevan barra inferior; los flujos paso a paso no. */
   withNav?: boolean;
   /** La acción principal: un botón a ancho completo al final de la pantalla. */
@@ -19,13 +20,14 @@ export function AppScreen({
   subtitle,
   back,
   accion,
+  compacto,
   withNav = true,
   footer,
   children,
 }: AppScreenProps) {
   return (
     <>
-      <AppHeader title={title} subtitle={subtitle} back={back} accion={accion} />
+      <AppHeader title={title} subtitle={subtitle} back={back} accion={accion} compacto={compacto} />
       <main className="relative -mt-solape-hoja flex flex-1 flex-col gap-espacio-4 rounded-t-2xl bg-fondo-app px-margen-pantalla pt-espacio-6 pb-espacio-6">
         {children}
         {footer && <div className="mt-auto pt-espacio-4">{footer}</div>}

@@ -13,9 +13,11 @@
 --   2. Crea las tablas otra vez, carga los datos de prueba y deja todo de solo
 --      lectura (contenido de schema.sql).
 --   3. Cambia el nombre de cada foto por su URL pública (contenido de imagenes.sql).
---   4. Abre los permisos de escritura de Registrar venta (contenido de escritura.sql).
+--   4. Abre los permisos de escritura de Registrar venta (contenido de escritura.sql)
+--      los de crear tienda, caja y empleados (cuentas.sql) y los de gastos y
+--      mercancía (gastos.sql).
 --
--- Si cambian schema.sql, imagenes.sql o escritura.sql, este archivo se arma otra
+-- Si cambian schema.sql, imagenes.sql, escritura.sql, cuentas.sql o gastos.sql, este archivo se arma otra
 -- vez con ellos.
 
 begin;
@@ -70,7 +72,7 @@ create table public.tienda (
   horario_apertura  time,
   horario_cierre    time,
   nit               text,
-  celular           text not null,
+  celular           text not null unique,         -- un celular, una tienda: con él se inicia sesión
   creada_en         timestamptz not null default now()
 );
 
@@ -116,7 +118,8 @@ create table public.listado_sugerido (
   categoria_id     text not null references public.categorias (id),
   nombre           text not null,
   nombre_corto     text not null,
-  precio_sugerido  integer not null check (precio_sugerido >= 0)
+  precio_sugerido  integer not null check (precio_sugerido >= 0),
+  imagen           text                           -- foto del bucket "imagenes" (la misma del producto)
 );
 
 -- Proveedores
@@ -194,7 +197,7 @@ create table public.entradas_mercancia (
   id              text primary key,
   tienda_id       text not null references public.tienda (id),
   proveedor_id    text references public.proveedores (id),
-  turno_id        text not null references public.turnos (id),
+  turno_id        text references public.turnos (id),         -- vacío si llegó con la caja cerrada
   persona_id      text not null references public.personas (id),
   fecha_hora      timestamptz not null,
   total           integer not null check (total >= 0),
@@ -277,8 +280,8 @@ insert into public.productos (id, tienda_id, categoria_id, nombre, nombre_corto,
   ('p12', 't01', 'c01', 'Pan francés', 'Pan', array['pan', 'un pan'], 500, 300, 40, 15, true, 'manual', 'p12-pan-frances.jpg', '2026-09-01T09:33:00-05:00'),
   ('p13', 't01', 'c01', 'Café Sello Rojo 250 g', 'Café', array['café', 'un café'], 9800, 8100, 8, 3, false, 'listado', 'p13-cafe-sello-rojo.jpg', '2026-09-01T09:00:00-05:00'),
   ('p14', 't01', 'c01', 'Chocolate Corona 250 g', 'Chocolate', array['chocolate', 'un chocolate'], 6900, 5600, 6, 3, false, 'listado', 'p14-chocolate-corona.jpg', '2026-09-01T09:00:00-05:00'),
-  ('p15', 't01', 'c01', 'Lentejas 500 g', 'Lentejas', array['lentejas', 'una libra de lentejas'], 3600, 2800, 10, 4, false, 'listado', 'p15-lentejas.jpg', '2026-09-01T09:00:00-05:00'),
-  ('p16', 't01', 'c01', 'Fríjol bola roja 500 g', 'Fríjol', array['fríjol', 'una libra de fríjol'], 6200, 5000, 7, 3, false, 'listado', 'p16-frijol-bola-roja.jpg', '2026-09-01T09:00:00-05:00'),
+  ('p15', 't01', 'c01', 'Lentejas Diana 500 g', 'Lentejas', array['lentejas', 'una libra de lentejas'], 3600, 2800, 10, 4, false, 'listado', 'p15-lentejas.jpg', '2026-09-01T09:00:00-05:00'),
+  ('p16', 't01', 'c01', 'Fríjol Diana bola roja 500 g', 'Fríjol', array['fríjol', 'una libra de fríjol'], 6200, 5000, 7, 3, false, 'listado', 'p16-frijol-bola-roja.jpg', '2026-09-01T09:00:00-05:00'),
   ('p17', 't01', 'c01', 'Pasta Doria spaghetti 250 g', 'Pasta', array['pasta', 'una pasta'], 2300, 1800, 14, 5, false, 'listado', 'p17-pasta-doria.jpg', '2026-09-01T09:00:00-05:00'),
   ('p18', 't01', 'c01', 'Atún Van Camp''s en aceite 160 g', 'Atún', array['atún', 'un atún'], 6500, 5300, 9, 3, false, 'listado', 'p18-atun-van-camps.jpg', '2026-09-01T09:00:00-05:00'),
   ('p19', 't01', 'c01', 'Sal Refisal 1 kg', 'Sal', array['sal', 'un kilo de sal'], 2200, 1600, 10, 3, false, 'listado', 'p19-sal-refisal.jpg', '2026-09-01T09:00:00-05:00'),
@@ -289,11 +292,11 @@ insert into public.productos (id, tienda_id, categoria_id, nombre, nombre_corto,
   ('p24', 't01', 'c02', 'Jugo Hit caja 200 ml', 'Hit', array['hit', 'un hit', 'jugo'], 1500, 1050, 24, 8, false, 'listado', 'p24-jugo-hit.jpg', '2026-09-01T09:00:00-05:00'),
   ('p25', 't01', 'c02', 'Gatorade 500 ml', 'Gatorade', array['gatorade', 'un gatorade'], 4200, 3300, 6, 3, false, 'listado', 'p25-gatorade.jpg', '2026-09-01T09:00:00-05:00'),
   ('p26', 't01', 'c03', 'Kumis Alpina 200 g', 'Kumis', array['kumis', 'un kumis'], 2600, 2000, 8, 4, false, 'listado', 'p26-kumis-alpina.jpg', '2026-09-01T09:00:00-05:00'),
-  ('p27', 't01', 'c03', 'Queso campesino 250 g', 'Queso', array['queso', 'un queso'], 7500, 6000, 4, 3, false, 'manual', 'p27-queso-campesino.jpg', '2026-09-01T09:40:00-05:00'),
+  ('p27', 't01', 'c03', 'Queso campesino Alpina 250 g', 'Queso', array['queso', 'un queso'], 7500, 6000, 4, 3, false, 'manual', 'p27-queso-campesino.jpg', '2026-09-01T09:40:00-05:00'),
   ('p28', 't01', 'c03', 'Yogur Alpina fresa 200 g', 'Yogur', array['yogur', 'un yogur'], 2800, 2200, 10, 4, false, 'listado', 'p28-yogur-alpina.jpg', '2026-09-01T09:00:00-05:00'),
   ('p29', 't01', 'c03', 'Margarina La Fina 125 g', 'Margarina', array['margarina', 'una la fina'], 3200, 2500, 6, 3, false, 'listado', 'p29-margarina-la-fina.jpg', '2026-09-01T09:00:00-05:00'),
   ('p30', 't01', 'c04', 'Jabón Rey barra 300 g', 'Jabón Rey', array['jabón', 'un jabón rey'], 3000, 2300, 12, 4, false, 'listado', 'p30-jabon-rey.jpg', '2026-09-01T09:00:00-05:00'),
-  ('p31', 't01', 'c04', 'Detergente en polvo Fab Floral bolsa ahorradora 2 kg + 500 g gratis', 'Fab 2 kg', array['fab', 'un fab', 'detergente'], 18900, 15600, 3, 2, false, 'manual', 'p31-detergente-fab-2kg.jpg', '2026-09-01T09:45:00-05:00'),
+  ('p31', 't01', 'c04', 'Detergente en polvo Fab Ultra Flash bolsa ahorradora 2 kg', 'Fab 2 kg', array['fab', 'un fab', 'detergente'], 18900, 15600, 3, 2, false, 'manual', 'p31-detergente-fab-2kg.jpg', '2026-09-01T09:45:00-05:00'),
   ('p32', 't01', 'c04', 'Límpido 1 L', 'Límpido', array['límpido', 'un límpido'], 4900, 3800, 6, 3, false, 'listado', 'p32-limpido-1l.jpg', '2026-09-01T09:00:00-05:00'),
   ('p33', 't01', 'c04', 'Crema dental Colgate Triple Acción 75 ml', 'Colgate', array['crema dental', 'una colgate'], 6500, 5200, 5, 2, false, 'listado', 'p33-crema-dental-colgate.jpg', '2026-09-01T09:00:00-05:00'),
   ('p34', 't01', 'c04', 'Champú Sedal sobre 18 ml', 'Sedal sobre', array['champú', 'un sobre de sedal'], 1000, 650, 40, 10, false, 'manual', 'p34-champu-sedal.jpg', '2026-09-01T09:50:00-05:00'),
@@ -304,36 +307,48 @@ insert into public.productos (id, tienda_id, categoria_id, nombre, nombre_corto,
   ('p39', 't01', 'c01', 'Arepas de maíz blanco x5', 'Arepas', array['arepas', 'un paquete de arepas'], 3500, 2600, 0, 4, false, 'manual', 'p39-arepas-maiz-blanco.jpg', '2026-09-01T09:55:00-05:00'),
   ('p40', 't01', 'c02', 'Bolsa de hielo 2 kg', 'Hielo', array['hielo', 'una bolsa de hielo'], 2000, 0, 0, 5, false, 'manual', 'p40-bolsa-hielo.jpg', '2026-09-01T09:58:00-05:00');
 
--- listado_sugerido (28)
-insert into public.listado_sugerido (id, categoria_id, nombre, nombre_corto, precio_sugerido) values
-  ('ls01', 'c01', 'Huevos AA x30', 'Huevos x30', 18500),
-  ('ls02', 'c01', 'Harina P.A.N. 1 kg', 'Harina PAN', 4500),
-  ('ls03', 'c01', 'Arroz Roa 1 kg', 'Arroz Roa', 5200),
-  ('ls04', 'c01', 'Maizena 200 g', 'Maizena', 3800),
-  ('ls05', 'c01', 'Salchichas Zenú x10', 'Salchichas', 7900),
-  ('ls06', 'c01', 'Mayonesa Fruco 200 g', 'Mayonesa', 4900),
-  ('ls07', 'c01', 'Salsa de tomate Fruco 200 g', 'Salsa de tomate', 4200),
-  ('ls08', 'c01', 'Café Águila Roja 250 g', 'Café Águila Roja', 9800),
-  ('ls09', 'c02', 'Gaseosa Postobón Manzana 400 ml', 'Manzana 400', 2500),
-  ('ls10', 'c02', 'Agua Brisa 600 ml', 'Brisa', 1800),
-  ('ls11', 'c02', 'Sprite 400 ml', 'Sprite', 2500),
-  ('ls12', 'c02', 'Cerveza Poker lata 330 ml', 'Poker', 3000),
-  ('ls13', 'c02', 'Jugo Del Valle 400 ml', 'Del Valle', 2800),
-  ('ls14', 'c03', 'Leche Colanta 1 L', 'Leche Colanta', 4200),
-  ('ls15', 'c03', 'Mantequilla Colanta 125 g', 'Mantequilla', 4500),
-  ('ls16', 'c03', 'Avena Alpina 250 ml', 'Avena Alpina', 2600),
-  ('ls17', 'c03', 'Queso doble crema 250 g', 'Queso doble crema', 7500),
-  ('ls18', 'c04', 'Jabón Protex barra 110 g', 'Protex', 3900),
-  ('ls19', 'c04', 'Lavaloza Axion 450 g', 'Axion', 6500),
-  ('ls20', 'c04', 'Toallas higiénicas Nosotras x10', 'Nosotras', 5900),
-  ('ls21', 'c04', 'Desodorante Rexona sobre', 'Rexona sobre', 1200),
-  ('ls22', 'c05', 'Papas Super Ricas 30 g', 'Super Ricas', 1800),
-  ('ls23', 'c05', 'Choclitos 40 g', 'Choclitos', 1800),
-  ('ls24', 'c05', 'Jet chocolatina 12 g', 'Jet', 1000),
-  ('ls25', 'c05', 'Galletas Saltín Noel', 'Saltín', 3200),
-  ('ls26', 'c05', 'Chicles Trident', 'Trident', 1500),
-  ('ls27', 'c06', 'Concentrado Dog Chow 500 g', 'Dog Chow', 7900),
-  ('ls28', 'c06', 'Concentrado Gatsy 500 g', 'Gatsy', 7200);
+-- listado_sugerido (40)
+insert into public.listado_sugerido (id, categoria_id, nombre, nombre_corto, precio_sugerido, imagen) values
+  ('ls01', 'c01', 'Arroz Diana 500 g', 'Arroz', 3200, 'p03-arroz-diana-500g.jpg'),
+  ('ls02', 'c01', 'Aceite Premier 1 L', 'Aceite', 11900, 'p07-aceite-premier-1l.jpg'),
+  ('ls03', 'c01', 'Azúcar Manuelita 1 kg', 'Azúcar', 4800, 'p08-azucar-manuelita-1kg.jpg'),
+  ('ls04', 'c01', 'Huevos AA x30', 'Huevos x30', 18500, 'p02-huevo-aa.jpg'),
+  ('ls05', 'c01', 'Panela 500 g', 'Panela', 3000, 'p09-panela.jpg'),
+  ('ls06', 'c01', 'Pan tajado Bimbo 600 g', 'Pan tajado', 6800, 'p06-pan-tajado-bimbo.jpg'),
+  ('ls07', 'c01', 'Pan francés', 'Pan', 500, 'p12-pan-frances.jpg'),
+  ('ls08', 'c01', 'Café Sello Rojo 250 g', 'Café', 9800, 'p13-cafe-sello-rojo.jpg'),
+  ('ls09', 'c01', 'Chocolate Corona 250 g', 'Chocolate', 6900, 'p14-chocolate-corona.jpg'),
+  ('ls10', 'c01', 'Lentejas Diana 500 g', 'Lentejas', 3600, 'p15-lentejas.jpg'),
+  ('ls11', 'c01', 'Fríjol Diana bola roja 500 g', 'Fríjol', 6200, 'p16-frijol-bola-roja.jpg'),
+  ('ls12', 'c01', 'Pasta Doria spaghetti 250 g', 'Pasta', 2300, 'p17-pasta-doria.jpg'),
+  ('ls13', 'c01', 'Atún Van Camp''s en aceite 160 g', 'Atún', 6500, 'p18-atun-van-camps.jpg'),
+  ('ls14', 'c01', 'Sal Refisal 1 kg', 'Sal', 2200, 'p19-sal-refisal.jpg'),
+  ('ls15', 'c01', 'Avena en hojuelas Quaker 250 g', 'Avena', 3400, 'p20-avena-quaker.jpg'),
+  ('ls16', 'c01', 'Arepas de maíz blanco x5', 'Arepas', 3500, 'p39-arepas-maiz-blanco.jpg'),
+  ('ls17', 'c02', 'Gaseosa Postobón 1,5 L', 'Gaseosa 1,5 L', 4500, 'p04-gaseosa-postobon-1-5l.jpg'),
+  ('ls18', 'c02', 'Agua Cristal 600 ml', 'Agua', 2000, 'p11-agua-cristal-600ml.jpg'),
+  ('ls19', 'c02', 'Coca-Cola 400 ml', 'Coca-Cola', 2800, 'p21-coca-cola-400ml.jpg'),
+  ('ls20', 'c02', 'Cerveza Águila lata 330 ml', 'Águila', 3200, 'p22-cerveza-aguila-lata.jpg'),
+  ('ls21', 'c02', 'Pony Malta 330 ml', 'Pony Malta', 2200, 'p23-pony-malta.jpg'),
+  ('ls22', 'c02', 'Jugo Hit caja 200 ml', 'Hit', 1500, 'p24-jugo-hit.jpg'),
+  ('ls23', 'c02', 'Gatorade 500 ml', 'Gatorade', 4200, 'p25-gatorade.jpg'),
+  ('ls24', 'c02', 'Bolsa de hielo 2 kg', 'Hielo', 2000, 'p40-bolsa-hielo.jpg'),
+  ('ls25', 'c03', 'Leche Alquería 1 L', 'Leche 1 L', 3900, 'p01-leche-alqueria-1l.jpg'),
+  ('ls26', 'c03', 'Kumis Alpina 200 g', 'Kumis', 2600, 'p26-kumis-alpina.jpg'),
+  ('ls27', 'c03', 'Queso campesino Alpina 250 g', 'Queso', 7500, 'p27-queso-campesino.jpg'),
+  ('ls28', 'c03', 'Yogur Alpina fresa 200 g', 'Yogur', 2800, 'p28-yogur-alpina.jpg'),
+  ('ls29', 'c03', 'Margarina La Fina 125 g', 'Margarina', 3200, 'p29-margarina-la-fina.jpg'),
+  ('ls30', 'c04', 'Papel higiénico Familia x4', 'Papel x4', 9500, 'p10-papel-higienico-familia.jpg'),
+  ('ls31', 'c04', 'Jabón Rey barra 300 g', 'Jabón Rey', 3000, 'p30-jabon-rey.jpg'),
+  ('ls32', 'c04', 'Detergente en polvo Fab Ultra Flash bolsa ahorradora 2 kg', 'Fab 2 kg', 18900, 'p31-detergente-fab-2kg.jpg'),
+  ('ls33', 'c04', 'Límpido 1 L', 'Límpido', 4900, 'p32-limpido-1l.jpg'),
+  ('ls34', 'c04', 'Crema dental Colgate Triple Acción 75 ml', 'Colgate', 6500, 'p33-crema-dental-colgate.jpg'),
+  ('ls35', 'c04', 'Champú Sedal sobre 18 ml', 'Sedal sobre', 1000, 'p34-champu-sedal.jpg'),
+  ('ls36', 'c05', 'Papas Margarita pollo 39 g', 'Papas', 2500, 'p05-papas-margarita.jpg'),
+  ('ls37', 'c05', 'Chocorramo', 'Chocorramo', 2800, 'p35-chocorramo.jpg'),
+  ('ls38', 'c05', 'Galletas Festival fresa', 'Festival', 1800, 'p36-galletas-festival.jpg'),
+  ('ls39', 'c05', 'Doritos 45 g', 'Doritos', 3200, 'p37-doritos.jpg'),
+  ('ls40', 'c05', 'Bon Bon Bum', 'Bon Bon Bum', 300, 'p38-bon-bon-bum.jpg');
 
 -- proveedores (6)
 insert into public.proveedores (id, tienda_id, nombre, celular, dia_visita) values
@@ -506,11 +521,11 @@ insert into public.gastos (id, tienda_id, turno_id, persona_id, fecha_hora, mont
   ('g01', 't01', 'tu01', 'pe01', '2026-09-19T07:30:00-05:00', 8000, 'transporte', null, null, 'voz', 'pagué 8 mil de transporte', 'efectivo', null, null),
   ('g02', 't01', 'tu01', 'pe01', '2026-09-19T10:15:00-05:00', 45000, 'servicios', 'Recibo de la luz (Enel)', null, 'manual', null, 'transferencia', null, null),
   ('g03', 't01', 'tu02', 'pe02', '2026-09-19T15:40:00-05:00', 12000, 'otro', 'Almuerzo', null, 'manual', null, 'efectivo', null, null),
-  ('g04', 't01', 'tu02', 'pe02', '2026-09-19T18:20:00-05:00', 96000, 'mercancia', null, 'pr04', 'foto', null, 'efectivo', null, 'g04-recibo-bimbo.jpg'),
+  ('g04', 't01', 'tu02', 'pe02', '2026-09-19T18:20:00-05:00', 96000, 'mercancia', null, 'pr04', 'foto', null, 'efectivo', null, null),
   ('g05', 't01', 'tu03', 'pe01', '2026-09-20T06:45:00-05:00', 6000, 'transporte', null, null, 'voz', 'pagué 6 mil de transporte', 'efectivo', null, null),
   ('g06', 't01', 'tu03', 'pe01', '2026-09-20T09:10:00-05:00', 20000, 'otro', 'Saqué para el mercado de la casa', null, 'voz', 'pagué 20 mil de otros', 'efectivo', null, null),
   ('g07', 't01', 'tu03', 'pe01', '2026-09-20T12:30:00-05:00', 38500, 'servicios', 'Internet del local', null, 'manual', null, 'transferencia', null, null),
-  ('g08', 't01', 'tu03', 'pe01', '2026-09-20T16:00:00-05:00', 54000, 'mercancia', null, 'pr03', 'foto', null, 'quede_debiendo', '2026-09-27', 'g08-factura-alpina.jpg'),
+  ('g08', 't01', 'tu03', 'pe01', '2026-09-20T16:00:00-05:00', 54000, 'mercancia', null, 'pr03', 'foto', null, 'quede_debiendo', '2026-09-27', null),
   ('g09', 't01', 'tu04', 'pe02', '2026-09-21T08:00:00-05:00', 10000, 'transporte', null, null, 'manual', null, 'efectivo', null, null),
   ('g10', 't01', 'tu04', 'pe02', '2026-09-21T13:45:00-05:00', 5000, 'otro', 'Bolsas plásticas y servilletas', null, 'manual', null, 'efectivo', null, null),
   ('g11', 't01', 'tu04', 'pe02', '2026-09-21T19:30:00-05:00', 850000, 'arriendo', 'Arriendo del local de septiembre, pagado a Don Hernando por Nequi; queda pendiente la parte del agua, que él manda el recibo la otra semana', null, 'manual', null, 'transferencia', null, null),
@@ -527,7 +542,7 @@ insert into public.gastos (id, tienda_id, turno_id, persona_id, fecha_hora, mont
 -- entradas_mercancia (3)
 insert into public.entradas_mercancia (id, tienda_id, proveedor_id, turno_id, persona_id, fecha_hora, total, medio_pago, pagar_antes_de, imagen) values
   ('e01', 't01', 'pr02', 'tu04', 'pe02', '2026-09-21T10:30:00-05:00', 144000, 'efectivo', null, null),
-  ('e02', 't01', 'pr03', 'tu05', 'pe01', '2026-09-22T09:30:00-05:00', 50400, 'quede_debiendo', '2026-09-29', 'e02-factura-alpina.jpg'),
+  ('e02', 't01', 'pr03', 'tu05', 'pe01', '2026-09-22T09:30:00-05:00', 50400, 'quede_debiendo', '2026-09-29', null),
   ('e03', 't01', 'pr02', 'tu08', 'pe01', '2026-09-23T11:30:00-05:00', 90000, 'quede_debiendo', '2026-09-25', null);
 
 -- entrada_productos (7)
@@ -584,9 +599,13 @@ update public.entradas_mercancia
 set imagen = 'https://dtrdbutpvutmxpapmbjw.supabase.co/storage/v1/object/public/imagenes/' || imagen
 where imagen is not null and imagen not like 'https://%';
 
+update public.listado_sugerido
+set imagen = 'https://dtrdbutpvutmxpapmbjw.supabase.co/storage/v1/object/public/imagenes/' || imagen
+where imagen is not null and imagen not like 'https://%';
+
 
 -- ═════════════════════════════════════════════════════════════
--- 4. Permisos de escritura (escritura.sql)
+-- 4. Permisos de escritura (escritura.sql, cuentas.sql y gastos.sql)
 -- ═════════════════════════════════════════════════════════════
 
 -- Tiendy · permisos de escritura para Registrar venta (20 → 22)
@@ -646,5 +665,80 @@ create policy "Cualquiera puede agregar personas"
   on public.personas for insert to anon, authenticated
   with check (true);
 
+
+-- Tiendy · permisos para crear tienda, iniciar sesión y guardar la caja
+--
+-- Se corre después de escritura.sql (SQL Editor → pegar → Run).
+-- Se puede correr más de una vez: cada política se borra antes de crearla.
+--
+-- Iniciar sesión solo lee (buscar la tienda por celular y traer sus datos), y la
+-- lectura ya está abierta en schema.sql. Estas políticas abren lo que se escribe
+-- desde el registro, Mi tienda y Caja. Como todavía no hay login con SMS,
+-- cualquiera con el link puede hacerlo: no se guardan datos personales reales.
+
+
+-- tienda · insertar: Tu tienda (06) crea la tienda de un número nuevo.
+drop policy if exists "Cualquiera puede crear tiendas" on public.tienda;
+create policy "Cualquiera puede crear tiendas"
+  on public.tienda for insert to anon, authenticated
+  with check (true);
+
+-- tienda · actualizar: Mi tienda (46) cambia nombre, barrio, dirección, horario y NIT.
+drop policy if exists "Cualquiera puede editar tiendas" on public.tienda;
+create policy "Cualquiera puede editar tiendas"
+  on public.tienda for update to anon, authenticated
+  using (true) with check (true);
+
+-- personas · actualizar: quitar un empleado (47) lo deja inactivo; no se borra
+-- porque sus ventas siguen a su nombre. (Agregar ya lo permite escritura.sql.)
+drop policy if exists "Cualquiera puede actualizar personas" on public.personas;
+create policy "Cualquiera puede actualizar personas"
+  on public.personas for update to anon, authenticated
+  using (true) with check (true);
+
+-- turnos · actualizar: cerrar caja (18) guarda lo contado, la diferencia y el
+-- motivo. (Abrir caja ya lo permite escritura.sql.)
+drop policy if exists "Cualquiera puede cerrar turnos" on public.turnos;
+create policy "Cualquiera puede cerrar turnos"
+  on public.turnos for update to anon, authenticated
+  using (true) with check (true);
+
+
+-- Tiendy · gastos y entradas de mercancía en Supabase
+--
+-- Se corre después de cuentas.sql (SQL Editor → pegar → Run).
+-- Se puede correr más de una vez: cada política se borra antes de crearla.
+--
+-- Hasta ahora los gastos (27 → 32) y Llegó mercancía (41a) se guardaban solo en
+-- el celular. Estas políticas dejan que la app los guarde aquí, para verlos desde
+-- cualquier celular y que la caja cuadre igual en todos.
+
+
+-- La mercancía puede llegar con la caja cerrada: la entrada no siempre tiene turno.
+
+-- gastos · insertar: registrar un gasto (31).
+drop policy if exists "Cualquiera puede anotar gastos" on public.gastos;
+create policy "Cualquiera puede anotar gastos"
+  on public.gastos for insert to anon, authenticated
+  with check (true);
+
+-- gastos · borrar: eliminar un gasto desde el cuaderno (36) o reemplazarlo al corregirlo.
+-- A diferencia de la venta, el gasto no tiene estado: se borra.
+drop policy if exists "Cualquiera puede borrar gastos" on public.gastos;
+create policy "Cualquiera puede borrar gastos"
+  on public.gastos for delete to anon, authenticated
+  using (true);
+
+-- entradas_mercancia · insertar: Llegó mercancía (41a), con proveedor, total y pago.
+drop policy if exists "Cualquiera puede anotar entradas de mercancía" on public.entradas_mercancia;
+create policy "Cualquiera puede anotar entradas de mercancía"
+  on public.entradas_mercancia for insert to anon, authenticated
+  with check (true);
+
+-- entrada_productos · insertar: qué productos llegaron, cuántos y a qué costo.
+drop policy if exists "Cualquiera puede anotar productos que llegaron" on public.entrada_productos;
+create policy "Cualquiera puede anotar productos que llegaron"
+  on public.entrada_productos for insert to anon, authenticated
+  with check (true);
 
 commit;
