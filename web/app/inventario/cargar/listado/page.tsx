@@ -189,6 +189,14 @@ export default function CargaListadoPage() {
               })}
             </ul>
           )}
+
+          {/* Los que ya están en el inventario no se ofrecen: se dice para que no parezca que faltan */}
+          {disponibles.length > 0 && disponibles.length < listado.length && (
+            <p className="text-secundario text-texto-secundario">
+              {plural(listado.length - disponibles.length, "producto", "productos")} del listado ya{" "}
+              {listado.length - disponibles.length === 1 ? "está" : "están"} en tu inventario.
+            </p>
+          )}
         </>
       )}
     </AppScreen>

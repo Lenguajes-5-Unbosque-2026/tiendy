@@ -7,6 +7,7 @@
 // de mercancía siguen solo en el navegador por ahora.
 import {
   createContext,
+  Fragment,
   useCallback,
   useContext,
   useEffect,
@@ -600,7 +601,7 @@ function useTiendaState() {
           return true;
         }
       } catch (error) {
-        console.error("No se pudo buscar la tienda en Supabase", error);
+        console.warn("No se pudo buscar la tienda en Supabase; se usa lo guardado en este celular", error);
         if (cel === mock.tienda.celular && estado.tienda.celular !== cel) {
           setEstado({ ...inicial, sesion: cel });
           return true;
@@ -645,7 +646,8 @@ function useTiendaState() {
     try {
       await nube.crearTienda(tienda, duena);
     } catch (error) {
-      console.error("No se pudo crear la tienda en Supabase", error);
+      // Advertencia y no error: la app sigue con la tienda en este celular
+      console.warn("No se pudo crear la tienda en Supabase; queda en este celular", error);
       enNube = false;
     }
     setEstado({
@@ -786,9 +788,19 @@ type TiendaContexto = ReturnType<typeof useTiendaState>;
 
 const Contexto = createContext<TiendaContexto | null>(null);
 
+/**
+ * El servidor no conoce la tienda de cada celular: pinta con los datos de prueba.
+ * Al leer lo guardado en el celular, la key cambia y React vuelve a montar las
+ * pantallas con esos datos, en vez de hidratar con datos distintos a los del HTML
+ * (error de hidratación). Mientras tanto, GuardaSesion tapa la pantalla.
+ */
 export function TiendaProvider({ children }: { children: React.ReactNode }) {
   const valor = useTiendaState();
-  return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;
+  return (
+    <Contexto.Provider value={valor}>
+      <Fragment key={valor.cargado ? "celular" : "servidor"}>{children}</Fragment>
+    </Contexto.Provider>
+  );
 }
 
 export function useTienda() {
