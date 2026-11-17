@@ -1,7 +1,11 @@
 // Lectura y escritura en Supabase de lo que ya vive en la base: la tienda y sus
 // personas (registro, inicio de sesión, Mi tienda), los productos (41), los turnos
 // (Caja), las ventas (20 → 22), los gastos (27 → 32) y las entradas de mercancía
-// (41a). Los permisos están en supabase/escritura.sql, cuentas.sql y gastos.sql.
+// (41a). Los permisos están en supabase/escritura.sql, cuentas.sql y gastos.sql;
+// el tiempo real y la tienda de cada línea de venta o entrada, en sincronizar.sql.
+//
+// Cada "subir…" deja en Supabase el registro tal como está en el celular y se
+// puede repetir sin duplicar nada: si falla, la app lo vuelve a intentar después.
 import type {
   Entrada,
   EntradaProducto,
@@ -29,19 +33,6 @@ export async function leerProductos(tiendaId: string): Promise<Producto[]> {
   return data as Producto[];
 }
 
-/** Lo que necesita la base para guardar una venta. */
-export type VentaParaGuardar = {
-  tiendaId: string;
-  venta: Venta;
-  lineas: VentaProducto[];
-  turno: Turno | null;
-  persona: Persona | null;
-  /** Productos de la venta, con las unidades que les quedan después de descontar. */
-  productos: Producto[];
-  /** Venta que esta reemplaza (corrección desde 36), con las unidades ya devueltas. */
-  corrige?: string;
-};
-
 function filaProducto(tiendaId: string, p: Producto) {
   return {
     id: p.id,
@@ -60,74 +51,9 @@ function filaProducto(tiendaId: string, p: Producto) {
   };
 }
 
-/**
- * Registrar venta: la guarda en ventas y venta_productos y descuenta las
- * unidades en productos. El turno, la persona y los productos creados en el
- * celular se agregan primero si la base todavía no los tiene.
- */
-export async function guardarVenta({
-  tiendaId,
-  venta,
-  lineas,
-  turno,
-  persona,
-  productos,
-  corrige,
-}: VentaParaGuardar) {
-  // 1. Lo que la venta necesita que exista (si ya está, no se toca)
-  if (persona) {
-    const { error } = await supabase
-      .from("personas")
-      .upsert({ ...persona, tienda_id: tiendaId }, { onConflict: "id", ignoreDuplicates: true });
-    if (error) throw error;
-  }
-  if (turno) {
-    const { error } = await supabase
-      .from("turnos")
-      .upsert({ ...turno, tienda_id: tiendaId }, { onConflict: "id", ignoreDuplicates: true });
-    if (error) throw error;
-  }
-  const { error: errorProductos } = await supabase
-    .from("productos")
-    .upsert(
-      productos.map((p) => filaProducto(tiendaId, p)),
-      { onConflict: "id", ignoreDuplicates: true }
-    );
-  if (errorProductos) throw errorProductos;
-
-  // 2. La venta corregida deja de contar
-  if (corrige) {
-    const { error } = await supabase.from("ventas").update({ estado: "eliminada" }).eq("id", corrige);
-    if (error) throw error;
-  }
-
-  // 3. La venta y sus productos (al reintentar, lo que ya quedó guardado no se duplica)
-  const { error: errorVenta } = await supabase
-    .from("ventas")
-    .upsert({ ...venta, tienda_id: tiendaId }, { onConflict: "id", ignoreDuplicates: true });
-  if (errorVenta) throw errorVenta;
-  const { error: errorLineas } = await supabase
-    .from("venta_productos")
-    .upsert(lineas, { onConflict: "id", ignoreDuplicates: true });
-  if (errorLineas) throw errorLineas;
-
-  // 4. Lo que queda en el estante
-  await guardarUnidades(productos);
-}
-
-/** Deshacer (22) o eliminar (36): la venta deja de contar y sus productos vuelven. */
-export async function quitarVenta(
-  ventaId: string,
-  estado: "deshecha" | "eliminada",
-  productos: Producto[]
-) {
-  const { error } = await supabase.from("ventas").update({ estado }).eq("id", ventaId);
-  if (error) throw error;
-  await guardarUnidades(productos);
-}
-
-/** Cargar productos (11, 12, 13): los nuevos quedan en la tabla productos de su tienda. */
-export async function agregarProductos(tiendaId: string, productos: Producto[]) {
+/** Agrega los productos que la base todavía no tiene (si ya están, no se tocan). */
+async function insertarProductos(tiendaId: string, productos: Producto[]) {
+  if (productos.length === 0) return;
   const { error } = await supabase
     .from("productos")
     .upsert(
@@ -137,10 +63,13 @@ export async function agregarProductos(tiendaId: string, productos: Producto[]) 
   if (error) throw error;
 }
 
-/** Ver y editar producto (42) y Llegó mercancía (41a): precio, costo y unidades. */
-export async function guardarCambiosProductos(
-  productos: Pick<Producto, "id" | "precio_venta" | "costo" | "unidades">[]
-) {
+/**
+ * Cargar productos (11, 12, 13), Ver y editar producto (42) y Llegó mercancía
+ * (41a): los productos quedan en su tienda con el precio, el costo y las
+ * unidades del celular.
+ */
+export async function subirProductos(tiendaId: string, productos: Producto[]) {
+  await insertarProductos(tiendaId, productos);
   const resultados = await Promise.all(
     productos.map(({ id, precio_venta, costo, unidades }) =>
       supabase.from("productos").update({ precio_venta, costo, unidades }).eq("id", id)
@@ -150,12 +79,80 @@ export async function guardarCambiosProductos(
   if (conError) throw conError.error;
 }
 
+let movimientos: Promise<boolean> | null = null;
+
+/**
+ * La base lleva las unidades (supabase/inventario.sql): resta con cada venta,
+ * devuelve al deshacer y suma con la mercancía que llega. Entonces la app no
+ * manda las unidades después de vender; si la base todavía no lo tiene, sí.
+ */
+export function porMovimientos(): Promise<boolean> {
+  movimientos ??= Promise.resolve(supabase.rpc("inventario_por_movimientos")).then(
+    ({ data, error }) => {
+      // Sin conexión no se sabe: se vuelve a preguntar la próxima vez
+      if (error && !error.code) movimientos = null;
+      return !error && data === true;
+    },
+    () => {
+      movimientos = null;
+      return false;
+    }
+  );
+  return movimientos;
+}
+
 async function guardarUnidades(productos: Pick<Producto, "id" | "unidades">[]) {
   const resultados = await Promise.all(
     productos.map(({ id, unidades }) => supabase.from("productos").update({ unidades }).eq("id", id))
   );
   const conError = resultados.find((r) => r.error);
   if (conError) throw conError.error;
+}
+
+/** Lo que necesita la base para guardar una venta. */
+export type VentaParaGuardar = {
+  tiendaId: string;
+  venta: Venta;
+  lineas: VentaProducto[];
+  turno: Turno | null;
+  persona: Persona | null;
+  /**
+   * Productos de la venta. Si la base lleva las unidades, con las que debe tener
+   * antes de contar lo pendiente (ver unidadesParaSubir en store.tsx); si no, con
+   * las que les quedan en el celular.
+   */
+  productos: Producto[];
+};
+
+/**
+ * Registrar venta (20 → 22), deshacer (22), eliminar o corregir (36): la venta y
+ * sus productos quedan en ventas y venta_productos con su estado. Las unidades
+ * las resta y las devuelve la base; si todavía no lo hace, se mandan las del
+ * celular. El turno, la persona y los productos se agregan primero si la base
+ * todavía no los tiene.
+ */
+export async function subirVenta({ tiendaId, venta, lineas, turno, persona, productos }: VentaParaGuardar) {
+  if (persona) await guardarPersona(tiendaId, persona);
+  if (turno) await subirTurno(tiendaId, turno);
+  await insertarProductos(tiendaId, productos);
+
+  const { error: errorVenta } = await supabase
+    .from("ventas")
+    .upsert({ ...venta, tienda_id: tiendaId }, { onConflict: "id", ignoreDuplicates: true });
+  if (errorVenta) throw errorVenta;
+  // venta_productos.tienda_id lo llena la base (supabase/sincronizar.sql)
+  const { error: errorLineas } = await supabase
+    .from("venta_productos")
+    .upsert(lineas, { onConflict: "id", ignoreDuplicates: true });
+  if (errorLineas) throw errorLineas;
+  // Si ya estaba guardada, pudo pasar a deshecha o eliminada
+  const { error: errorEstado } = await supabase
+    .from("ventas")
+    .update({ estado: venta.estado })
+    .eq("id", venta.id);
+  if (errorEstado) throw errorEstado;
+
+  if (!(await porMovimientos())) await guardarUnidades(productos);
 }
 
 /** Supabase devuelve las fechas en UTC; la app las usa en hora de Colombia ("…-05:00"). */
@@ -177,6 +174,21 @@ export async function buscarTienda(celular: string): Promise<string | null> {
     .maybeSingle();
   if (error) throw error;
   return data?.id ?? null;
+}
+
+/** PostgREST: la función no existe en la base. */
+const SIN_FUNCION = "PGRST202";
+
+/**
+ * Tu celular (03): si el número ya tiene tienda. Se pregunta antes de iniciar
+ * sesión, cuando todavía no se puede leer la tabla tienda (permisos-por-tienda.sql):
+ * la función solo responde sí o no.
+ */
+export async function celularRegistrado(celular: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc("celular_registrado", { cel: celular });
+  if (error?.code === SIN_FUNCION) return Boolean(await buscarTienda(celular));
+  if (error) throw error;
+  return data === true;
 }
 
 export type DatosTienda = {
@@ -217,6 +229,7 @@ export async function leerTienda(tiendaId: string): Promise<DatosTienda> {
       .select("id, turno_id, persona_id, fecha_hora, canal, medio_pago, total, paga_con, estado")
       .eq("tienda_id", tiendaId),
     // Los productos de cada venta se filtran por la tienda de su venta
+    // (así funciona aunque todavía no se haya corrido sincronizar.sql)
     supabase
       .from("venta_productos")
       .select("id, venta_id, producto_id, cantidad, precio_unitario, costo_unitario, subtotal, ventas!inner(tienda_id)")
@@ -298,7 +311,7 @@ const REPETIDO = "23505";
 /** Tu tienda (06): la tienda nueva y su dueña. Un celular, una tienda. */
 export async function crearTienda(tienda: Tienda, duena: Persona) {
   // Se revisa antes por si la base todavía no tiene la regla de celular único
-  if (tienda.celular && (await buscarTienda(tienda.celular))) throw new CelularRegistrado();
+  if (tienda.celular && (await celularRegistrado(tienda.celular))) throw new CelularRegistrado();
   const { error } = await supabase.from("tienda").insert(tienda);
   if (error?.code === REPETIDO) throw new CelularRegistrado();
   if (error) throw error;
@@ -311,31 +324,35 @@ export async function guardarTienda(tiendaId: string, cambios: Partial<Tienda>) 
   if (error) throw error;
 }
 
-/** Empleados (47): agregar una persona (si ya está, no se toca). */
-export async function guardarPersona(tiendaId: string, persona: Persona) {
+/** Agrega una persona si la base no la tiene (si ya está, no se toca). */
+async function guardarPersona(tiendaId: string, persona: Persona) {
   const { error } = await supabase
     .from("personas")
     .upsert({ ...persona, tienda_id: tiendaId }, { onConflict: "id", ignoreDuplicates: true });
   if (error) throw error;
 }
 
-/** Quitar un empleado: queda inactivo, sus registros siguen a su nombre. */
-export async function desactivarPersona(personaId: string) {
-  const { error } = await supabase.from("personas").update({ activo: false }).eq("id", personaId);
+/**
+ * Empleados (47): la persona queda como en el celular. Al quitarla queda
+ * inactiva y sus registros siguen a su nombre.
+ */
+export async function subirPersona(tiendaId: string, persona: Persona) {
+  await guardarPersona(tiendaId, persona);
+  const { error } = await supabase
+    .from("personas")
+    .update({ nombre: persona.nombre, nombre_corto: persona.nombre_corto, activo: persona.activo })
+    .eq("id", persona.id);
   if (error) throw error;
 }
 
-/** Abrir caja (16): el turno nuevo. */
-export async function abrirTurno(tiendaId: string, turno: Turno) {
+/** Abrir caja (16) y cerrar caja (18): el turno, con lo contado si ya se cerró. */
+export async function subirTurno(tiendaId: string, turno: Turno) {
   const { error } = await supabase
     .from("turnos")
     .upsert({ ...turno, tienda_id: tiendaId }, { onConflict: "id", ignoreDuplicates: true });
   if (error) throw error;
-}
-
-/** Cerrar caja (18): lo contado, la diferencia y el motivo. */
-export async function cerrarTurno(turno: Turno) {
-  const { error } = await supabase
+  if (turno.estado !== "cerrado") return;
+  const { error: errorCierre } = await supabase
     .from("turnos")
     .update({
       cerrado_en: turno.cerrado_en,
@@ -346,37 +363,46 @@ export async function cerrarTurno(turno: Turno) {
       estado: turno.estado,
     })
     .eq("id", turno.id);
-  if (error) throw error;
+  if (errorCierre) throw errorCierre;
 }
 
 /** Lo que necesita la base para guardar un gasto o una entrada: su turno y quién atendía. */
-type Contexto = { tiendaId: string; turno: Turno | null; persona: Persona | null };
+export type Contexto = { tiendaId: string; turno: Turno | null; persona: Persona | null };
 
 async function asegurarContexto({ tiendaId, turno, persona }: Contexto) {
   if (persona) await guardarPersona(tiendaId, persona);
-  if (turno) await abrirTurno(tiendaId, turno);
+  if (turno) await subirTurno(tiendaId, turno);
 }
 
-/** Registrar gasto (31). Al corregir desde el cuaderno (36), el gasto anterior se borra. */
-export async function guardarGasto(gasto: Gasto, contexto: Contexto & { corrige?: string }) {
+/**
+ * Registrar gasto (31). Si el gasto ya no está en el celular (se eliminó o se
+ * corrigió desde el cuaderno, 36), se borra de la base.
+ */
+export async function subirGasto(gastoId: string, gasto: Gasto | null, contexto: Contexto) {
+  if (!gasto) {
+    const { error } = await supabase.from("gastos").delete().eq("id", gastoId);
+    if (error) throw error;
+    return;
+  }
   await asegurarContexto(contexto);
-  if (contexto.corrige) await borrarGasto(contexto.corrige);
-  // Al reintentar, lo que ya quedó guardado no se duplica
   const { error } = await supabase
     .from("gastos")
     .upsert({ ...gasto, tienda_id: contexto.tiendaId }, { onConflict: "id", ignoreDuplicates: true });
   if (error) throw error;
 }
 
-/** Eliminar registro (36): el gasto deja de contar. */
-export async function borrarGasto(gastoId: string) {
-  const { error } = await supabase.from("gastos").delete().eq("id", gastoId);
-  if (error) throw error;
-}
-
-/** Llegó mercancía (41a): la entrada y sus productos (las unidades se guardan aparte). */
-export async function guardarEntrada(entrada: Entrada, lineas: EntradaProducto[], contexto: Contexto) {
+/**
+ * Llegó mercancía (41a): la entrada y sus productos. Las unidades y el costo
+ * los suma la base; si todavía no lo hace, se mandan los del celular.
+ */
+export async function subirEntrada(
+  entrada: Entrada,
+  lineas: EntradaProducto[],
+  productos: Producto[],
+  contexto: Contexto
+) {
   await asegurarContexto(contexto);
+  await insertarProductos(contexto.tiendaId, productos);
   const { error } = await supabase
     .from("entradas_mercancia")
     .upsert(
@@ -384,8 +410,48 @@ export async function guardarEntrada(entrada: Entrada, lineas: EntradaProducto[]
       { onConflict: "id", ignoreDuplicates: true }
     );
   if (error) throw error;
+  // entrada_productos.tienda_id lo llena la base (supabase/sincronizar.sql)
   const { error: errorLineas } = await supabase
     .from("entrada_productos")
     .upsert(lineas, { onConflict: "id", ignoreDuplicates: true });
   if (errorLineas) throw errorLineas;
+  if (!(await porMovimientos())) await subirProductos(contexto.tiendaId, productos);
+}
+
+/** Tablas con tienda_id que avisan en tiempo real cuando cambian (supabase/sincronizar.sql). */
+const TABLAS_DE_LA_TIENDA = [
+  "personas",
+  "productos",
+  "turnos",
+  "ventas",
+  "venta_productos",
+  "gastos",
+  "entradas_mercancia",
+  "entrada_productos",
+] as const;
+
+/**
+ * Escucha los cambios de la tienda en Supabase (desde otro celular o desde el
+ * panel de Supabase) y llama a alCambiar. Devuelve la función para dejar de escuchar.
+ * Si las tablas no tienen el tiempo real activo, no llega nada: la app igual
+ * vuelve a leer cada cierto tiempo.
+ */
+export function escucharTienda(tiendaId: string, alCambiar: () => void) {
+  const canal = supabase.channel(`tienda:${tiendaId}:${Date.now()}`);
+  canal.on(
+    "postgres_changes",
+    { event: "*", schema: "public", table: "tienda", filter: `id=eq.${tiendaId}` },
+    alCambiar
+  );
+  for (const table of TABLAS_DE_LA_TIENDA) {
+    canal.on(
+      "postgres_changes",
+      { event: "*", schema: "public", table, filter: `tienda_id=eq.${tiendaId}` },
+      alCambiar
+    );
+  }
+  canal.subscribe();
+  return () => {
+    supabase.removeChannel(canal);
+  };
 }

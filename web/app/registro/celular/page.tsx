@@ -6,17 +6,27 @@ import { useRouter } from "next/navigation";
 import { AppScreen } from "@/components/layout/AppScreen";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { buscarTienda } from "@/lib/tienda/nube";
+import { conSms, enviarCodigo, ErrorCodigo, type FallaCodigo } from "@/lib/tienda/acceso";
+import { celularRegistrado } from "@/lib/tienda/nube";
 import { useTienda } from "@/lib/tienda/store";
 
 /** "3001234567" → "300 123 4567" mientras se escribe. */
 const conEspacios = (d: string) => [d.slice(0, 3), d.slice(3, 6), d.slice(6, 10)].filter(Boolean).join(" ");
 
+/** Qué decir si el SMS no sale. */
+const TEXTO_FALLA: Record<FallaCodigo, string> = {
+  "sin-conexion": "No pudimos enviar el SMS. Revisa tu conexión a internet e intenta de nuevo.",
+  "muchos-intentos": "Pediste muchos códigos seguidos. Espera un minuto e intenta de nuevo.",
+  "codigo-malo": "No pudimos enviar el SMS. Intenta de nuevo.",
+  otra: "No pudimos enviar el SMS. Revisa que el número esté bien escrito e intenta de nuevo.",
+};
+
 /**
  * Tu celular (03): crea cuenta ("Empezar") o inicia sesión ("Ya tengo cuenta").
  * Un celular, una tienda: antes de seguir revisa en Supabase si el número ya
  * tiene tienda. Al crear, si ya la tiene, solo deja iniciar sesión; al iniciar
- * sesión, si no la tiene, ofrece crearla.
+ * sesión, si no la tiene, ofrece crearla. Con el login por SMS prendido
+ * (acceso.ts) envía el código antes de pasar a 04.
  */
 export default function CelularPage() {
   const router = useRouter();
@@ -25,28 +35,45 @@ export default function CelularPage() {
   const [buscando, setBuscando] = useState(false);
   const [sinTienda, setSinTienda] = useState(false);
   const [yaRegistrado, setYaRegistrado] = useState(false);
+  const [fallaSms, setFallaSms] = useState<FallaCodigo | null>(null);
   const entrar = modoEntrada === "entrar";
   // Los celulares en Colombia tienen 10 dígitos y empiezan por 3
   const valido = /^3\d{9}$/.test(digitos);
 
-  const seguir = () => {
-    setCelularPendiente(`+57${digitos}`);
+  /** Envía el código por SMS (si está prendido) y pasa a Verificación (04). */
+  const seguir = async () => {
+    const celular = `+57${digitos}`;
+    setFallaSms(null);
+    setBuscando(true);
+    try {
+      await enviarCodigo(celular);
+    } catch (error) {
+      setFallaSms(error instanceof ErrorCodigo ? error.falla : "otra");
+      setBuscando(false);
+      return;
+    }
+    setCelularPendiente(celular);
     router.push("/registro/codigo");
   };
 
   const enviar = async () => {
     setBuscando(true);
+    setFallaSms(null);
+    let tieneTienda: boolean;
     try {
-      const tieneTienda = Boolean(await buscarTienda(`+57${digitos}`));
-      if (entrar === tieneTienda) seguir();
-      else if (entrar) setSinTienda(true);
-      else setYaRegistrado(true);
+      tieneTienda = await celularRegistrado(`+57${digitos}`);
     } catch {
-      // Sin conexión no se puede revisar: 04 entra con lo guardado en este celular
-      seguir();
-    } finally {
       setBuscando(false);
+      // Sin SMS y sin conexión: 04 entra con lo guardado en este celular.
+      // Con SMS no hay cómo enviar el código sin internet.
+      if (conSms) setFallaSms("sin-conexion");
+      else void seguir();
+      return;
     }
+    if (entrar === tieneTienda) return seguir();
+    setBuscando(false);
+    if (entrar) setSinTienda(true);
+    else setYaRegistrado(true);
   };
 
   return (
@@ -57,7 +84,7 @@ export default function CelularPage() {
       footer={
         <div className="flex flex-col gap-espacio-3">
           <Button disabled={!valido || buscando || yaRegistrado} onClick={enviar}>
-            {buscando ? "Buscando tu tienda…" : "Enviar código"}
+            {buscando ? (conSms ? "Enviando código…" : "Buscando tu tienda…") : "Enviar código"}
           </Button>
           <p className="text-center text-caption text-texto-secundario">
             Al continuar aceptas los Términos y la Política de datos.
@@ -92,11 +119,17 @@ export default function CelularPage() {
               setDigitos(e.target.value.replace(/\D/g, "").slice(0, 10));
               setSinTienda(false);
               setYaRegistrado(false);
+              setFallaSms(null);
             }}
             className="pl-[calc(var(--espacio-4)+var(--espacio-6)+var(--espacio-3))]"
           />
         </div>
       </label>
+      {fallaSms && (
+        <p role="alert" className="text-secundario text-texto-peligro">
+          {TEXTO_FALLA[fallaSms]}
+        </p>
+      )}
       {yaRegistrado ? (
         <div role="alert" className="flex flex-col gap-espacio-3 rounded-lg bg-fondo-tarjeta p-espacio-4">
           <p className="text-cuerpo-fuerte text-texto-principal">Este número ya tiene una tienda</p>
@@ -105,9 +138,10 @@ export default function CelularPage() {
             escribe otro.
           </p>
           <Button
+            disabled={buscando}
             onClick={() => {
               setModoEntrada("entrar");
-              seguir();
+              void seguir();
             }}
           >
             Iniciar sesión con este número
@@ -121,9 +155,10 @@ export default function CelularPage() {
           </p>
           <Button
             variant="secondary"
+            disabled={buscando}
             onClick={() => {
               setModoEntrada("crear");
-              seguir();
+              void seguir();
             }}
           >
             Crear mi tienda
