@@ -65,7 +65,12 @@ export function VenderSheet() {
     },
     [productos, setBorrador],
   );
-  const voz = useReconocimientoVoz(alEscuchar);
+  // Los nombres de los productos ayudan a la voz por API a entenderlos
+  const pistaVoz = useMemo(
+    () => [...new Set(productos.map((p) => p.nombre_corto))].join(", "),
+    [productos],
+  );
+  const voz = useReconocimientoVoz(alEscuchar, pistaVoz);
   const escuchando = voz.estado === "escuchando";
 
   const porId = useMemo(() => new Map(productos.map((p) => [p.id, p])), [productos]);
@@ -144,7 +149,8 @@ export function VenderSheet() {
   const cancelar = (abierto: boolean) => {
     setVenderAbierto(abierto);
     if (!abierto) {
-      voz.detener();
+      // Lo que se alcanzó a decir no se anota
+      voz.cancelar();
       reiniciarBorrador();
       limpiar();
     }
@@ -206,7 +212,9 @@ export function VenderSheet() {
                   <div role="status" className="flex items-center gap-espacio-3 rounded-lg bg-fondo-primario-suave p-espacio-4">
                     <IconBadge icon={Mic} tono="exito" tamano="l" />
                     <div className="flex min-w-0 flex-col gap-espacio-1">
-                      <span className="text-secundario font-bold text-texto-primario">Escuchando…</span>
+                      <span className="text-secundario font-bold text-texto-primario">
+                        {voz.procesando ? "Entendiendo lo que dijiste…" : "Escuchando…"}
+                      </span>
                       {voz.parcial && (
                         <span className="text-cuerpo text-texto-principal">“{voz.parcial}…”</span>
                       )}
@@ -227,7 +235,9 @@ export function VenderSheet() {
                       Aquí van apareciendo los productos que digas
                     </span>
                   </div>
-                  <Button onClick={voz.detener}>Listo, ya terminé</Button>
+                  <Button disabled={voz.procesando} onClick={voz.detener}>
+                    Listo, ya terminé
+                  </Button>
                 </>
               ) : dicho?.entendido ? (
                 <div className="flex flex-col gap-espacio-2">
@@ -271,7 +281,7 @@ export function VenderSheet() {
                       <Button
                         variant={voz.estado === "escuchando" ? "default" : "secondary"}
                         size="icon"
-                        disabled={!voz.disponible}
+                        disabled={!voz.disponible || voz.procesando}
                         aria-label={
                           voz.estado === "escuchando" ? "Dejar de escuchar" : "Vender hablando"
                         }
@@ -284,7 +294,11 @@ export function VenderSheet() {
 
                     {voz.estado === "error" && (
                       <p role="status" className="text-secundario text-texto-secundario">
-                        No pudimos usar el micrófono. Revisa el permiso o busca a mano.
+                        {voz.falla === "no-escuche"
+                          ? "No te escuché. Toca el micrófono e intenta de nuevo, o busca a mano."
+                          : voz.falla === "servicio"
+                            ? "No pudimos entender lo que dijiste. Revisa tu conexión o busca a mano."
+                            : "No pudimos usar el micrófono. Revisa el permiso o busca a mano."}
                       </p>
                     )}
                     {dicho && !dicho.entendido && (

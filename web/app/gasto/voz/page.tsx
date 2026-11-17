@@ -16,6 +16,10 @@ import { cn } from "@/lib/utils";
 
 const EJEMPLO = "Pagué 20.000 de transporte";
 
+/** Palabras que ayudan a la voz por API a entender el gasto. */
+const PISTA_GASTO =
+  "transporte, pasaje, taxi, servicios, luz, agua, gas, internet, arriendo, mercancía, proveedor, domicilio, mil pesos";
+
 /** Gasto por voz (28): "pagué 20.000 de transporte" → monto y categoría. */
 export default function GastoVozPage() {
   const router = useRouter();
@@ -38,14 +42,21 @@ export default function GastoVozPage() {
     },
     [setBorradorGasto]
   );
-  const voz = useReconocimientoVoz(alEscuchar);
+  const voz = useReconocimientoVoz(alEscuchar, PISTA_GASTO);
   const escuchando = voz.estado === "escuchando";
   const listo = b.monto > 0 && b.categoria !== null;
 
   let estadoMic = "Toca para hablar";
-  if (escuchando) estadoMic = "Escuchando…";
+  if (voz.procesando) estadoMic = "Entendiendo lo que dijiste…";
+  else if (escuchando) estadoMic = "Escuchando…";
   else if (!voz.disponible) estadoMic = "Este navegador no tiene micrófono: usa el ejemplo o anótalo a mano";
-  else if (voz.estado === "error") estadoMic = "No te escuché. Toca para intentar de nuevo";
+  else if (voz.estado === "error")
+    estadoMic =
+      voz.falla === "microfono"
+        ? "No pudimos usar el micrófono. Revisa el permiso o anótalo a mano"
+        : voz.falla === "servicio"
+          ? "No pudimos entender lo que dijiste. Revisa tu conexión e intenta de nuevo"
+          : "No te escuché. Toca para intentar de nuevo";
   else if (oido) estadoMic = "Toca para decirlo otra vez";
 
   return (
@@ -63,7 +74,7 @@ export default function GastoVozPage() {
         <button
           type="button"
           onClick={escuchando ? voz.detener : voz.escuchar}
-          disabled={!voz.disponible}
+          disabled={!voz.disponible || voz.procesando}
           aria-label={escuchando ? "Dejar de escuchar" : "Hablar"}
           className={cn(
             "flex size-voz-halo items-center justify-center rounded-full bg-fondo-primario-suave",
