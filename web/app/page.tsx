@@ -88,7 +88,9 @@ function HomeDelDia() {
           tono="advertencia"
           titulo={`Se está acabando: ${masUrgente.producto.nombre_corto}`}
           detalle={
-            masUrgente.producto.unidades === 0
+            masUrgente.producto.unidades < 0
+              ? `Vendiste ${-masUrgente.producto.unidades} de más · ver sugerencia de compra`
+              : masUrgente.producto.unidades === 0
               ? "Agotado · ver sugerencia de compra"
               : `Quedan ${masUrgente.producto.unidades} · ver sugerencia de compra`
           }

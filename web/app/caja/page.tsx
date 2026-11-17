@@ -62,6 +62,7 @@ export default function CajaPage() {
         />
         <AmountCard
           compacta
+          montoAdvertencia
           etiqueta="Gastos en efectivo"
           monto={pesos(caja.gastosEfectivo)}
           className="col-span-2"

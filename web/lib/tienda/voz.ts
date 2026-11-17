@@ -53,8 +53,8 @@ export function interpretarVenta(dicho: string, productos: Producto[]): VentaDic
   const pedido = ` ${texto.split(/\bpaga(?:n)? con\b/)[0]} `;
 
   // Frases con las que se nombra cada producto, de la más larga a la más corta
+  // También los agotados: se puede vender lo que está en el estante sin anotar
   const frases = productos
-    .filter((p) => p.unidades > 0)
     .flatMap((p) =>
       [...(p.alias ?? []), p.nombre_corto, p.nombre].map((f) => ({
         producto: p,
@@ -88,10 +88,7 @@ export function interpretarVenta(dicho: string, productos: Producto[]): VentaDic
 
   const lineas = [...encontrados]
     .sort(([, a], [, b]) => a.posicion - b.posicion)
-    .map(([productoId, { cantidad }]) => {
-      const p = productos.find((x) => x.id === productoId)!;
-      return { productoId, cantidad: Math.min(cantidad, p.unidades) };
-    });
+    .map(([productoId, { cantidad }]) => ({ productoId, cantidad }));
 
   return {
     lineas,

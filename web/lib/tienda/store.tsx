@@ -198,7 +198,7 @@ function unidadesParaSubir(e: Mutable, productos: Producto[]): Producto[] {
     const llego = e.entradaProductos
       .filter((l) => l.producto_id === p.id && entradas.has(l.entrada_id))
       .reduce((s, l) => s + l.cantidad, 0);
-    return { ...p, unidades: Math.max(0, p.unidades + vendido - llego) };
+    return { ...p, unidades: p.unidades + vendido - llego };
   });
 }
 
@@ -373,7 +373,11 @@ function quitarVenta(e: Mutable, ventaId: string, estado: "deshecha" | "eliminad
   };
 }
 
-/** Anota la venta y descuenta el inventario; si corrige otra, esa se elimina primero. */
+/**
+ * Anota la venta y descuenta el inventario; si corrige otra, esa se elimina primero.
+ * Se puede vender más de lo anotado: las unidades quedan en negativo (−2 son dos
+ * que estaban en el estante sin anotar) hasta que llegue mercancía o se cuente en 42.
+ */
 function sumarVenta(e: Mutable, nueva: Venta, lineas: VentaProducto[], corrige?: string): Mutable {
   const base = corrige ? quitarVenta(e, corrige, "eliminada") : e;
   return {
@@ -382,7 +386,7 @@ function sumarVenta(e: Mutable, nueva: Venta, lineas: VentaProducto[], corrige?:
     ventaProductos: [...base.ventaProductos, ...lineas],
     productos: base.productos.map((p) => {
       const vendida = lineas.find((l) => l.producto_id === p.id);
-      return vendida ? { ...p, unidades: Math.max(0, p.unidades - vendida.cantidad) } : p;
+      return vendida ? { ...p, unidades: p.unidades - vendida.cantidad } : p;
     }),
   };
 }
@@ -902,7 +906,8 @@ function useTiendaState() {
       const sumarLlegada = (p: Producto) => {
         const llego = productosEntrada.find((l) => l.producto_id === p.id);
         return llego
-          ? { ...p, unidades: p.unidades + llego.cantidad, costo: llego.costo_unitario }
+          ? // Si estaba en negativo (se vendió de más), cuenta desde 0: lo de más ya se vendió
+            { ...p, unidades: Math.max(0, p.unidades) + llego.cantidad, costo: llego.costo_unitario }
           : p;
       };
       avisarSiFalla.current = true;

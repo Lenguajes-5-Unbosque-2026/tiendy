@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/tiendy/EmptyState";
 import { FotoProducto } from "@/components/tiendy/FotoProducto";
 import { ListItem } from "@/components/tiendy/ListItem";
 import { plural, pesos } from "@/lib/formato";
+import { textoDeMas } from "@/lib/tienda/calculos";
 import { useTienda } from "@/lib/tienda/store";
 import { textoUnidades, useInventario } from "@/lib/tienda/useInventario";
 
@@ -113,7 +114,13 @@ export default function InventarioPage() {
                   <ListItem
                     leading={<FotoProducto producto={item.producto} />}
                     titulo={item.producto.nombre}
-                    detalle={`${item.categoria} · ${pesos(item.producto.precio_venta)}`}
+                    detalle={
+                      item.producto.unidades < 0 ? (
+                        <span className="text-texto-advertencia">{textoDeMas(item.producto)}</span>
+                      ) : (
+                        `${item.categoria} · ${pesos(item.producto.precio_venta)}`
+                      )
+                    }
                     valor={unidades.texto}
                     valorTono={unidades.tono}
                     flecha

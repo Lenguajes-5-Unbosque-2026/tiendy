@@ -7,6 +7,8 @@ const tonos = {
   oscuro: "bg-fondo-encabezado text-texto-inverso",
   neutro: "bg-fondo-sutil text-texto-secundario",
   advertencia: "bg-fondo-advertencia text-texto-inverso",
+  // Gastos (cuaderno 33 y 36): naranja suave, para distinguirlos de las ventas
+  advertenciaSuave: "bg-fondo-advertencia-suave text-texto-advertencia",
   peligro: "bg-fondo-peligro-suave text-texto-peligro",
   exito: "bg-fondo-exito text-texto-inverso",
   // Sobre una tarjeta verde (botón Vender del Home)

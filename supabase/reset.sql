@@ -871,7 +871,23 @@ end $$;
 -- ═════════════════════════════════════════════════════════════
 -- Va después de los datos de prueba: sus ventas y entradas ya vienen contadas.
 
--- Vendido: resta, solo si la venta cuenta (una venta que sube ya deshecha no resta)
+-- Las unidades pueden quedar en negativo (vender de más)
+do $$
+declare
+  regla text;
+begin
+  for regla in
+    select conname from pg_constraint
+    where conrelid = 'public.productos'::regclass
+      and contype = 'c'
+      and pg_get_constraintdef(oid) ilike '%unidades >= 0%'
+  loop
+    execute format('alter table public.productos drop constraint %I', regla);
+  end loop;
+end $$;
+
+-- Vendido: resta, solo si la venta cuenta (una venta que sube ya deshecha no resta).
+-- Puede quedar en negativo: se vendió lo que había en el estante sin anotar
 create or replace function public.restar_vendido()
 returns trigger
 language plpgsql
@@ -881,7 +897,7 @@ as $$
 begin
   if exists (select 1 from ventas where id = new.venta_id and estado = 'anotada') then
     update productos
-      set unidades = greatest(0, unidades - new.cantidad)
+      set unidades = unidades - new.cantidad
       where id = new.producto_id;
   end if;
   return new;
@@ -921,7 +937,8 @@ create trigger devolver_vendido
   after update of estado on public.ventas
   for each row execute function public.devolver_vendido();
 
--- Llegó mercancía: suma y deja el costo de esta compra
+-- Llegó mercancía: suma y deja el costo de esta compra. Si estaba en negativo
+-- (vendido de más), cuenta desde 0
 create or replace function public.sumar_llegada()
 returns trigger
 language plpgsql
@@ -930,7 +947,7 @@ set search_path = public
 as $$
 begin
   update productos
-    set unidades = unidades + new.cantidad,
+    set unidades = greatest(0, unidades) + new.cantidad,
         costo = new.costo_unitario
     where id = new.producto_id;
   return new;

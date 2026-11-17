@@ -10,7 +10,7 @@ import { CampoPesos } from "@/components/tiendy/CampoPesos";
 import { FotoProducto } from "@/components/tiendy/FotoProducto";
 import { IconBadge } from "@/components/tiendy/IconBadge";
 import { QuantityStepper } from "@/components/tiendy/QuantityStepper";
-import { ventasUltimos7Dias } from "@/lib/tienda/calculos";
+import { textoDeMas, ventasUltimos7Dias } from "@/lib/tienda/calculos";
 import { useTienda } from "@/lib/tienda/store";
 import { useInventario } from "@/lib/tienda/useInventario";
 import { cn } from "@/lib/utils";
@@ -69,7 +69,12 @@ function EditarProducto({ item }: { item: ReturnType<typeof useInventario>["item
       <div className="flex items-center gap-espacio-4 rounded-lg bg-fondo-tarjeta p-espacio-4">
         {/* Por agotarse manda la alerta (diseño v4); si no, la foto o el ícono de caja */}
         {stock.porAgotarse ? (
-          <IconBadge icon={TriangleAlert} tono="peligro" tamano="l" />
+          // Vendido de más va en naranja; por agotarse, en rojo
+          <IconBadge
+            icon={TriangleAlert}
+            tono={producto.unidades < 0 ? "advertenciaSuave" : "peligro"}
+            tamano="l"
+          />
         ) : producto.imagen?.startsWith("https://") ? (
           <FotoProducto producto={producto} tamano="l" />
         ) : (
@@ -79,14 +84,19 @@ function EditarProducto({ item }: { item: ReturnType<typeof useInventario>["item
           <p
             className={cn(
               "text-valor",
-              !stock.porAgotarse
-                ? "text-texto-principal"
-                : stock.nivel === "critico"
-                  ? "text-texto-peligro"
-                  : "text-texto-advertencia"
+              // Vendido de más: naranja, no es una falta sino lo que había sin anotar
+              producto.unidades < 0
+                ? "text-texto-advertencia"
+                : !stock.porAgotarse
+                  ? "text-texto-principal"
+                  : stock.nivel === "critico"
+                    ? "text-texto-peligro"
+                    : "text-texto-advertencia"
             )}
           >
-            {producto.unidades === 0
+            {producto.unidades < 0
+              ? textoDeMas(producto)
+              : producto.unidades === 0
               ? "Agotado"
               : `${stock.porAgotarse ? "Quedan" : "Tienes"} ${producto.unidades} ${
                   producto.unidades === 1 ? "unidad" : "unidades"
@@ -107,13 +117,17 @@ function EditarProducto({ item }: { item: ReturnType<typeof useInventario>["item
       <div className="flex items-center justify-between gap-espacio-3 rounded-lg bg-fondo-tarjeta p-espacio-4">
         <div className="flex flex-col gap-espacio-1">
           <span className="text-cuerpo-fuerte">Unidades</span>
-          <span className="text-secundario text-texto-secundario">Ajustar si contaste distinto</span>
+          <span className={cn("text-secundario", unidades < 0 ? "text-texto-advertencia" : "text-texto-secundario")}>
+            {unidades < 0 ? "Cuenta el estante y escribe cuántas hay" : "Ajustar si contaste distinto"}
+          </span>
         </div>
         <QuantityStepper
           valor={unidades}
           etiqueta={producto.nombre}
           onMenos={() => setUnidades((u) => Math.max(0, u - 1))}
-          onMas={() => setUnidades((u) => u + 1)}
+          // Desde negativo (vendido de más) se cuenta desde 0
+          onMas={() => setUnidades((u) => Math.max(0, u) + 1)}
+          onCambiar={setUnidades}
           masRelleno
         />
       </div>

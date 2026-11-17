@@ -164,18 +164,31 @@ export function promedioDiario(
 
 export type NivelStock = "ok" | "bajo" | "critico";
 
+/**
+ * Unidades vendidas por encima de lo anotado: el inventario en negativo (−2 son
+ * dos que estaban en el estante sin anotar). 0 si no se vendió de más.
+ */
+export const vendidasDeMas = (producto: Pick<Producto, "unidades">) => Math.max(0, -producto.unidades);
+
+/** "Vendiste 2 de más · estaban en el estante sin anotar". */
+export const textoDeMas = (producto: Pick<Producto, "unidades">) =>
+  `Vendiste ${vendidasDeMas(producto)} de más · estaban en el estante sin anotar`;
+
 /** Estado del inventario de un producto: por agotarse si está en su mínimo o debajo. */
 export function estadoStock(producto: Producto, promedio: number) {
   // Mínimo 0: todavía no se han contado las unidades (cargado desde el listado, 13)
-  const porAgotarse = producto.minimo > 0 && producto.unidades <= producto.minimo;
-  const dias = promedio > 0 ? Math.floor(producto.unidades / promedio) : null;
+  // Vendido de más (negativo): ya no queda nada, aunque no se haya contado
+  const porAgotarse =
+    producto.unidades < 0 || (producto.minimo > 0 && producto.unidades <= producto.minimo);
+  const dias = promedio > 0 ? Math.floor(Math.max(0, producto.unidades) / promedio) : null;
   let nivel: NivelStock = "ok";
   if (porAgotarse) {
-    nivel = producto.unidades === 0 || (dias !== null && dias <= 2) ? "critico" : "bajo";
+    nivel = producto.unidades <= 0 || (dias !== null && dias <= 2) ? "critico" : "bajo";
   }
 
   let alcance: string | null = null;
-  if (producto.unidades === 0) alcance = "agotado";
+  if (producto.unidades < 0) alcance = `vendiste ${vendidasDeMas(producto)} de más`;
+  else if (producto.unidades === 0) alcance = "agotado";
   else if (dias !== null) alcance = dias <= 1 ? "se acaba mañana" : `alcanza ${dias} días`;
 
   return { porAgotarse, nivel, dias, alcance, promedio };
@@ -187,5 +200,6 @@ export const DIAS_SUGERENCIA = 7;
 /** Cuánto pedir para cubrir los próximos días de venta, sin bajar del mínimo. */
 export function cantidadSugerida(producto: Producto, promedio: number) {
   const necesarias = Math.max(Math.ceil(promedio * DIAS_SUGERENCIA), producto.minimo);
-  return Math.max(0, necesarias - producto.unidades);
+  // Lo vendido de más no se repone dos veces: al llegar mercancía se cuenta desde 0
+  return Math.max(0, necesarias - Math.max(0, producto.unidades));
 }

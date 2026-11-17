@@ -11,18 +11,41 @@
 -- · Producto vendido (venta_productos): resta la cantidad, si la venta está anotada.
 -- · Venta deshecha (22) o eliminada (36): devuelve lo que se había restado.
 -- · Mercancía que llegó (entrada_productos): suma la cantidad y deja el costo nuevo.
+--   Si estaba en negativo, cuenta desde 0.
 --
 -- El conteo a mano (42, Ver y editar producto) sigue escribiendo las unidades
 -- directamente: es el número que la persona contó en el estante.
 --
--- Las unidades nunca quedan negativas (la base no lo permite): si se vende más
--- de lo que había, quedan en 0, como en la app.
+-- Vender de más: se puede vender aunque el inventario diga agotado (había en el
+-- estante sin anotar). Las unidades quedan en negativo (−2 = vendiste 2 que no
+-- estaban anotadas) y la app lo muestra en naranja. Cuando llega mercancía se
+-- cuenta desde 0 (lo de más ya se vendió) y el conteo a mano (42) pone el número
+-- que se contó.
+--
+-- Si ya habías corrido este archivo, córrelo otra vez: quita la regla que no
+-- dejaba unidades negativas y cambia las dos funciones.
 --
 -- Lo que ya está en la base no se vuelve a contar: esto solo aplica a lo nuevo.
 
 begin;
 
--- Vendido: resta, solo si la venta cuenta (una venta que sube ya deshecha no resta)
+-- Las unidades pueden quedar en negativo (vender de más)
+do $$
+declare
+  regla text;
+begin
+  for regla in
+    select conname from pg_constraint
+    where conrelid = 'public.productos'::regclass
+      and contype = 'c'
+      and pg_get_constraintdef(oid) ilike '%unidades >= 0%'
+  loop
+    execute format('alter table public.productos drop constraint %I', regla);
+  end loop;
+end $$;
+
+-- Vendido: resta, solo si la venta cuenta (una venta que sube ya deshecha no resta).
+-- Puede quedar en negativo: se vendió lo que había en el estante sin anotar
 create or replace function public.restar_vendido()
 returns trigger
 language plpgsql
@@ -32,7 +55,7 @@ as $$
 begin
   if exists (select 1 from ventas where id = new.venta_id and estado = 'anotada') then
     update productos
-      set unidades = greatest(0, unidades - new.cantidad)
+      set unidades = unidades - new.cantidad
       where id = new.producto_id;
   end if;
   return new;
@@ -72,7 +95,8 @@ create trigger devolver_vendido
   after update of estado on public.ventas
   for each row execute function public.devolver_vendido();
 
--- Llegó mercancía: suma y deja el costo de esta compra
+-- Llegó mercancía: suma y deja el costo de esta compra. Si estaba en negativo
+-- (vendido de más), cuenta desde 0
 create or replace function public.sumar_llegada()
 returns trigger
 language plpgsql
@@ -81,7 +105,7 @@ set search_path = public
 as $$
 begin
   update productos
-    set unidades = unidades + new.cantidad,
+    set unidades = greatest(0, unidades) + new.cantidad,
         costo = new.costo_unitario
     where id = new.producto_id;
   return new;
