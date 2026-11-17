@@ -11,6 +11,7 @@ import { HOY } from "@/lib/tienda/calculos";
 import { nombreMedio, resultadoCaja, type TipoMovimiento } from "@/lib/tienda/cuaderno";
 import { nombreCategoria } from "@/lib/tienda/gastos";
 import { useTienda } from "@/lib/tienda/store";
+import { cn } from "@/lib/utils";
 
 type Fila = [string, string];
 
@@ -201,7 +202,7 @@ export function DetalleMovimiento({ id }: { id: string }) {
               <dd
                 className={
                   i === 0
-                    ? "text-monto-m text-texto-principal"
+                    ? cn("text-monto-m", tipo === "gasto" ? "text-texto-advertencia" : "text-texto-principal")
                     : "text-right text-cuerpo-fuerte font-bold text-texto-principal"
                 }
               >

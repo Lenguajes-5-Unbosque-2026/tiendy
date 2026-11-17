@@ -10,7 +10,7 @@ type AmountCardProps = {
   centrada?: boolean;
   /** El monto en verde cuando es plata que entra ("Ventas en efectivo"). */
   montoPrimario?: boolean;
-  /** El monto en naranja cuando es una alerta ("Diferencia de caja" con faltante, 19). */
+  /** El monto en naranja: gastos ("Gastos en efectivo") o una alerta ("Diferencia de caja" con faltante, 19). */
   montoAdvertencia?: boolean;
   /** Línea de detalle debajo del monto ("Ganancia $118.000"). */
   children?: React.ReactNode;

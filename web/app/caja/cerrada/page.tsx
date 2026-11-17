@@ -56,7 +56,7 @@ export default function CajaCerradaPage() {
 
       <div className="grid grid-cols-2 gap-espacio-3">
         <AmountCard compacta montoPrimario etiqueta="Vendido" monto={pesos(resultado.vendido)} />
-        <AmountCard compacta etiqueta="Gastos" monto={pesos(resultado.gastos)} />
+        <AmountCard compacta montoAdvertencia etiqueta="Gastos" monto={pesos(resultado.gastos)} />
         <AmountCard
           compacta
           montoPrimario
@@ -64,7 +64,7 @@ export default function CajaCerradaPage() {
           monto={pesos(resultado.ganancia)}
           className="bg-fondo-exito-suave"
         />
-        {/* Naranja solo si faltó plata: es una alerta, no un gasto */}
+        {/* La diferencia va en naranja solo si faltó plata (alerta) */}
         <AmountCard
           compacta
           montoAdvertencia={diferencia < 0}

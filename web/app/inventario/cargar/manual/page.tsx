@@ -17,7 +17,10 @@ const MINIMO_INICIAL = 5;
 
 const vacio = { nombre: "", precio: null as number | null, costo: null as number | null, categoria: null as string | null, cantidad: 0 };
 
-/** Carga manual (11): un producto con nombre, precio, costo, categoría y cantidad. */
+/**
+ * Carga manual (11): un producto con nombre, precio, costo, categoría y cantidad.
+ * La cantidad se cambia con − y + o se escribe con el teclado (11a).
+ */
 export default function CargaManualPage() {
   const router = useRouter();
   const { categorias, agregarProductos } = useTienda();
@@ -148,6 +151,8 @@ export default function CargaManualPage() {
           etiqueta={form.nombre || "Producto nuevo"}
           onMenos={() => setForm({ ...form, cantidad: Math.max(0, form.cantidad - 1) })}
           onMas={() => setForm({ ...form, cantidad: form.cantidad + 1 })}
+          // 11a · La cantidad también se escribe: 120 unidades no se suman de a una
+          onCambiar={(cantidad) => setForm((f) => ({ ...f, cantidad }))}
           masRelleno
         />
       </div>

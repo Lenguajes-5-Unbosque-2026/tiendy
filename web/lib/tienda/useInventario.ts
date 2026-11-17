@@ -30,8 +30,11 @@ export function useInventario() {
 
 export type ItemInventario = ReturnType<typeof useInventario>["items"][number];
 
-/** "Quedan 2", "Agotado" o "24 und." con su color. */
+/** "Quedan 2", "Agotado", "24 und." o "−2 und." (vendido de más) con su color. */
 export function textoUnidades({ producto, stock }: ItemInventario) {
+  // Vendido de más: en naranja, con el signo (−2 und.)
+  if (producto.unidades < 0)
+    return { texto: `−${-producto.unidades} und.`, tono: "advertencia" as const };
   if (producto.unidades === 0 && producto.minimo === 0)
     return { texto: "Sin contar", tono: "secundario" as const };
   if (producto.unidades === 0) return { texto: "Agotado", tono: "peligro" as const };

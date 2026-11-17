@@ -6,14 +6,30 @@ import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
 import { useTienda } from "@/lib/tienda/store";
+import { cn } from "@/lib/utils";
 
 // La misma foto de Fiados próximamente (37): el tendero atendiendo a un cliente
 import foto from "@/public/img/fiados-proximamente.jpg";
 // Último cuadro del video: se muestra si el video no se puede reproducir
 import finalSplash from "@/public/img/splash-final.jpg";
 
+// Entrada del Splash (01a → 01c): el lápiz en verde, el ícono y el logo
+import splashLapiz from "@/public/img/splash-lapiz.png";
+import splashIcono from "@/public/img/splash-icono.png";
+import splashLogo from "@/public/img/splash-logo.png";
+
+/** Cada cuadro de la entrada: el lápiz sobre verde, el ícono "Ti" y el logo. */
+const ENTRADA = [
+  { src: splashLapiz, fondo: "bg-fondo-encabezado", alt: "Lápiz de Tiendy" },
+  { src: splashIcono, fondo: "bg-fondo-splash", alt: "Ícono de Tiendy" },
+  { src: splashLogo, fondo: "bg-fondo-splash", alt: "Tiendy" },
+];
+/** Lo que se ve cada cuadro de la entrada. */
+const POR_CUADRO = 800;
+/** Segundo del video en que aparece el logo, como en el último cuadro de la entrada. */
+const VIDEO_DESDE = 1.2;
 /** Tope del Splash: aunque el video se quede cargando, se sigue a Bienvenida. */
-const DURACION_MAXIMA = 6000;
+const DURACION_MAXIMA = 8000;
 /** Lo que se ve el último cuadro cuando el video no se puede reproducir. */
 const DURACION_RESPALDO = 1800;
 
@@ -25,23 +41,44 @@ export default function BienvenidaPage() {
 }
 
 /**
- * Splash (01): el video de public/img/splash.mp4 (4 s, sin sonido) y, al
- * terminar, Bienvenida. Si el celular no deja reproducirlo (sin conexión, ahorro
- * de batería), se ve su último cuadro: el logo de Tiendy.
+ * Splash (01): primero la entrada (01a lápiz en verde, 01b ícono, 01c logo) y
+ * después el video de public/img/splash.mp4 (sin sonido) desde que aparece el
+ * logo, hasta "Tu tienda, al día" con sus tres etiquetas (02a). Al terminar,
+ * Bienvenida. Si el celular no deja reproducir el video (sin conexión, ahorro de
+ * batería), se ve su último cuadro.
  */
 function Splash({ alTerminar }: { alTerminar: () => void }) {
   const video = useRef<HTMLVideoElement>(null);
+  /** Cuadro de la entrada que se ve; al pasar el último, el video. */
+  const [paso, setPaso] = useState(0);
   const [respaldo, setRespaldo] = useState(false);
+  const enVideo = paso >= ENTRADA.length;
 
-  // Algunos celulares bloquean la reproducción automática: entonces va el respaldo
+  // La entrada avanza sola, un cuadro tras otro
   useEffect(() => {
-    video.current?.play().catch(() => setRespaldo(true));
-  }, []);
+    if (enVideo) return;
+    const t = setTimeout(() => setPaso((n) => n + 1), POR_CUADRO);
+    return () => clearTimeout(t);
+  }, [paso, enVideo]);
+
+  // Al terminar la entrada sigue el video desde el logo. Algunos celulares
+  // bloquean la reproducción automática: entonces va el respaldo
+  useEffect(() => {
+    const v = video.current;
+    if (!enVideo || !v) return;
+    try {
+      v.currentTime = VIDEO_DESDE;
+    } catch {
+      // Sin datos del video todavía: arranca desde el principio
+    }
+    v.play().catch(() => setRespaldo(true));
+  }, [enVideo]);
 
   useEffect(() => {
+    if (!enVideo) return;
     const t = setTimeout(alTerminar, respaldo ? DURACION_RESPALDO : DURACION_MAXIMA);
     return () => clearTimeout(t);
-  }, [respaldo, alTerminar]);
+  }, [enVideo, respaldo, alTerminar]);
 
   return (
     <main className="relative flex-1 overflow-hidden bg-fondo-splash">
@@ -58,7 +95,6 @@ function Splash({ alTerminar }: { alTerminar: () => void }) {
         <video
           ref={video}
           src="/img/splash.mp4"
-          autoPlay
           muted
           playsInline
           preload="auto"
@@ -69,6 +105,20 @@ function Splash({ alTerminar }: { alTerminar: () => void }) {
           className="absolute inset-0 size-full object-cover"
         />
       )}
+      {/* La entrada va encima del video y se funde de un cuadro al siguiente */}
+      {ENTRADA.map((cuadro, i) => (
+        <div
+          key={cuadro.alt}
+          aria-hidden={i !== paso}
+          className={cn(
+            "absolute inset-0 transition-opacity duration-500",
+            cuadro.fondo,
+            i <= paso && !enVideo ? "opacity-100" : "opacity-0"
+          )}
+        >
+          <Image src={cuadro.src} alt={cuadro.alt} priority fill sizes="100vw" className="object-cover" />
+        </div>
+      ))}
     </main>
   );
 }

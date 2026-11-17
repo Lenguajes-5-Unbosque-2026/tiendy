@@ -17,6 +17,7 @@ import type { MedioPago, Producto } from "@/lib/mock/tipos";
 import { useTienda, type Borrador } from "@/lib/tienda/store";
 import { useReconocimientoVoz } from "@/lib/tienda/useReconocimientoVoz";
 import { interpretarVenta, normalizar } from "@/lib/tienda/voz";
+import { cn } from "@/lib/utils";
 
 const mediosPago: { valor: MedioPago; etiqueta: string }[] = [
   { valor: "efectivo", etiqueta: "Efectivo" },
@@ -65,7 +66,12 @@ export function VenderSheet() {
     },
     [productos, setBorrador],
   );
-  const voz = useReconocimientoVoz(alEscuchar);
+  // Los nombres de los productos ayudan a la voz por API a entenderlos
+  const pistaVoz = useMemo(
+    () => [...new Set(productos.map((p) => p.nombre_corto))].join(", "),
+    [productos],
+  );
+  const voz = useReconocimientoVoz(alEscuchar, pistaVoz);
   const escuchando = voz.estado === "escuchando";
 
   const porId = useMemo(() => new Map(productos.map((p) => [p.id, p])), [productos]);
@@ -96,8 +102,12 @@ export function VenderSheet() {
   const cantidadDe = (id: string) =>
     borrador.lineas.find((l) => l.productoId === id)?.cantidad ?? 0;
 
+  /** Lo que se vende por encima de lo anotado en el inventario (va en naranja). */
+  const deMas = (producto: Producto, cantidad = cantidadDe(producto.id)) =>
+    Math.max(0, cantidad - Math.max(0, producto.unidades));
+
+  // Aunque diga agotado se puede vender: lo que hay en el estante sin anotar
   const sumar = (producto: Producto, canal: Borrador["canal"]) => {
-    if (cantidadDe(producto.id) >= producto.unidades) return;
     const existe = borrador.lineas.some((l) => l.productoId === producto.id);
     actualizar({
       canal: borrador.lineas.length === 0 ? canal : borrador.canal,
@@ -144,7 +154,8 @@ export function VenderSheet() {
   const cancelar = (abierto: boolean) => {
     setVenderAbierto(abierto);
     if (!abierto) {
-      voz.detener();
+      // Lo que se alcanzó a decir no se anota
+      voz.cancelar();
       reiniciarBorrador();
       limpiar();
     }
@@ -206,7 +217,9 @@ export function VenderSheet() {
                   <div role="status" className="flex items-center gap-espacio-3 rounded-lg bg-fondo-primario-suave p-espacio-4">
                     <IconBadge icon={Mic} tono="exito" tamano="l" />
                     <div className="flex min-w-0 flex-col gap-espacio-1">
-                      <span className="text-secundario font-bold text-texto-primario">Escuchando…</span>
+                      <span className="text-secundario font-bold text-texto-primario">
+                        {voz.procesando ? "Entendiendo lo que dijiste…" : "Escuchando…"}
+                      </span>
                       {voz.parcial && (
                         <span className="text-cuerpo text-texto-principal">“{voz.parcial}…”</span>
                       )}
@@ -227,7 +240,9 @@ export function VenderSheet() {
                       Aquí van apareciendo los productos que digas
                     </span>
                   </div>
-                  <Button onClick={voz.detener}>Listo, ya terminé</Button>
+                  <Button disabled={voz.procesando} onClick={voz.detener}>
+                    Listo, ya terminé
+                  </Button>
                 </>
               ) : dicho?.entendido ? (
                 <div className="flex flex-col gap-espacio-2">
@@ -271,7 +286,7 @@ export function VenderSheet() {
                       <Button
                         variant={voz.estado === "escuchando" ? "default" : "secondary"}
                         size="icon"
-                        disabled={!voz.disponible}
+                        disabled={!voz.disponible || voz.procesando}
                         aria-label={
                           voz.estado === "escuchando" ? "Dejar de escuchar" : "Vender hablando"
                         }
@@ -284,7 +299,11 @@ export function VenderSheet() {
 
                     {voz.estado === "error" && (
                       <p role="status" className="text-secundario text-texto-secundario">
-                        No pudimos usar el micrófono. Revisa el permiso o busca a mano.
+                        {voz.falla === "no-escuche"
+                          ? "No te escuché. Toca el micrófono e intenta de nuevo, o busca a mano."
+                          : voz.falla === "servicio"
+                            ? "No pudimos entender lo que dijiste. Revisa tu conexión o busca a mano."
+                            : "No pudimos usar el micrófono. Revisa el permiso o busca a mano."}
                       </p>
                     )}
                     {dicho && !dicho.entendido && (
@@ -302,19 +321,23 @@ export function VenderSheet() {
                             <li key={p.id} className="border-b border-borde-default last:border-0">
                               <button
                                 type="button"
-                                disabled={agotado}
                                 onClick={() => {
                                   sumar(p, "busqueda");
                                   setBusqueda("");
                                 }}
-                                className="flex w-full items-center justify-between gap-espacio-3 px-espacio-4 py-espacio-3 text-left disabled:text-texto-sutil"
+                                className="flex w-full items-center justify-between gap-espacio-3 px-espacio-4 py-espacio-3 text-left"
                               >
                                 <span className="flex min-w-0 items-center gap-espacio-3">
                                   <FotoProducto producto={p} />
                                   <span className="text-cuerpo">{p.nombre}</span>
                                 </span>
-                                <span className="shrink-0 text-secundario">
-                                  {p.unidades === 0 ? "Agotado" : pesos(p.precio_venta)}
+                                <span
+                                  className={cn(
+                                    "shrink-0 text-secundario",
+                                    agotado && "font-bold text-texto-advertencia"
+                                  )}
+                                >
+                                  {agotado ? `Agotado · ${pesos(p.precio_venta)}` : pesos(p.precio_venta)}
                                 </span>
                               </button>
                             </li>
@@ -338,8 +361,12 @@ export function VenderSheet() {
                       {ventasRapidas.map((p) => (
                         <Chip
                           key={p.id}
-                          disabled={cantidadDe(p.id) >= p.unidades}
                           onClick={() => sumar(p, "toque")}
+                          // Agotado: se sigue vendiendo, en naranja
+                          className={cn(
+                            cantidadDe(p.id) >= p.unidades &&
+                              "border-fondo-advertencia bg-fondo-advertencia-suave text-texto-advertencia"
+                          )}
                         >
                           {p.nombre_corto} · {pesos(p.precio_venta)}
                         </Chip>
@@ -357,15 +384,19 @@ export function VenderSheet() {
                   <ul className="flex flex-col gap-espacio-3">
                     {lineas.map((l) => (
                       <li key={l.productoId} className="flex items-center gap-espacio-3">
-                        <span className="min-w-0 flex-1 text-cuerpo-fuerte">
-                          {l.producto.nombre}
+                        <span className="flex min-w-0 flex-1 flex-col gap-espacio-1">
+                          <span className="text-cuerpo-fuerte">{l.producto.nombre}</span>
+                          {deMas(l.producto, l.cantidad) > 0 && (
+                            <span className="text-secundario font-bold text-texto-advertencia">
+                              {deMas(l.producto, l.cantidad)} de más · sin anotar en el inventario
+                            </span>
+                          )}
                         </span>
                         <QuantityStepper
                           valor={l.cantidad}
                           etiqueta={l.producto.nombre}
                           onMenos={() => restar(l.productoId)}
                           onMas={() => sumar(l.producto, borrador.canal)}
-                          maximo={l.producto.unidades}
                         />
                         <span className="shrink-0 text-cuerpo-fuerte font-bold">
                           {pesos(l.producto.precio_venta * l.cantidad)}

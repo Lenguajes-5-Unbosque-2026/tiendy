@@ -56,7 +56,7 @@ export default function GastoListoPage() {
         {filas.map(([etiqueta, valor], i) => (
           <div key={etiqueta} className="flex items-center justify-between gap-espacio-3">
             <dt className="text-cuerpo text-texto-secundario">{etiqueta}</dt>
-            <dd className={i === 0 ? "text-monto-m text-texto-principal" : "text-cuerpo-fuerte font-bold text-texto-principal"}>
+            <dd className={i === 0 ? "text-monto-m text-texto-advertencia" : "text-cuerpo-fuerte font-bold text-texto-principal"}>
               {valor}
             </dd>
           </div>

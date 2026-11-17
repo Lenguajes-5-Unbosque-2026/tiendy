@@ -31,7 +31,10 @@ const PALABRAS: Record<Exclude<CategoriaGasto, "otro">, RegExp> = {
 const NUMEROS: Record<string, number> = {
   // Sin "un"/"uno": en "pagué un domicilio de 5 mil" no son plata
   dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8,
-  nueve: 9, diez: 10, quince: 15, veinte: 20, treinta: 30, cuarenta: 40, cincuenta: 50,
+  nueve: 9, diez: 10, once: 11, doce: 12, trece: 13, catorce: 14, quince: 15, dieciseis: 16,
+  diecisiete: 17, dieciocho: 18, diecinueve: 19, veinte: 20, veintiun: 21, veintiuno: 21,
+  veintidos: 22, veintitres: 23, veinticuatro: 24, veinticinco: 25, veintiseis: 26,
+  veintisiete: 27, veintiocho: 28, veintinueve: 29, treinta: 30, cuarenta: 40, cincuenta: 50,
   sesenta: 60, setenta: 70, ochenta: 80, noventa: 90, cien: 100, doscientos: 200,
   trescientos: 300, quinientos: 500,
 };

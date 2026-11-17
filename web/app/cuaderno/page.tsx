@@ -84,7 +84,7 @@ export default function CuadernoPage() {
 
       <div className="grid grid-cols-2 gap-espacio-3">
         <AmountCard compacta montoPrimario etiqueta="Entró" monto={pesos(entro)} />
-        <AmountCard compacta etiqueta="Salió" monto={pesos(salio)} />
+        <AmountCard compacta montoAdvertencia etiqueta="Salió" monto={pesos(salio)} />
       </div>
 
       <div className="flex items-center gap-espacio-2">
@@ -123,7 +123,13 @@ export default function CuadernoPage() {
                     titulo={m.titulo}
                     detalle={m.detalle}
                     valor={m.monto === null ? undefined : `${m.monto > 0 ? "+" : ""}${pesos(m.monto)}`}
-                    valorTono={m.monto !== null && m.monto > 0 ? "primario" : "principal"}
+                    valorTono={
+                      m.tipo === "gasto"
+                        ? "advertencia"
+                        : m.monto !== null && m.monto > 0
+                          ? "primario"
+                          : "principal"
+                    }
                     href={`/cuaderno/${m.id}`}
                   />
                 </li>

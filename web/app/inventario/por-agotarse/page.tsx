@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/tiendy/EmptyState";
 import { FotoProducto } from "@/components/tiendy/FotoProducto";
 import { ListItem } from "@/components/tiendy/ListItem";
 import { plural } from "@/lib/formato";
+import { textoDeMas } from "@/lib/tienda/calculos";
 import { useInventario } from "@/lib/tienda/useInventario";
 
 type Filtro = "todos" | "critico" | "bajo";
@@ -60,7 +61,9 @@ export default function PorAgotarsePage() {
                   leading={<FotoProducto producto={producto} />}
                   titulo={producto.nombre}
                   detalle={
-                    producto.unidades === 0
+                    producto.unidades < 0
+                      ? textoDeMas(producto)
+                      : producto.unidades === 0
                       ? "Agotado"
                       : [`Quedan ${producto.unidades}`, stock.alcance].filter(Boolean).join(" · ")
                   }
