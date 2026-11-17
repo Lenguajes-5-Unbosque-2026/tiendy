@@ -1,10 +1,13 @@
 "use client";
 
 // Estado de la tienda en el celular. Guarda lo que cambia en el navegador y, si la
-// tienda existe en Supabase, también allá (ver nube.ts): al iniciar sesión se traen
-// la tienda, sus personas, productos, turnos, ventas, gastos y entradas de
-// mercancía; cada venta, gasto, entrada, apertura y cierre de caja, empleado y
-// cambio de producto se escribe allá.
+// tienda existe en Supabase, también allá (ver nube.ts). En las dos direcciones:
+// · Del celular a Supabase: cada venta, gasto, entrada, apertura y cierre de caja,
+//   empleado y cambio de producto queda marcado en sinSubir hasta que Supabase lo
+//   confirma; si falla (sin internet), se reintenta solo.
+// · De Supabase al celular: al iniciar sesión, al abrir la app, al volver a ella,
+//   cada 30 s y cuando Supabase avisa un cambio (tiempo real), se vuelve a leer la
+//   tienda. Lo marcado que todavía no ha subido no se pisa.
 import {
   createContext,
   Fragment,
@@ -34,6 +37,7 @@ import type {
 } from "@/lib/mock/tipos";
 import { cajaDelTurno, fijarHoy, HOY, HOY_PRUEBA, hoyEnColombia } from "@/lib/tienda/calculos";
 import { type Filtros, filtrosHoy } from "@/lib/tienda/cuaderno";
+import * as acceso from "@/lib/tienda/acceso";
 import * as nube from "@/lib/tienda/nube";
 
 const mock = datos as unknown as DatosMock;
@@ -55,7 +59,226 @@ type Mutable = {
   entradaProductos: EntradaProducto[];
   /** La tienda existe en Supabase: lo que se anota se guarda también allá. */
   enNube: boolean;
+  /** Lo anotado en este celular que Supabase todavía no ha confirmado. */
+  sinSubir: Marca[];
 };
+
+/**
+ * Un registro que hay que dejar en Supabase como está en el celular. `vez`
+ * cambia cada vez que se vuelve a tocar, para no dar por subido un cambio más
+ * nuevo que el que se mandó.
+ */
+export type Marca = {
+  tipo: "tienda" | "persona" | "producto" | "turno" | "venta" | "gasto" | "entrada";
+  id: string;
+  vez: number;
+};
+
+/** Se sube primero lo que otros registros necesitan que exista. */
+const ORDEN_SUBIDA: Record<Marca["tipo"], number> = {
+  tienda: 0,
+  persona: 1,
+  producto: 2,
+  turno: 3,
+  venta: 4,
+  gasto: 4,
+  entrada: 4,
+};
+
+/** Cada cuánto se vuelve a leer Supabase, aunque no llegue aviso en tiempo real. */
+const CADA_CUANTO_LEER = 30_000;
+
+let contadorVez = 0;
+
+/** Agrega las marcas (o renueva las que ya estaban). */
+function marcar(e: Mutable, nuevas: Omit<Marca, "vez">[]): Mutable {
+  if (!e.enNube || nuevas.length === 0) return e;
+  const clave = (m: Omit<Marca, "vez">) => `${m.tipo}:${m.id}`;
+  const claves = new Set(nuevas.map(clave));
+  return {
+    ...e,
+    sinSubir: [
+      ...e.sinSubir.filter((m) => !claves.has(clave(m))),
+      ...nuevas.map((m) => ({ ...m, vez: Date.now() * 1000 + (contadorVez++ % 1000) })),
+    ],
+  };
+}
+
+/** Los ids que el celular dice que aún no están en Supabase, de un tipo. */
+function idsSinSubir(e: Pick<Mutable, "sinSubir">, tipo: Marca["tipo"]) {
+  return new Set(e.sinSubir.filter((m) => m.tipo === tipo).map((m) => m.id));
+}
+
+/** Lo de Supabase manda, salvo lo que el celular todavía no ha subido. */
+function mezclar<T extends { id: string }>(deLaNube: T[], locales: T[], sinSubir: Set<string>) {
+  const local = new Map(locales.filter((x) => sinSubir.has(x.id)).map((x) => [x.id, x]));
+  const enLaNube = new Set(deLaNube.map((x) => x.id));
+  return [
+    // En el mismo orden de Supabase, con la versión del celular si falta subirla
+    // (si en el celular ya no está, por ejemplo un gasto eliminado, no se muestra)
+    ...deLaNube.flatMap((x) => (sinSubir.has(x.id) ? (local.has(x.id) ? [local.get(x.id)!] : []) : [x])),
+    ...[...local.values()].filter((x) => !enLaNube.has(x.id)),
+  ];
+}
+
+const porFecha = <T extends { fecha_hora: string }>(a: T, b: T) => a.fecha_hora.localeCompare(b.fecha_hora);
+
+/** El estado del celular con lo que hay en Supabase, sin perder lo que falta por subir. */
+function unirConNube(e: Mutable, datos: nube.DatosTienda): Mutable {
+  const ventasSinSubir = idsSinSubir(e, "venta");
+  const entradasSinSubir = idsSinSubir(e, "entrada");
+  // Los productos de una venta o entrada sin subir guardan las unidades del celular:
+  // al subirla, son las que quedan en Supabase
+  const productosSinSubir = idsSinSubir(e, "producto");
+  for (const l of e.ventaProductos) if (ventasSinSubir.has(l.venta_id)) productosSinSubir.add(l.producto_id);
+  for (const l of e.entradaProductos)
+    if (entradasSinSubir.has(l.entrada_id)) productosSinSubir.add(l.producto_id);
+  return {
+    ...e,
+    tienda: idsSinSubir(e, "tienda").size > 0 ? e.tienda : datos.tienda,
+    personas: mezclar(datos.personas, e.personas, idsSinSubir(e, "persona")),
+    productos: mezclar(datos.productos, e.productos, productosSinSubir),
+    turnos: mezclar(datos.turnos, e.turnos, idsSinSubir(e, "turno")).sort((a, b) =>
+      a.abierto_en.localeCompare(b.abierto_en)
+    ),
+    ventas: mezclar(datos.ventas, e.ventas, ventasSinSubir).sort(porFecha),
+    ventaProductos: [
+      ...datos.ventaProductos.filter((l) => !ventasSinSubir.has(l.venta_id)),
+      ...e.ventaProductos.filter((l) => ventasSinSubir.has(l.venta_id)),
+    ],
+    gastos: mezclar(datos.gastos, e.gastos, idsSinSubir(e, "gasto")).sort(porFecha),
+    entradas: mezclar(datos.entradas, e.entradas, entradasSinSubir).sort(porFecha),
+    entradaProductos: [
+      ...datos.entradaProductos.filter((l) => !entradasSinSubir.has(l.entrada_id)),
+      ...e.entradaProductos.filter((l) => entradasSinSubir.has(l.entrada_id)),
+    ],
+  };
+}
+
+/**
+ * Registros creados en este celular (sus id llevan "-", los de prueba no) que no
+ * están en Supabase: quedaron de antes de que la app llevara la cuenta de lo que
+ * falta por subir, o de una tienda creada sin conexión.
+ */
+function huerfanos(e: Mutable, datos: nube.DatosTienda | null): Omit<Marca, "vez">[] {
+  const deLaApp = (id: string) => id.includes("-");
+  const faltan = <T extends { id: string }>(tipo: Marca["tipo"], locales: T[], enNube: T[] | undefined) => {
+    const ya = new Set((enNube ?? []).map((x) => x.id));
+    return locales.filter((x) => deLaApp(x.id) && !ya.has(x.id)).map((x) => ({ tipo, id: x.id }));
+  };
+  return [
+    ...faltan("persona", e.personas, datos?.personas),
+    ...faltan("producto", e.productos, datos?.productos),
+    ...faltan("turno", e.turnos, datos?.turnos),
+    ...faltan("venta", e.ventas, datos?.ventas),
+    ...faltan("gasto", e.gastos, datos?.gastos),
+    ...faltan("entrada", e.entradas, datos?.entradas),
+  ];
+}
+
+/** Lo que cambió entre dos estados, para no volver a pintar si Supabase trae lo mismo. */
+function igual(a: Mutable, b: Mutable) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/**
+ * Cuando la base lleva las unidades (supabase/inventario.sql), un producto que se
+ * sube con su número (nuevo, o contado a mano en 42) va con las unidades de
+ * antes de lo que falta por subir: la base va a restar las ventas pendientes y a
+ * sumar la mercancía pendiente cuando lleguen. Si no, iría contado dos veces.
+ */
+function unidadesParaSubir(e: Mutable, productos: Producto[]): Producto[] {
+  const ventas = idsSinSubir(e, "venta");
+  const entradas = idsSinSubir(e, "entrada");
+  const anotadas = new Set(e.ventas.filter((v) => ventas.has(v.id) && v.estado === "anotada").map((v) => v.id));
+  return productos.map((p) => {
+    const vendido = e.ventaProductos
+      .filter((l) => l.producto_id === p.id && anotadas.has(l.venta_id))
+      .reduce((s, l) => s + l.cantidad, 0);
+    const llego = e.entradaProductos
+      .filter((l) => l.producto_id === p.id && entradas.has(l.entrada_id))
+      .reduce((s, l) => s + l.cantidad, 0);
+    return { ...p, unidades: Math.max(0, p.unidades + vendido - llego) };
+  });
+}
+
+/** Los productos como deben subir: ajustados si la base lleva las unidades, o como están. */
+async function productosParaSubir(e: Mutable, productos: Producto[]) {
+  return (await nube.porMovimientos()) ? unidadesParaSubir(e, productos) : productos;
+}
+
+/** Arma la subida de una marca con lo que hay ahora en el celular (null: no hay nada que subir). */
+function subidaDe(e: Mutable, m: Marca): (() => Promise<void>) | null {
+  const tiendaId = e.tienda.id;
+  const turnoDe = (id: string) => e.turnos.find((t) => t.id === id) ?? null;
+  const personaDe = (id: string) => e.personas.find((p) => p.id === id) ?? null;
+  switch (m.tipo) {
+    case "tienda": {
+      const { nombre, tipo, barrio, direccion, ciudad, horario_apertura, horario_cierre, nit } = e.tienda;
+      return () =>
+        nube.guardarTienda(tiendaId, {
+          nombre,
+          tipo,
+          barrio,
+          direccion,
+          ciudad,
+          horario_apertura,
+          horario_cierre,
+          nit,
+        });
+    }
+    case "persona": {
+      const persona = personaDe(m.id);
+      return persona && (() => nube.subirPersona(tiendaId, persona));
+    }
+    case "producto": {
+      const producto = e.productos.find((p) => p.id === m.id);
+      return producto
+        ? async () => nube.subirProductos(tiendaId, await productosParaSubir(e, [producto]))
+        : null;
+    }
+    case "turno": {
+      const turno = turnoDe(m.id);
+      return turno && (() => nube.subirTurno(tiendaId, turno));
+    }
+    case "venta": {
+      const venta = e.ventas.find((v) => v.id === m.id);
+      if (!venta) return null;
+      return async () =>
+        nube.subirVenta({
+          tiendaId,
+          venta,
+          lineas: e.ventaProductos.filter((l) => l.venta_id === venta.id),
+          turno: turnoDe(venta.turno_id),
+          persona: personaDe(venta.persona_id),
+          productos: await productosParaSubir(e, productosDe(e, [venta.id])),
+        });
+    }
+    case "gasto": {
+      // Si ya no está en el celular, se eliminó o se corrigió: se borra
+      const gasto = e.gastos.find((g) => g.id === m.id) ?? null;
+      return () =>
+        nube.subirGasto(m.id, gasto, {
+          tiendaId,
+          turno: gasto ? turnoDe(gasto.turno_id) : null,
+          persona: gasto ? personaDe(gasto.persona_id) : null,
+        });
+    }
+    case "entrada": {
+      const entrada = e.entradas.find((x) => x.id === m.id);
+      if (!entrada) return null;
+      const lineas = e.entradaProductos.filter((l) => l.entrada_id === entrada.id);
+      const ids = new Set(lineas.map((l) => l.producto_id));
+      return async () =>
+        nube.subirEntrada(
+          entrada,
+          lineas,
+          await productosParaSubir(e, e.productos.filter((p) => ids.has(p.id))),
+          { tiendaId, turno: turnoDe(entrada.turno_id), persona: personaDe(entrada.persona_id) }
+        );
+    }
+  }
+}
 
 export type LineaVenta = { productoId: string; cantidad: number };
 
@@ -126,6 +349,7 @@ const inicial: Mutable = {
   entradas: mock.entradas,
   entradaProductos: mock.entradaProductos,
   enNube: true,
+  sinSubir: [],
 };
 
 function horaDeHoy() {
@@ -171,12 +395,6 @@ function productosDe(e: Mutable, ventaIds: (string | undefined)[]) {
   return e.productos.filter((p) => ids.has(p.id));
 }
 
-/** Lo de Supabase manda; los productos creados en este celular que aún no están allá se conservan. */
-function unirProductos(deLaNube: Producto[], locales: Producto[]) {
-  const enLaNube = new Set(deLaNube.map((p) => p.id));
-  return [...deLaNube, ...locales.filter((p) => p.id.startsWith("p-") && !enLaNube.has(p.id))];
-}
-
 function useTiendaState() {
   const [estado, setEstado] = useState<Mutable>(inicial);
   const [cargado, setCargado] = useState(false);
@@ -199,11 +417,31 @@ function useTiendaState() {
   const [modoEntrada, setModoEntrada] = useState<"crear" | "entrar">("crear");
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [estadoProductos, setEstadoProductos] = useState<EstadoProductos>("cargando");
-  const [intentoProductos, setIntentoProductos] = useState(0);
-  // Lo que se escribe en Supabase va en fila, para que deshacer no se adelante a guardar
-  const cola = useRef<Promise<unknown>>(Promise.resolve());
-  // Ventas que no se pudieron guardar en Supabase, para reintentar desde el aviso (22)
-  const pendientes = useRef(new Map<string, nube.VentaParaGuardar>());
+
+  // ── Sincronización con Supabase ──────────────────────────────
+  // Todo lo que se anota queda marcado en sinSubir hasta que Supabase lo confirma
+  // (si falla, se reintenta solo). Y cada tanto, al volver a la app y cuando
+  // Supabase avisa un cambio, se vuelve a leer la tienda: así lo que cambia en
+  // otro celular o en el panel de Supabase también llega a este.
+
+  /** El estado más reciente, para subir y leer sin esperar a que React vuelva a pintar. */
+  const ultimo = useRef(estado);
+  useEffect(() => {
+    ultimo.current = estado;
+  }, [estado]);
+  const subiendo = useRef(false);
+  /** Llegó algo para subir mientras se subía: al terminar se da otra vuelta. */
+  const otraVuelta = useRef(false);
+  /** Subidas terminadas: si cambia mientras se lee, lo leído ya está viejo. */
+  const subidas = useRef(0);
+  /** Se pidió leer mientras se subía: se lee al terminar. */
+  const leerDespues = useRef(false);
+  /** La próxima subida es de algo que se acaba de anotar: si falla, se avisa. */
+  const avisarSiFalla = useRef(false);
+  /** El estado guardado es de antes de llevar la cuenta de lo que falta por subir. */
+  const revisarHuerfanos = useRef(false);
+  /** El celular de la tienda creada sin conexión ya tiene otra tienda en Supabase. */
+  const tiendaLocalBloqueada = useRef(false);
 
   /** Una tienda creada sin conexión (o antes de correr cuentas.sql) sigue solo en el navegador. */
   const enLaNube = estado.enNube;
@@ -212,8 +450,15 @@ function useTiendaState() {
   useEffect(() => {
     try {
       const guardado = localStorage.getItem(CLAVE);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- se lee una sola vez al abrir
-      if (guardado) setEstado(JSON.parse(guardado));
+      if (guardado) {
+        const leido = JSON.parse(guardado) as Mutable;
+        if (!Array.isArray(leido.sinSubir)) {
+          leido.sinSubir = [];
+          revisarHuerfanos.current = true;
+        }
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- se lee una sola vez al abrir
+        setEstado(leido);
+      }
     } catch {
       // Sin almacenamiento: se trabaja con los datos de prueba
     }
@@ -229,49 +474,24 @@ function useTiendaState() {
     }
   }, [estado, cargado]);
 
-  const productosActuales = useRef(estado.productos);
-  useEffect(() => {
-    productosActuales.current = estado.productos;
-  }, [estado.productos]);
-
-  // Mi inventario (41): los productos de la tienda se leen de Supabase
   const tiendaId = estado.tienda.id;
   const conSesion = estado.sesion !== null;
+
+  // Con el login por SMS, la sesión del celular vale solo si Supabase también la
+  // tiene (con el mismo número): si venció o es de otro número, se vuelve a entrar
+  const celularSesion = estado.sesion;
   useEffect(() => {
-    if (!cargado || !conSesion) return;
-    if (!enLaNube) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sin base, los productos son los del celular
-      setEstadoProductos("listo");
-      return;
-    }
+    if (!cargado || !acceso.conSms || celularSesion === null) return;
     let vigente = true;
-    setEstadoProductos("cargando");
-    nube
-      .leerProductos(tiendaId)
-      .then((deLaNube) => {
-        if (!vigente) return;
-        // Productos cargados en este celular que todavía no están en Supabase
-        // (por ejemplo, de antes de guardarlos al agregarlos): se suben ahora
-        const enBase = new Set(deLaNube.map((p) => p.id));
-        const pendientes = productosActuales.current.filter((p) => p.id.startsWith("p-") && !enBase.has(p.id));
-        if (pendientes.length > 0) {
-          nube
-            .agregarProductos(tiendaId, pendientes)
-            .catch((error) => console.warn("No se pudieron subir productos pendientes", error));
-        }
-        setEstado((e) => ({ ...e, productos: unirProductos(deLaNube, e.productos) }));
-        setEstadoProductos("listo");
-      })
-      .catch((error) => {
-        console.error("No se pudieron leer los productos de Supabase", error);
-        if (vigente) setEstadoProductos("error");
-      });
+    void acceso.celularConSesion().then((celular) => {
+      if (vigente && celular !== celularSesion) setEstado((e) => ({ ...e, sesion: null }));
+    });
+    const dejar = acceso.alSalir(() => setEstado((e) => ({ ...e, sesion: null })));
     return () => {
       vigente = false;
+      dejar();
     };
-  }, [cargado, conSesion, enLaNube, tiendaId, intentoProductos]);
-
-  const recargarProductos = useCallback(() => setIntentoProductos((n) => n + 1), []);
+  }, [cargado, celularSesion]);
 
   const turnoAbierto = estado.turnos.find((t) => t.estado === "abierto") ?? null;
   const atiende = estado.personas.find((p) => p.id === turnoAbierto?.persona_id) ?? null;
@@ -287,54 +507,210 @@ function useTiendaState() {
     setAviso(null);
   }, []);
 
-  /** Pone una escritura en la fila de Supabase; si falla, avisa con ese texto. */
-  const escribirEnNube = useCallback(
-    (escritura: () => Promise<void>, textoError: string) => {
-      const paso = cola.current.then(escritura);
-      cola.current = paso.catch((error) => {
-        console.error(textoError, error);
-        mostrarAviso({ tipo: "error", texto: textoError });
+  /** Venta anotada (22): el aviso pasa de "guardando" a anotada o a error, si sigue a la vista. */
+  const avisoDeVenta = useCallback((ventaId: string, guardado: Guardado) => {
+    setAviso((actual) => {
+      if (actual?.tipo !== "venta" || actual.ventaId !== ventaId) return actual;
+      if (temporizador.current) clearTimeout(temporizador.current);
+      // El error se queda a la vista hasta reintentar
+      if (guardado !== "error" && guardado !== "guardando")
+        temporizador.current = setTimeout(() => setAviso(null), DURACION_AVISO);
+      return { ...actual, guardado };
+    });
+  }, []);
+
+  /**
+   * Lee la tienda de Supabase y la une con lo del celular. Lo que todavía no se
+   * ha subido no se pisa. Si se está subiendo algo, espera a que termine.
+   */
+  const leer = useCallback(async () => {
+    const e0 = ultimo.current;
+    if (!e0.enNube || e0.sesion === null) return;
+    if (subiendo.current) {
+      leerDespues.current = true;
+      return;
+    }
+    const id = e0.tienda.id;
+    const antes = subidas.current;
+    try {
+      const datos = await nube.leerTienda(id);
+      // Algo se subió mientras se leía: lo leído puede no tenerlo
+      if (subiendo.current || subidas.current !== antes) {
+        leerDespues.current = true;
+        return;
+      }
+      const revisar = revisarHuerfanos.current;
+      revisarHuerfanos.current = false;
+      setEstado((e) => {
+        if (e.tienda.id !== id || !e.enNube) return e;
+        const nuevo = unirConNube(revisar ? marcar(e, huerfanos(e, datos)) : e, datos);
+        return igual(nuevo, e) ? e : nuevo;
       });
-    },
-    [mostrarAviso]
-  );
+      setEstadoProductos("listo");
+    } catch (error) {
+      console.warn("No se pudo leer la tienda de Supabase; se sigue con lo del celular", error);
+      setEstadoProductos((actual) => (actual === "listo" ? actual : "error"));
+    }
+  }, []);
 
-  /** Registrar venta en Supabase; el aviso (22) pasa de "guardando" a anotada o a error. */
-  const guardarVentaEnNube = useCallback(
-    (datos: nube.VentaParaGuardar, aviso: Extract<Aviso, { tipo: "venta" }>) => {
-      pendientes.current.set(datos.venta.id, datos);
-      // Solo se actualiza el aviso si sigue siendo el de esta venta
-      const actualizar = (guardado: Guardado, sinTiempo = false) =>
-        setAviso((actual) => {
-          if (actual?.tipo !== "venta" || actual.ventaId !== datos.venta.id) return actual;
-          if (temporizador.current) clearTimeout(temporizador.current);
-          if (!sinTiempo) temporizador.current = setTimeout(() => setAviso(null), DURACION_AVISO);
-          return { ...actual, guardado };
-        });
-      mostrarAviso({ ...aviso, guardado: "guardando" }, true);
-      const paso = cola.current.then(() => nube.guardarVenta(datos));
-      cola.current = paso.then(
-        () => {
-          pendientes.current.delete(datos.venta.id);
-          actualizar("listo");
-        },
-        (error) => {
-          console.error("No se pudo guardar la venta en Supabase", error);
-          // El error se queda a la vista hasta reintentar
-          actualizar("error", true);
-        }
-      );
-    },
-    [mostrarAviso]
-  );
+  /**
+   * Tienda creada sin conexión (06): apenas hay internet se crea en Supabase y
+   * todo lo anotado queda para subir.
+   */
+  const subirTiendaLocal = useCallback(async () => {
+    const e = ultimo.current;
+    if (e.enNube || e.sesion === null || tiendaLocalBloqueada.current) return false;
+    const duena = e.personas.find((p) => p.rol === "duena");
+    if (!duena) return false;
+    try {
+      await nube.crearTienda(e.tienda, duena);
+    } catch (error) {
+      if (error instanceof nube.CelularRegistrado) {
+        tiendaLocalBloqueada.current = true;
+        console.warn("Este celular ya tiene otra tienda en Supabase; esta sigue solo en el celular");
+      } else {
+        console.warn("Todavía no se pudo crear la tienda en Supabase", error);
+      }
+      return false;
+    }
+    setEstado((x) =>
+      x.tienda.id !== e.tienda.id
+        ? x
+        : marcar({ ...x, enNube: true }, [
+            { tipo: "tienda", id: x.tienda.id },
+            ...huerfanos(x, null),
+          ])
+    );
+    return true;
+  }, []);
 
-  /** Reintentar (22): vuelve a guardar en Supabase la venta que falló. */
+  /**
+   * Una vuelta por lo marcado en sinSubir, en orden (la persona y el turno antes
+   * que la venta). Lo que falla se queda marcado. Devuelve true si falló algo
+   * que no es una venta (la venta tiene su propio aviso).
+   */
+  const subirUnaVuelta = useCallback(async () => {
+    const hechas = new Set<string>();
+    const fallaron = new Set<string>();
+    let fallaOtraCosa = false;
+    for (;;) {
+      const e = ultimo.current;
+      if (!e.enNube || e.sesion === null) break;
+      const m = e.sinSubir
+        .filter((x) => !hechas.has(`${x.tipo}:${x.id}:${x.vez}`) && !fallaron.has(`${x.tipo}:${x.id}`))
+        .sort((a, b) => ORDEN_SUBIDA[a.tipo] - ORDEN_SUBIDA[b.tipo] || a.vez - b.vez)[0];
+      if (!m) break;
+      hechas.add(`${m.tipo}:${m.id}:${m.vez}`);
+      try {
+        const subida = subidaDe(e, m);
+        if (subida) await subida();
+        subidas.current++;
+        setEstado((x) => ({
+          ...x,
+          sinSubir: x.sinSubir.filter((y) => !(y.tipo === m.tipo && y.id === m.id && y.vez === m.vez)),
+        }));
+        if (m.tipo === "venta") avisoDeVenta(m.id, "listo");
+      } catch (error) {
+        console.error(`No se pudo guardar en Supabase (${m.tipo} ${m.id}); se reintenta después`, error);
+        fallaron.add(`${m.tipo}:${m.id}`);
+        if (m.tipo === "venta") avisoDeVenta(m.id, "error");
+        else fallaOtraCosa = true;
+      }
+    }
+    return fallaOtraCosa;
+  }, [avisoDeVenta]);
+
+  /**
+   * Sube a Supabase lo que falta. Si ya se está subiendo, la subida en curso da
+   * otra vuelta al terminar. Al final, si se pidió, vuelve a leer la tienda.
+   */
+  const subir = useCallback(async () => {
+    if (subiendo.current) {
+      otraVuelta.current = true;
+      return;
+    }
+    subiendo.current = true;
+    let fallaOtraCosa = false;
+    try {
+      if (await subirTiendaLocal()) return;
+      do {
+        otraVuelta.current = false;
+        if (await subirUnaVuelta()) fallaOtraCosa = true;
+      } while (otraVuelta.current);
+    } finally {
+      subiendo.current = false;
+    }
+    if (fallaOtraCosa && avisarSiFalla.current) {
+      mostrarAviso({ tipo: "error", texto: "No pudimos guardar en la base de datos. Quedó en este celular" });
+    }
+    avisarSiFalla.current = false;
+    if (leerDespues.current) {
+      leerDespues.current = false;
+      void leer();
+    }
+  }, [subirTiendaLocal, subirUnaVuelta, mostrarAviso, leer]);
+
+  // Lo que se acaba de anotar se sube de una vez
+  // (solo cuando entra una marca nueva, no cuando se quita una ya subida)
+  const ultimaMarca = estado.sinSubir.reduce((max, m) => Math.max(max, m.vez), 0);
+  const marcaVista = useRef(0);
+  useEffect(() => {
+    if (!cargado || !conSesion || ultimaMarca <= marcaVista.current) return;
+    marcaVista.current = ultimaMarca;
+    void subir();
+  }, [cargado, conSesion, ultimaMarca, subir]);
+
+  // Al abrir la app, al volver a ella, al volver el internet, cada 30 s y cuando
+  // Supabase avisa un cambio: se sube lo pendiente y se lee la tienda
+  useEffect(() => {
+    if (!cargado || !conSesion) return;
+    if (!enLaNube) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sin base, los productos son los del celular
+      setEstadoProductos("listo");
+    }
+    const sincronizar = () => {
+      void subir();
+      void leer();
+    };
+    sincronizar();
+    const alVolver = () => {
+      if (document.visibilityState === "visible") sincronizar();
+    };
+    window.addEventListener("online", sincronizar);
+    window.addEventListener("focus", alVolver);
+    document.addEventListener("visibilitychange", alVolver);
+    const reloj = setInterval(alVolver, CADA_CUANTO_LEER);
+    // Un cambio suele traer varios avisos seguidos (la venta y sus productos): se lee una vez
+    let espera: ReturnType<typeof setTimeout> | undefined;
+    const dejarDeEscuchar = enLaNube
+      ? nube.escucharTienda(tiendaId, () => {
+          clearTimeout(espera);
+          espera = setTimeout(() => void leer(), 800);
+        })
+      : () => {};
+    return () => {
+      window.removeEventListener("online", sincronizar);
+      window.removeEventListener("focus", alVolver);
+      document.removeEventListener("visibilitychange", alVolver);
+      clearInterval(reloj);
+      clearTimeout(espera);
+      dejarDeEscuchar();
+    };
+  }, [cargado, conSesion, enLaNube, tiendaId, subir, leer]);
+
+  /** Mi inventario (41) · "Reintentar": vuelve a leer la tienda de Supabase. */
+  const recargarProductos = useCallback(() => {
+    setEstadoProductos("cargando");
+    void leer();
+  }, [leer]);
+
+  /** Reintentar (22): vuelve a subir la venta que falló (y lo demás que esté pendiente). */
   const reintentarVenta = useCallback(
     (ventaId: string) => {
-      const datos = pendientes.current.get(ventaId);
-      if (datos && aviso?.tipo === "venta") guardarVentaEnNube(datos, aviso);
+      avisoDeVenta(ventaId, "guardando");
+      void subir();
     },
-    [aviso, guardarVentaEnNube]
+    [avisoDeVenta, subir]
   );
 
   /** Anota la venta: suma a la caja y descuenta el inventario. */
@@ -369,92 +745,60 @@ function useTiendaState() {
       };
 
       // Al corregir, la venta anterior se elimina y sus productos vuelven antes de descontar
-      setEstado((e) => sumarVenta(e, nueva, lineas, venta.corrige));
+      setEstado((e) =>
+        marcar(sumarVenta(e, nueva, lineas, venta.corrige), [
+          { tipo: "venta", id },
+          ...(venta.corrige ? [{ tipo: "venta" as const, id: venta.corrige }] : []),
+        ])
+      );
 
-      const aviso = {
-        tipo: "venta" as const,
-        ventaId: id,
-        total,
-        medioPago: venta.medioPago,
-        guardado: "local" as const,
-      };
-      if (enLaNube) {
-        const despues = sumarVenta(estado, nueva, lineas, venta.corrige);
-        guardarVentaEnNube(
-          {
-            tiendaId: estado.tienda.id,
-            venta: nueva,
-            lineas,
-            turno: estado.turnos.find((t) => t.id === nueva.turno_id) ?? null,
-            persona: estado.personas.find((p) => p.id === nueva.persona_id) ?? null,
-            productos: productosDe(despues, [id, venta.corrige]),
-            corrige: venta.corrige,
-          },
-          aviso
-        );
-      } else {
-        mostrarAviso(aviso);
-      }
+      // Con la tienda en Supabase, el aviso dice "Guardando…" hasta que se confirma
+      mostrarAviso(
+        {
+          tipo: "venta",
+          ventaId: id,
+          total,
+          medioPago: venta.medioPago,
+          guardado: enLaNube ? "guardando" : "local",
+        },
+        enLaNube
+      );
       setBorrador(borradorVacio);
       return id;
     },
-    [estado, turnoAbierto, atiende, enLaNube, guardarVentaEnNube, mostrarAviso]
-  );
-
-  /** Deshacer (22) o eliminar (36) en Supabase: la venta deja de contar y vuelven las unidades. */
-  const quitarVentaEnNube = useCallback(
-    (ventaId: string, motivo: "deshecha" | "eliminada") => {
-      if (!enLaNube) return;
-      pendientes.current.delete(ventaId);
-      const despues = quitarVenta(estado, ventaId, motivo);
-      escribirEnNube(
-        () => nube.quitarVenta(ventaId, motivo, productosDe(despues, [ventaId])),
-        motivo === "deshecha"
-          ? "No pudimos deshacer la venta en la base de datos"
-          : "No pudimos eliminar la venta en la base de datos"
-      );
-    },
-    [estado, enLaNube, escribirEnNube]
+    [estado, turnoAbierto, atiende, enLaNube, mostrarAviso]
   );
 
   /** Deshacer (22): la venta queda "deshecha" y los productos vuelven al inventario. */
   const deshacerVenta = useCallback(
     (ventaId: string) => {
-      setEstado((e) => quitarVenta(e, ventaId, "deshecha"));
+      avisarSiFalla.current = true;
+      setEstado((e) => marcar(quitarVenta(e, ventaId, "deshecha"), [{ tipo: "venta", id: ventaId }]));
       cerrarAviso();
-      quitarVentaEnNube(ventaId, "deshecha");
     },
-    [cerrarAviso, quitarVentaEnNube]
+    [cerrarAviso]
   );
 
   /** Abrir caja (16a → 16): empieza el turno con quién atiende y la base contada. */
-  const abrirTurno = useCallback(
-    (personaId: string, base: number) => {
-      const abiertoEn = horaDeHoy();
-      const turno: Turno = {
-        id: `tu-${Date.now()}`,
-        persona_id: personaId,
-        fecha: HOY,
-        franja: Number(abiertoEn.slice(11, 13)) < 13 ? "manana" : "tarde",
-        abierto_en: abiertoEn,
-        cerrado_en: null,
-        base,
-        efectivo_esperado: null,
-        efectivo_contado: null,
-        diferencia: null,
-        motivo_diferencia: null,
-        estado: "abierto",
-      };
-      setEstado((e) => ({ ...e, turnos: [...e.turnos, turno] }));
-      if (enLaNube) {
-        escribirEnNube(
-          () => nube.abrirTurno(estado.tienda.id, turno),
-          "No pudimos guardar la apertura de caja en la base de datos"
-        );
-      }
-    },
-    [enLaNube, estado.tienda.id, escribirEnNube]
-  );
+  const abrirTurno = useCallback((personaId: string, base: number) => {
+    const abiertoEn = horaDeHoy();
+    const turno: Turno = {
+      id: `tu-${Date.now()}`,
+      persona_id: personaId,
+      fecha: HOY,
+      franja: Number(abiertoEn.slice(11, 13)) < 13 ? "manana" : "tarde",
+      abierto_en: abiertoEn,
+      cerrado_en: null,
+      base,
+      efectivo_esperado: null,
+      efectivo_contado: null,
+      diferencia: null,
+      motivo_diferencia: null,
+      estado: "abierto",
+    };
+    avisarSiFalla.current = true;
+    setEstado((e) => marcar({ ...e, turnos: [...e.turnos, turno] }, [{ tipo: "turno", id: turno.id }]));
+  }, []);
 
   /** Cerrar caja (18): guarda lo contado, la diferencia y el motivo. Devuelve el id del turno. */
   const cerrarTurno = useCallback(
@@ -471,20 +815,16 @@ function useTiendaState() {
         motivo_diferencia: diferencia === 0 ? null : motivo,
         estado: "cerrado",
       };
-      setEstado((e) => ({
-        ...e,
-        turnos: e.turnos.map((t) => (t.id === cerrado.id ? cerrado : t)),
-      }));
-      if (enLaNube) {
-        // Si el turno se abrió sin conexión, primero se crea y luego se cierra
-        escribirEnNube(async () => {
-          await nube.abrirTurno(estado.tienda.id, turnoAbierto);
-          await nube.cerrarTurno(cerrado);
-        }, "No pudimos guardar el cierre de caja en la base de datos");
-      }
+      avisarSiFalla.current = true;
+      setEstado((e) =>
+        marcar(
+          { ...e, turnos: e.turnos.map((t) => (t.id === cerrado.id ? cerrado : t)) },
+          [{ tipo: "turno", id: cerrado.id }]
+        )
+      );
       return cerrado.id;
     },
-    [turnoAbierto, estado.ventas, estado.gastos, estado.tienda.id, enLaNube, escribirEnNube]
+    [turnoAbierto, estado.ventas, estado.gastos]
   );
 
   /** Registrar gasto (31): sale plata con su motivo y queda con quién atiende. Devuelve el id. */
@@ -508,49 +848,32 @@ function useTiendaState() {
         pagar_antes_de: pago.medio === "quede_debiendo" ? pago.pagarAntesDe : null,
         imagen: null,
       };
-      setEstado((e) => ({
-        ...e,
-        gastos: [...e.gastos.filter((g) => g.id !== b.corrige), gasto],
-      }));
-      if (enLaNube) {
-        escribirEnNube(
-          () =>
-            nube.guardarGasto(gasto, {
-              tiendaId: estado.tienda.id,
-              turno: estado.turnos.find((t) => t.id === gasto.turno_id) ?? null,
-              persona: estado.personas.find((p) => p.id === gasto.persona_id) ?? null,
-              corrige: b.corrige,
-            }),
-          "No pudimos guardar el gasto en la base de datos"
-        );
-      }
+      avisarSiFalla.current = true;
+      // Al corregir, el gasto anterior sale del celular y se borra de Supabase
+      setEstado((e) =>
+        marcar({ ...e, gastos: [...e.gastos.filter((g) => g.id !== b.corrige), gasto] }, [
+          { tipo: "gasto", id },
+          ...(b.corrige ? [{ tipo: "gasto" as const, id: b.corrige }] : []),
+        ])
+      );
       setBorradorGasto(borradorGastoVacio);
       return id;
     },
-    [borradorGasto, estado, turnoAbierto, atiende, enLaNube, escribirEnNube]
+    [borradorGasto, estado.gastos, turnoAbierto, atiende]
   );
 
   /** Eliminar registro (36): la venta deja de contar y sus productos vuelven al inventario. */
-  const eliminarVenta = useCallback(
-    (ventaId: string) => {
-      setEstado((e) => quitarVenta(e, ventaId, "eliminada"));
-      quitarVentaEnNube(ventaId, "eliminada");
-    },
-    [quitarVentaEnNube]
-  );
+  const eliminarVenta = useCallback((ventaId: string) => {
+    avisarSiFalla.current = true;
+    setEstado((e) => marcar(quitarVenta(e, ventaId, "eliminada"), [{ tipo: "venta", id: ventaId }]));
+  }, []);
 
-  const eliminarGasto = useCallback(
-    (gastoId: string) => {
-      setEstado((e) => ({ ...e, gastos: e.gastos.filter((g) => g.id !== gastoId) }));
-      if (enLaNube) {
-        escribirEnNube(
-          () => nube.borrarGasto(gastoId),
-          "No pudimos eliminar el gasto en la base de datos"
-        );
-      }
-    },
-    [enLaNube, escribirEnNube]
-  );
+  const eliminarGasto = useCallback((gastoId: string) => {
+    avisarSiFalla.current = true;
+    setEstado((e) =>
+      marcar({ ...e, gastos: e.gastos.filter((g) => g.id !== gastoId) }, [{ tipo: "gasto", id: gastoId }])
+    );
+  }, []);
 
   /** Llegó mercancía (41a): suma unidades y actualiza el costo de cada producto. */
   const anotarEntrada = useCallback(
@@ -582,47 +905,36 @@ function useTiendaState() {
           ? { ...p, unidades: p.unidades + llego.cantidad, costo: llego.costo_unitario }
           : p;
       };
-      setEstado((e) => ({
-        ...e,
-        entradas: [...e.entradas, entrada],
-        entradaProductos: [...e.entradaProductos, ...productosEntrada],
-        productos: e.productos.map(sumarLlegada),
-      }));
-      // La entrada y las unidades y costos nuevos quedan en Supabase
-      if (enLaNube) {
-        const cambiados = estado.productos
-          .filter((p) => productosEntrada.some((l) => l.producto_id === p.id))
-          .map(sumarLlegada);
-        escribirEnNube(async () => {
-          await nube.guardarEntrada(entrada, productosEntrada, {
-            tiendaId: estado.tienda.id,
-            turno: turnoAbierto,
-            persona: estado.personas.find((p) => p.id === entrada.persona_id) ?? null,
-          });
-          await nube.guardarCambiosProductos(cambiados);
-        }, "No pudimos guardar la mercancía en la base de datos");
-      }
+      avisarSiFalla.current = true;
+      // La entrada sube con las unidades y costos nuevos de sus productos
+      setEstado((e) =>
+        marcar(
+          {
+            ...e,
+            entradas: [...e.entradas, entrada],
+            entradaProductos: [...e.entradaProductos, ...productosEntrada],
+            productos: e.productos.map(sumarLlegada),
+          },
+          [{ tipo: "entrada", id }]
+        )
+      );
       return id;
     },
-    [turnoAbierto, atiende, enLaNube, estado, escribirEnNube]
+    [turnoAbierto, atiende, estado.personas]
   );
 
-  /** Cargar productos (11, 12, 13): los suma al inventario. */
-  const agregarProductos = useCallback(
-    (nuevos: ProductoNuevo[]) => {
-      const base = Date.now();
-      const conId = nuevos.map((p, i) => ({ ...p, id: `p-${base}-${i}` }));
-      setEstado((e) => ({ ...e, productos: [...e.productos, ...conId] }));
-      // Se guardan ya en Supabase, no solo con su primera venta
-      if (enLaNube) {
-        escribirEnNube(
-          () => nube.agregarProductos(estado.tienda.id, conId),
-          "No pudimos guardar los productos en la base de datos"
-        );
-      }
-    },
-    [enLaNube, estado.tienda.id, escribirEnNube]
-  );
+  /** Cargar productos (11, 12, 13): los suma al inventario y los sube a Supabase. */
+  const agregarProductos = useCallback((nuevos: ProductoNuevo[]) => {
+    const base = Date.now();
+    const conId = nuevos.map((p, i) => ({ ...p, id: `p-${base}-${i}` }));
+    avisarSiFalla.current = true;
+    setEstado((e) =>
+      marcar(
+        { ...e, productos: [...e.productos, ...conId] },
+        conId.map((p) => ({ tipo: "producto" as const, id: p.id }))
+      )
+    );
+  }, []);
 
   /**
    * Verificación (04): si el celular ya tiene tienda en Supabase, trae sus datos
@@ -635,50 +947,18 @@ function useTiendaState() {
         const tiendaId = await nube.buscarTienda(cel);
         if (tiendaId) {
           const datos = await nube.leerTienda(tiendaId);
-          // Gastos y entradas anotados en este celular antes de guardarse en Supabase:
-          // se conservan y se suben ahora
-          const mismaTienda = estado.tienda.id === tiendaId;
-          const gastosEnBase = new Set(datos.gastos.map((g) => g.id));
-          const entradasEnBase = new Set(datos.entradas.map((x) => x.id));
-          const gastosPendientes = mismaTienda
-            ? estado.gastos.filter((g) => g.id.startsWith("g-") && !gastosEnBase.has(g.id))
-            : [];
-          const entradasPendientes = mismaTienda
-            ? estado.entradas.filter((x) => x.id.startsWith("e-") && !entradasEnBase.has(x.id))
-            : [];
-          const lineasPendientes = estado.entradaProductos.filter((l) =>
-            entradasPendientes.some((x) => x.id === l.entrada_id)
-          );
-          setEstado({
-            ...datos,
-            gastos: [...datos.gastos, ...gastosPendientes],
-            entradas: [...datos.entradas, ...entradasPendientes],
-            entradaProductos: [...datos.entradaProductos, ...lineasPendientes],
-            sesion: cel,
-            enNube: true,
+          const revisar = revisarHuerfanos.current;
+          revisarHuerfanos.current = false;
+          setEstado((e) => {
+            // Otra tienda en este celular: se entra solo con lo de Supabase
+            if (e.tienda.id !== tiendaId) {
+              return { ...datos, sesion: cel, enNube: true, sinSubir: [] };
+            }
+            // La misma tienda: lo anotado aquí que Supabase no tiene se conserva y se sube
+            const conMarcas = marcar({ ...e, enNube: true }, revisar ? huerfanos(e, datos) : []);
+            return { ...unirConNube(conMarcas, datos), sesion: cel, enNube: true };
           });
-          const contexto = (turnoId: string, personaId: string) => ({
-            tiendaId,
-            turno: estado.turnos.find((t) => t.id === turnoId) ?? null,
-            persona: estado.personas.find((p) => p.id === personaId) ?? null,
-          });
-          for (const g of gastosPendientes) {
-            escribirEnNube(
-              () => nube.guardarGasto(g, contexto(g.turno_id, g.persona_id)),
-              "No pudimos guardar un gasto en la base de datos"
-            );
-          }
-          for (const x of entradasPendientes) {
-            escribirEnNube(
-              () =>
-                nube.guardarEntrada(
-                  x,
-                  lineasPendientes.filter((l) => l.entrada_id === x.id),
-                  contexto(x.turno_id, x.persona_id)
-                ),
-              "No pudimos guardar una entrada de mercancía en la base de datos"
-            );
-          }
+          setEstadoProductos("listo");
           return true;
         }
       } catch (error) {
@@ -688,19 +968,20 @@ function useTiendaState() {
           return true;
         }
       }
-      // Una tienda creada sin conexión solo existe en este celular
+      // Una tienda creada sin conexión solo existe en este celular (se sube cuando haya internet)
       if (cel === estado.tienda.celular) {
         setEstado((e) => ({ ...e, sesion: cel }));
         return true;
       }
       return false;
     },
-    [estado, escribirEnNube]
+    [estado.tienda.celular]
   );
 
   /**
    * Tu tienda (06): cuenta nueva con la tienda vacía y la dueña como primera persona.
-   * Se guarda en Supabase; si no hay conexión, la tienda queda solo en este celular.
+   * Se guarda en Supabase; si no hay conexión, la tienda queda en este celular y
+   * se sube apenas haya internet.
    * Si el celular ya tiene tienda no crea otra: devuelve "ya-registrado".
    */
   const crearTienda = useCallback(async (
@@ -737,10 +1018,12 @@ function useTiendaState() {
       console.warn("No se pudo crear la tienda en Supabase; queda en este celular", error);
       enNube = false;
     }
+    tiendaLocalBloqueada.current = false;
     setEstado({
       tienda,
       personas: [duena],
       enNube,
+      sinSubir: [],
       sesion: cel,
       productos: [],
       ventas: [],
@@ -755,75 +1038,55 @@ function useTiendaState() {
 
   const cerrarSesion = useCallback(() => {
     setEstado((e) => ({ ...e, sesion: null }));
+    void acceso.salir();
   }, []);
 
   /** Mi tienda (46): cambia los datos del negocio. */
-  const guardarTienda = useCallback(
-    (cambios: Partial<Tienda>) => {
-      setEstado((e) => ({ ...e, tienda: { ...e.tienda, ...cambios } }));
-      if (enLaNube) {
-        escribirEnNube(
-          () => nube.guardarTienda(estado.tienda.id, cambios),
-          "No pudimos guardar los datos de la tienda en la base de datos"
-        );
-      }
-    },
-    [enLaNube, estado.tienda.id, escribirEnNube]
-  );
+  const guardarTienda = useCallback((cambios: Partial<Tienda>) => {
+    avisarSiFalla.current = true;
+    setEstado((e) =>
+      marcar({ ...e, tienda: { ...e.tienda, ...cambios } }, [{ tipo: "tienda", id: e.tienda.id }])
+    );
+  }, []);
 
   /** Empleados (47): entra eligiendo su nombre en 16a, sin cuenta ni código. */
-  const agregarEmpleado = useCallback(
-    (nombre: string) => {
-      const limpio = nombre.trim().replace(/\s+/g, " ");
-      const persona: Persona = {
-        id: `pe-${Date.now()}`,
-        nombre: limpio,
-        nombre_corto: limpio.split(" ")[0],
-        rol: "empleado",
-        activo: true,
-      };
-      setEstado((e) => ({ ...e, personas: [...e.personas, persona] }));
-      if (enLaNube) {
-        escribirEnNube(
-          () => nube.guardarPersona(estado.tienda.id, persona),
-          "No pudimos guardar el empleado en la base de datos"
-        );
-      }
-    },
-    [enLaNube, estado.tienda.id, escribirEnNube]
-  );
+  const agregarEmpleado = useCallback((nombre: string) => {
+    const limpio = nombre.trim().replace(/\s+/g, " ");
+    const persona: Persona = {
+      id: `pe-${Date.now()}`,
+      nombre: limpio,
+      nombre_corto: limpio.split(" ")[0],
+      rol: "empleado",
+      activo: true,
+    };
+    avisarSiFalla.current = true;
+    setEstado((e) =>
+      marcar({ ...e, personas: [...e.personas, persona] }, [{ tipo: "persona", id: persona.id }])
+    );
+  }, []);
 
   /** Quitar un empleado: deja de salir en 16a, pero lo que anotó sigue con su nombre. */
-  const quitarEmpleado = useCallback(
-    (personaId: string) => {
-      setEstado((e) => ({
-        ...e,
-        personas: e.personas.map((p) => (p.id === personaId ? { ...p, activo: false } : p)),
-      }));
-      if (enLaNube) {
-        escribirEnNube(
-          () => nube.desactivarPersona(personaId),
-          "No pudimos quitar el empleado en la base de datos"
-        );
-      }
-    },
-    [enLaNube, escribirEnNube]
-  );
+  const quitarEmpleado = useCallback((personaId: string) => {
+    avisarSiFalla.current = true;
+    setEstado((e) =>
+      marcar(
+        { ...e, personas: e.personas.map((p) => (p.id === personaId ? { ...p, activo: false } : p)) },
+        [{ tipo: "persona", id: personaId }]
+      )
+    );
+  }, []);
 
   const guardarProducto = useCallback(
     (id: string, cambios: Pick<Producto, "precio_venta" | "costo" | "unidades">) => {
-      setEstado((e) => ({
-        ...e,
-        productos: e.productos.map((p) => (p.id === id ? { ...p, ...cambios } : p)),
-      }));
-      if (enLaNube) {
-        escribirEnNube(
-          () => nube.guardarCambiosProductos([{ id, ...cambios }]),
-          "No pudimos guardar el producto en la base de datos"
-        );
-      }
+      avisarSiFalla.current = true;
+      setEstado((e) =>
+        marcar(
+          { ...e, productos: e.productos.map((p) => (p.id === id ? { ...p, ...cambios } : p)) },
+          [{ tipo: "producto", id }]
+        )
+      );
     },
-    [enLaNube, escribirEnNube]
+    []
   );
 
   return {

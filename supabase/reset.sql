@@ -16,8 +16,15 @@
 --   4. Abre los permisos de escritura de Registrar venta (contenido de escritura.sql)
 --      los de crear tienda, caja y empleados (cuentas.sql) y los de gastos y
 --      mercancía (gastos.sql).
+--   5. Pone la tienda en los productos de cada venta y de cada entrada, crea la
+--      vista ventas_con_nombres y activa el tiempo real (contenido de sincronizar.sql).
+--   6. Hace que la base reste, devuelva y sume las unidades con cada venta y cada
+--      mercancía que llega (contenido de inventario.sql).
 --
--- Si cambian schema.sql, imagenes.sql, escritura.sql, cuentas.sql o gastos.sql, este archivo se arma otra
+-- ⚠ Deja todo abierto ("Cualquiera puede…"). Si la app ya usa el login por SMS,
+--   después de este se corre otra vez permisos-por-tienda.sql.
+--
+-- Si cambian schema.sql, imagenes.sql, escritura.sql, cuentas.sql, gastos.sql, sincronizar.sql o inventario.sql, este archivo se arma otra
 -- vez con ellos.
 
 begin;
@@ -26,6 +33,7 @@ begin;
 -- 1. Borrar las tablas
 -- ═════════════════════════════════════════════════════════════
 
+drop view if exists public.ventas_con_nombres;
 drop table if exists public.entrada_productos cascade;
 drop table if exists public.entradas_mercancia cascade;
 drop table if exists public.gastos cascade;
@@ -740,5 +748,213 @@ drop policy if exists "Cualquiera puede anotar productos que llegaron" on public
 create policy "Cualquiera puede anotar productos que llegaron"
   on public.entrada_productos for insert to anon, authenticated
   with check (true);
+
+-- ═════════════════════════════════════════════════════════════
+-- 5. Tienda en cada línea, ventas con nombres y tiempo real (sincronizar.sql)
+-- ═════════════════════════════════════════════════════════════
+
+-- ─────────────────────────────────────────────────────────────
+-- 1. tienda_id en los productos de cada venta y de cada entrada
+-- ─────────────────────────────────────────────────────────────
+
+alter table public.venta_productos add column if not exists tienda_id text references public.tienda (id);
+alter table public.entrada_productos add column if not exists tienda_id text references public.tienda (id);
+
+-- Los que ya están toman la tienda de su venta o de su entrada
+update public.venta_productos l
+  set tienda_id = v.tienda_id
+  from public.ventas v
+  where v.id = l.venta_id and l.tienda_id is distinct from v.tienda_id;
+
+update public.entrada_productos l
+  set tienda_id = e.tienda_id
+  from public.entradas_mercancia e
+  where e.id = l.entrada_id and l.tienda_id is distinct from e.tienda_id;
+
+-- Los nuevos también (aunque la app no lo mande, o mande otro)
+create or replace function public.tienda_de_la_venta()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  new.tienda_id := (select tienda_id from public.ventas where id = new.venta_id);
+  return new;
+end;
+$$;
+
+create or replace function public.tienda_de_la_entrada()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  new.tienda_id := (select tienda_id from public.entradas_mercancia where id = new.entrada_id);
+  return new;
+end;
+$$;
+
+drop trigger if exists poner_tienda on public.venta_productos;
+create trigger poner_tienda
+  before insert or update of venta_id on public.venta_productos
+  for each row execute function public.tienda_de_la_venta();
+
+drop trigger if exists poner_tienda on public.entrada_productos;
+create trigger poner_tienda
+  before insert or update of entrada_id on public.entrada_productos
+  for each row execute function public.tienda_de_la_entrada();
+
+alter table public.venta_productos alter column tienda_id set not null;
+alter table public.entrada_productos alter column tienda_id set not null;
+
+create index if not exists venta_productos_tienda_id_idx on public.venta_productos (tienda_id);
+create index if not exists entrada_productos_tienda_id_idx on public.entrada_productos (tienda_id);
+
+-- ─────────────────────────────────────────────────────────────
+-- 2. Ventas con nombres, para leerlas en el Table Editor
+-- ─────────────────────────────────────────────────────────────
+-- En las tablas solo salen ids (t-179…, pe-179…). Esta vista muestra cada venta
+-- con el nombre y el celular de la tienda, quién atendía y qué se vendió.
+-- Se filtra por tienda_nombre, tienda_celular o atendio. Solo se lee.
+
+create or replace view public.ventas_con_nombres
+with (security_invoker = true) as
+select
+  v.id,
+  v.fecha_hora at time zone 'America/Bogota' as fecha_hora_colombia,
+  t.id         as tienda_id,
+  t.nombre     as tienda_nombre,
+  t.celular    as tienda_celular,
+  p.nombre     as atendio,
+  v.turno_id,
+  v.medio_pago,
+  v.total,
+  v.estado,
+  v.canal,
+  (
+    select string_agg(l.cantidad || ' × ' || pr.nombre_corto, ', ' order by l.id)
+    from public.venta_productos l
+    join public.productos pr on pr.id = l.producto_id
+    where l.venta_id = v.id
+  ) as productos
+from public.ventas v
+join public.tienda t on t.id = v.tienda_id
+join public.personas p on p.id = v.persona_id;
+
+grant select on public.ventas_con_nombres to anon, authenticated;
+
+-- ─────────────────────────────────────────────────────────────
+-- 3. Tiempo real en las tablas de la tienda
+-- ─────────────────────────────────────────────────────────────
+-- Supabase avisa por la publicación supabase_realtime. Solo se agregan las
+-- tablas que todavía no están (agregar una repetida da error).
+
+do $$
+declare
+  t text;
+begin
+  foreach t in array array[
+    'tienda', 'personas', 'productos', 'turnos', 'ventas', 'venta_productos',
+    'gastos', 'entradas_mercancia', 'entrada_productos'
+  ] loop
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = t
+    ) then
+      execute format('alter publication supabase_realtime add table public.%I', t);
+    end if;
+  end loop;
+end $$;
+
+-- ═════════════════════════════════════════════════════════════
+-- 6. La base lleva las unidades del inventario (inventario.sql)
+-- ═════════════════════════════════════════════════════════════
+-- Va después de los datos de prueba: sus ventas y entradas ya vienen contadas.
+
+-- Vendido: resta, solo si la venta cuenta (una venta que sube ya deshecha no resta)
+create or replace function public.restar_vendido()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if exists (select 1 from ventas where id = new.venta_id and estado = 'anotada') then
+    update productos
+      set unidades = greatest(0, unidades - new.cantidad)
+      where id = new.producto_id;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists restar_vendido on public.venta_productos;
+create trigger restar_vendido
+  after insert on public.venta_productos
+  for each row execute function public.restar_vendido();
+
+-- Deshecha o eliminada: lo vendido vuelve al estante
+create or replace function public.devolver_vendido()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if old.estado = 'anotada' and new.estado <> 'anotada' then
+    update productos p
+      set unidades = p.unidades + l.cantidad
+      from (
+        select producto_id, sum(cantidad) as cantidad
+        from venta_productos
+        where venta_id = new.id
+        group by producto_id
+      ) l
+      where p.id = l.producto_id;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists devolver_vendido on public.ventas;
+create trigger devolver_vendido
+  after update of estado on public.ventas
+  for each row execute function public.devolver_vendido();
+
+-- Llegó mercancía: suma y deja el costo de esta compra
+create or replace function public.sumar_llegada()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update productos
+    set unidades = unidades + new.cantidad,
+        costo = new.costo_unitario
+    where id = new.producto_id;
+  return new;
+end;
+$$;
+
+drop trigger if exists sumar_llegada on public.entrada_productos;
+create trigger sumar_llegada
+  after insert on public.entrada_productos
+  for each row execute function public.sumar_llegada();
+
+-- Las funciones solo las usan los triggers: nadie las llama desde afuera
+revoke execute on function public.restar_vendido() from public, anon, authenticated;
+revoke execute on function public.devolver_vendido() from public, anon, authenticated;
+revoke execute on function public.sumar_llegada() from public, anon, authenticated;
+
+-- La app pregunta esto al abrir: si existe, deja de mandar las unidades después
+-- de vender o de recibir mercancía (si no, las sigue mandando como antes)
+create or replace function public.inventario_por_movimientos()
+returns boolean
+language sql
+stable
+as $$ select true $$;
+
+grant execute on function public.inventario_por_movimientos() to anon, authenticated;
 
 commit;

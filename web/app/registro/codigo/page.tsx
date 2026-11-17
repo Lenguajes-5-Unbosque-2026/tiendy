@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { AppScreen } from "@/components/layout/AppScreen";
 import { Button } from "@/components/ui/button";
+import { conSms, enviarCodigo, ErrorCodigo, verificarCodigo, type FallaCodigo } from "@/lib/tienda/acceso";
 import { useCuentaRegresiva } from "@/lib/tienda/useCuentaRegresiva";
 import { useTienda } from "@/lib/tienda/store";
 import { cn } from "@/lib/utils";
@@ -15,13 +16,23 @@ const LARGO = 6;
 /** "+573001234567" → "+57 300 ••• 4567". */
 const enmascarar = (cel: string) => `+57 ${cel.slice(3, 6)} ••• ${cel.slice(-4)}`;
 
-/** Verificación (04): seis dígitos del SMS. */
+const TEXTO_FALLA: Record<FallaCodigo, string> = {
+  "codigo-malo": "Ese código no es o ya venció. Revisa el SMS o pide otro.",
+  "sin-conexion": "No pudimos revisar el código. Revisa tu conexión a internet e intenta de nuevo.",
+  "muchos-intentos": "Hiciste muchos intentos seguidos. Espera un minuto e intenta de nuevo.",
+  otra: "No pudimos revisar el código. Intenta de nuevo.",
+};
+
+/**
+ * Verificación (04): seis dígitos del SMS. Con el login por SMS prendido
+ * (acceso.ts) Supabase revisa el código; si no, sirve cualquiera.
+ */
 export default function CodigoPage() {
   const router = useRouter();
   const { celularPendiente, iniciarSesion, modoEntrada } = useTienda();
   const [codigo, setCodigo] = useState("");
   const [verificando, setVerificando] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [enfocado, setEnfocado] = useState(true);
   const campo = useRef<HTMLInputElement>(null);
   const reenvio = useCuentaRegresiva(45);
@@ -38,14 +49,38 @@ export default function CodigoPage() {
 
   const verificar = async () => {
     setVerificando(true);
-    setError(false);
+    setError(null);
+    try {
+      await verificarCodigo(celularPendiente, codigo);
+    } catch (e) {
+      const falla = e instanceof ErrorCodigo ? e.falla : "otra";
+      if (falla === "codigo-malo") setCodigo("");
+      setError(TEXTO_FALLA[falla]);
+      setVerificando(false);
+      return;
+    }
     // Si el número ya tiene tienda entra al Home con sus datos; si es nuevo, sigue a Tu tienda (06)
     const entro = await iniciarSesion(celularPendiente);
     if (entro) return router.push("/");
     if (modoEntrada === "crear") return router.push("/registro/tienda");
     // Iniciar sesión nunca crea tienda: sin encontrarla se queda aquí
     setVerificando(false);
-    setError(true);
+    setError("No pudimos encontrar tu tienda. Revisa tu conexión a internet e intenta de nuevo.");
+  };
+
+  const reenviar = async () => {
+    reenvio.reiniciar();
+    setError(null);
+    try {
+      await enviarCodigo(celularPendiente);
+    } catch (e) {
+      const falla = e instanceof ErrorCodigo ? e.falla : "otra";
+      setError(
+        falla === "muchos-intentos"
+          ? "Pediste muchos códigos seguidos. Espera un minuto e intenta de nuevo."
+          : "No pudimos enviar el SMS. Revisa tu conexión a internet e intenta de nuevo."
+      );
+    }
   };
 
   return (
@@ -104,7 +139,7 @@ export default function CodigoPage() {
         {reenvio.quedan > 0 ? (
           <span className="text-secundario text-texto-secundario">Reenviar en {reenvio.texto}</span>
         ) : (
-          <button type="button" onClick={reenvio.reiniciar} className="text-secundario font-bold text-texto-primario">
+          <button type="button" onClick={reenviar} className="text-secundario font-bold text-texto-primario">
             Reenviar código
           </button>
         )}
@@ -115,14 +150,16 @@ export default function CodigoPage() {
 
       {error && (
         <p role="alert" className="text-secundario text-texto-peligro">
-          No pudimos encontrar tu tienda. Revisa tu conexión a internet e intenta de nuevo.
+          {error}
         </p>
       )}
 
-      {/* Todavía no hay servicio de SMS (llega con Supabase Auth) */}
-      <p className="rounded-lg bg-fondo-primario-suave p-espacio-4 text-secundario text-texto-primario">
-        Versión de prueba: sirve cualquier código de 6 dígitos.
-      </p>
+      {/* Sin el login por SMS prendido no se envía nada */}
+      {!conSms && (
+        <p className="rounded-lg bg-fondo-primario-suave p-espacio-4 text-secundario text-texto-primario">
+          Versión de prueba: sirve cualquier código de 6 dígitos.
+        </p>
+      )}
     </AppScreen>
   );
 }
