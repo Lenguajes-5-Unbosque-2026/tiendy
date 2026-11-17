@@ -216,16 +216,23 @@ export function useReconocimientoVoz(alEscuchar: (texto: string) => void, pista 
     r.lang = "es-CO";
     r.interimResults = true;
     r.maxAlternatives = 1;
+    // Lo último que se entendió. En algunos celulares (iPhone, algunos Android) la
+    // frase nunca llega "terminada": al apagarse el micrófono se usa esto
+    let ultimo = "";
+    let entregado = false;
+    const entregar = (texto: string) => {
+      if (entregado || !texto) return;
+      entregado = true;
+      setParcial("");
+      callback.current(texto);
+    };
     r.onresult = (e) => {
       if (turno.current !== mio) return;
       const resultados = Array.from(e.results);
       const texto = resultados.map((x) => x[0]?.transcript ?? "").join(" ").trim();
-      if (resultados.every((x) => x.isFinal)) {
-        setParcial("");
-        if (texto) callback.current(texto);
-      } else {
-        setParcial(texto);
-      }
+      ultimo = texto;
+      if (resultados.every((x) => x.isFinal)) entregar(texto);
+      else setParcial(texto);
     };
     r.onerror = (e) => {
       if (turno.current !== mio) return;
@@ -237,7 +244,13 @@ export function useReconocimientoVoz(alEscuchar: (texto: string) => void, pista 
             : "servicio"
       );
     };
-    r.onend = () => turno.current === mio && setEstado((s) => (s === "escuchando" ? "listo" : s));
+    r.onend = () => {
+      if (turno.current !== mio) return;
+      // Si alcanzó a entender algo, se usa aunque el navegador haya marcado error
+      const alcanzo = !entregado && ultimo !== "";
+      entregar(ultimo);
+      setEstado((s) => (alcanzo || s === "escuchando" ? "listo" : s));
+    };
     navegador.current = r;
     setParcial("");
     setFalla(null);
